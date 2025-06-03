@@ -15,8 +15,15 @@ class ProfileController extends Controller
     
     public function edit(Request $request): View
     {
+        $previousUrl = url()->previous();
+
+        if ($previousUrl === route('profile.edit')) {
+            $previousUrl = route('dashboard');
+        }
+
         return view('profile.edit', [
             'user' => $request->user(),
+            'backUrl' => $previousUrl,
         ]);
     }
 

@@ -236,7 +236,6 @@ html:not(.expanded-sidebar) .sidebar-user.show .dropdown-menu-custom {
     top: calc(var(--user-icon-top, 0) - 40px); /* 40px offset below the icon */
 }
 
-
     </style>
 </head>
 <body>
@@ -279,27 +278,25 @@ html:not(.expanded-sidebar) .sidebar-user.show .dropdown-menu-custom {
                     </a>
                 </li>
             </ul>
-@auth
-<div class="sidebar-user dropdown w-100">
-    <a href="#" class="d-flex align-items-center justify-content-center justify-content-md-start gap-2 text-decoration-none text-dark"
-       id="sidebarUserDropdown" role="button">
-        <i class="bi bi-person-circle fs-4"></i>
-        <span class="sidebar-user-name d-none d-md-inline">{{ Auth::user()->name }}</span>
-        <!-- 🔥 Add a toggle button/icon here for clarity -->
-        <i class="bi bi-caret-down-fill toggle-icon"></i>
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-custom" id="customDropdown">
-        <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person-fill me-2"></i> Profile</a></li>
-        <li>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
-            </form>
-        </li>
-    </ul>
-</div>
-@endauth
-
+            @auth
+            <div class="sidebar-user dropdown w-100">
+                <a href="#" class="d-flex align-items-center justify-content-center justify-content-md-start gap-2 text-decoration-none text-dark"
+                id="sidebarUserDropdown" role="button">
+                    <i class="bi bi-person-circle fs-4"></i>
+                    <span class="sidebar-user-name d-none d-md-inline">{{ Auth::user()->name }}</span>
+                    <i class="bi bi-caret-down-fill toggle-icon"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-custom" id="customDropdown">
+                    <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person-fill me-2"></i> Profile</a></li>
+                    <li>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            @endauth
         </div>
     </div>
 
@@ -346,23 +343,22 @@ html:not(.expanded-sidebar) .sidebar-user.show .dropdown-menu-custom {
             if (successToast) new bootstrap.Toast(successToast, { delay: 3000 }).show();
             if (errorToast) new bootstrap.Toast(errorToast, { delay: 3000 }).show();
         });
-document.addEventListener("DOMContentLoaded", function () {
-    const userLink = document.getElementById('sidebarUserDropdown');
-    const sidebarUser = userLink.closest('.sidebar-user');
-    const dropdownMenu = document.getElementById('customDropdown');
 
-    userLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        sidebarUser.classList.toggle('show');
+        document.addEventListener("DOMContentLoaded", function () {
+            const userLink = document.getElementById('sidebarUserDropdown');
+            const sidebarUser = userLink.closest('.sidebar-user');
+            const dropdownMenu = document.getElementById('customDropdown');
 
-        if (!document.documentElement.classList.contains('expanded-sidebar')) {
-            const iconRect = userLink.getBoundingClientRect();
-            document.documentElement.style.setProperty('--user-icon-top', `${iconRect.top}px`);
-        }
-    });
-});
+            userLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                sidebarUser.classList.toggle('show');
 
-
+                if (!document.documentElement.classList.contains('expanded-sidebar')) {
+                    const iconRect = userLink.getBoundingClientRect();
+                    document.documentElement.style.setProperty('--user-icon-top', `${iconRect.top}px`);
+                }
+            });
+        });
 
     </script>
 

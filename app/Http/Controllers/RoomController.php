@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Room;
 use App\Models\RoomType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreRoomRequest; // New Form Request
+use App\Http\Requests\UpdateRoomRequest; // New Form Request
+use Illuminate\Support\Facades\Log; // For logging errors if needed
 
 class RoomController extends Controller
 {
@@ -39,77 +43,84 @@ class RoomController extends Controller
         return view('rooms.index', compact('rooms', 'roomTypes', 'sortBy', 'direction'));
     }
 
-    public function create()
+    // `create()` method is no longer strictly necessary if using modals only
+    // public function create()
+    // {
+    //     $roomTypes = RoomType::all();
+    //     return view('rooms.create', compact('roomTypes'));
+    // }
+
+    public function store(StoreRoomRequest $request) // Using StoreRoomRequest for validation
     {
-        $roomTypes = RoomType::all();
-        return view('rooms.create', compact('roomTypes'));
-    }
+        try {
+            // Generate next room code
+            $lastRoom = Room::orderBy('id', 'desc')->first();
+            $nextNumber = 1;
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:100',
-            'room_type_code' => 'required|exists:room_types,room_type_code',
-            'status' => 'required|string|in:Available,Occupied,Cleaning,Maintenance',
+            if ($lastRoom && preg_match('/ROOM-(\d+)/', $lastRoom->room_code, $matches)) {
+                $nextNumber = (int)$matches[1] + 1;
+            }
 
-        ]);
+            $roomCode = 'ROOM-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
 
-        // Generate next room code
-        $lastRoom = Room::orderBy('id', 'desc')->first();
-        $nextNumber = 1;
+            Room::create([
+                'room_code' => $roomCode,
+                'name' => $request->name,
+                'room_type_code' => $request->room_type_code,
+                'status' => $request->status,
+                'created_by' => Auth::id(), // replaces auth()->id()
+                'is_active' => true, // Assuming default active state
+            ]);
 
-        if ($lastRoom && preg_match('/ROOM-(\d+)/', $lastRoom->room_code, $matches)) {
-            $nextNumber = (int)$matches[1] + 1;
+            return redirect()->route('rooms.index')->with('success', 'Room created successfully.');
+        } catch (\Exception $e) {
+            Log::error("Error creating room: " . $e->getMessage());
+            return redirect()->route('rooms.index')->with('error', 'Failed to create room. Please try again.');
         }
-
-        $roomCode = 'ROOM-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
-
-        Room::create([
-            'room_code' => $roomCode,
-            'name' => $request->name,
-            'room_type_code' => $request->room_type_code,
-            'status' => $request->status,
-            'created_by' => 1,
-            'is_active' => true,
-        ]);
-
-        return redirect()->route('rooms.index')->with('success', 'Room created successfully.');
     }
 
     public function show(Room $room)
     {
+        // This method is implicitly handled by the view modal in index.blade.php
+        // If you were to have a dedicated show page, this would return that view.
+        // For now, it's mostly for direct access or API.
         $room->load('roomType');
-        return view('rooms.show', compact('room'));
+        return view('rooms.show', compact('room')); // Assuming you have a rooms/show.blade.php
     }
 
-    public function edit(Room $room)
+    // `edit()` method is no longer strictly necessary if using modals only
+    // public function edit(Room $room)
+    // {
+    //     $roomTypes = RoomType::all();
+    //     return view('rooms.edit', compact('room', 'roomTypes'));
+    // }
+
+    public function update(UpdateRoomRequest $request, Room $room) // Using UpdateRoomRequest for validation
     {
-        $roomTypes = RoomType::all();
-        return view('rooms.edit', compact('room', 'roomTypes'));
-    }
+        try {
+            $room->update([
+                'name' => $request->name,
+                'room_type_code' => $request->room_type_code,
+                'status' => $request->status,
+                'modified_by' => Auth::id(),
+            ]);
 
-    public function update(Request $request, Room $room)
-    {
-        $request->validate([
-            'name' => 'required|string|max:100',
-            'room_type_code' => 'required|exists:room_types,room_type_code',
-            'status' => 'required|string|in:Available,Occupied,Cleaning,Maintenance',
-        ]);
-
-        $room->update([
-            'name' => $request->name,
-            'room_type_code' => $request->room_type_code,
-            'status' => $request->status,
-            'modified_by' => 1,
-        ]);
-
-
-        return redirect()->route('rooms.index')->with('success', 'Room updated successfully.');
+            return redirect()->route('rooms.index')->with('success', 'Room updated successfully.');
+        } catch (\Exception $e) {
+            Log::error("Error updating room ID {$room->id}: " . $e->getMessage());
+            // Flash a flag to re-open the edit modal if there's an error
+            return redirect()->back()->withInput()->withErrors($e->getMessage())->with('error', 'Failed to update room. Please try again.')->with('edit_modal_errors', true);
+        }
     }
 
     public function destroy(Room $room)
     {
-        $room->delete();
-        return redirect()->route('rooms.index')->with('success', 'Room deleted successfully.');
+        try {
+            $room->delete(); // If SoftDeletes trait is used on Room model, this will soft delete
+            return redirect()->route('rooms.index')->with('success', 'Room deleted successfully.');
+        } catch (\Exception $e) {
+            Log::error("Error deleting room ID {$room->id}: " . $e->getMessage());
+            return redirect()->route('rooms.index')->with('error', 'Failed to delete room. Please try again.');
+        }
     }
 }
