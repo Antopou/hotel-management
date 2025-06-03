@@ -1,9 +1,9 @@
-name: Deploy to Production
+name: Deploy to Server
 
 on:
   push:
     branches:
-      - main
+      - main  # or your deploy branch
 
 jobs:
   deploy:
@@ -13,16 +13,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up SSH
-      uses: webfactory/ssh-agent@v0.7.0
+    - name: Setup SSH key
+      uses: webfactory/ssh-agent@v0.8.0
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Deploy via SSH
+    - name: Deploy Laravel app
       run: |
-        ssh -o StrictHostKeyChecking=no root@167.71.202.143 << 'EOF'
+        ssh -o StrictHostKeyChecking=no root@your_server_ip << 'EOF'
           cd /var/www/hotel-management
-          git pull origin main
+          git pull origin main  # or your branch
           composer install --no-dev --optimize-autoloader
           php artisan migrate --force
           php artisan config:cache
