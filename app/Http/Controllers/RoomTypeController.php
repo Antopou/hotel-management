@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\RoomType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class RoomTypeController extends Controller
 {
@@ -36,13 +37,20 @@ class RoomTypeController extends Controller
         ]);
 
         $data = $request->only(['name', 'description', 'price_per_night', 'max_occupancy']);
-        $data['room_type_code'] = Str::uuid();
+        $data['created_by'] = Auth::id() ?? 1;
+        $data['is_active'] = true;
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('room_types', 'public');
         }
 
-        RoomType::create($data);
+        // Create the room type first to get ID
+        $roomType = RoomType::create($data);
+
+        // Update room_type_code based on ID
+        $roomType->update([
+            'room_type_code' => 'RT-' . strtoupper(Str::random(5)),
+        ]);
 
         return redirect()->route('room-types.index')->with('success', 'Room Type created.');
     }

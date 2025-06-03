@@ -8,9 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes; // <-- Add this for soft deletes
 
 class GuestReservation extends Model
 {
-    use HasFactory, SoftDeletes; // <-- Enable soft deletes
-
-    protected $table = 'guest_reservation';
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'reservation_code', 'guest_code', 'room_code', 'checkin_date', 'checkout_date',
@@ -18,7 +16,6 @@ class GuestReservation extends Model
         'number_of_guest', 'is_checkin', 'created_by', 'modified_by', 'is_active'
     ];
 
-    // Optional: Cast fields (e.g., dates and booleans)
     protected $casts = [
         'checkin_date' => 'datetime',
         'checkout_date' => 'datetime',

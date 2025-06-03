@@ -5,11 +5,11 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\CheckinController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProfileController; 
 use App\Http\Controllers\ReservationController;
 
 Route::get('/', function () {
-    return redirect()->route('login'); // Redirect to built-in login
+    return redirect()->route('login');
 });
 
 // Authenticated dashboard
@@ -27,6 +27,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('guests', GuestController::class);
     Route::resource('reservations', ReservationController::class);
     Route::resource('checkins', CheckinController::class);
+    Route::put('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
+
 });
 
 require __DIR__.'/auth.php';

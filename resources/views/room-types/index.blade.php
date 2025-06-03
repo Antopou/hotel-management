@@ -6,7 +6,7 @@
     {{-- Page Title and Add Button --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="bold m-0">Room Type Management</h3>
-        <a href="{{ route('room-types.create') }}" class="btn btn-success">Add New</a>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createRoomTypeModal">Add New</button>
     </div>
 
     {{-- Toast Notifications --}}
@@ -54,29 +54,15 @@
                     <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                         <div>
                             <h5 class="mb-1">{{ $type->name }}</h5>
-                            <div class="text-muted small mb-1">
-                                <strong>Code:</strong> {{ $type->room_type_code }}
-                            </div>
-                            <div class="text-muted small mb-1">
-                                <strong>Description:</strong> {{ $type->description ?: 'N/A' }}
-                            </div>
-                            <div class="text-muted small mb-1">
-                                <strong>Price/Night:</strong> ${{ number_format($type->price_per_night, 2) }}
-                            </div>
-                            <div class="text-muted small">
-                                <strong>Max Occupancy:</strong> {{ $type->max_occupancy }}
-                            </div>
+                            <div class="text-muted small mb-1"><strong>Code:</strong> {{ $type->room_type_code }}</div>
+                            <div class="text-muted small mb-1"><strong>Description:</strong> {{ $type->description ?: 'N/A' }}</div>
+                            <div class="text-muted small mb-1"><strong>Price/Night:</strong> ${{ number_format($type->price_per_night, 2) }}</div>
+                            <div class="text-muted small"><strong>Max Occupancy:</strong> {{ $type->max_occupancy }}</div>
                         </div>
                         <div class="d-flex gap-2">
-                            <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewRoomTypeModal{{ $type->id }}">
-                                <i class="bi bi-eye-fill"></i>
-                            </button>
-                            <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editRoomTypeModal{{ $type->id }}">
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteRoomTypeModal{{ $type->id }}">
-                                <i class="bi bi-trash-fill"></i>
-                            </button>
+                            <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewRoomTypeModal{{ $type->id }}"><i class="bi bi-eye-fill"></i></button>
+                            <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editRoomTypeModal{{ $type->id }}"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteRoomTypeModal{{ $type->id }}"><i class="bi bi-trash-fill"></i></button>
                         </div>
                     </div>
                 </div>
@@ -199,7 +185,47 @@
         {{ $roomTypes->links('pagination::bootstrap-5') }}
     </div>
 </div>
-@endsection
+        {{-- Create Room Type Modal --}}
+        <div class="modal fade" id="createRoomTypeModal" tabindex="-1" aria-labelledby="createRoomTypeLabel" aria-hidden="true">
+            <div class="modal-dialog custom-modal">
+                <div class="modal-content">
+                    <form action="{{ route('room-types.store') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add New Room Type</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Room Type Name</label>
+                                <input type="text" name="name" id="name" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea name="description" id="description" class="form-control" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="price_per_night" class="form-label">Price per Night</label>
+                                <input type="number" name="price_per_night" step="0.01" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="max_occupancy" class="form-label">Max Occupancy</label>
+                                <input type="number" name="max_occupancy" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="image" class="form-label">Image</label>
+                                <input type="file" name="image" id="image" class="form-control">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @endsection
 
 @section('scripts')
 <script>

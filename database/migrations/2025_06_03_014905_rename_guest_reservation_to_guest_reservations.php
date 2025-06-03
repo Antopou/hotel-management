@@ -11,16 +11,12 @@ return new class extends Migration
      */
 public function up()
 {
-    Schema::table('guest_reservation', function (Blueprint $table) {
-        $table->softDeletes();
-    });
+    Schema::rename('guest_reservation', 'guest_reservations');
 }
 
 public function down()
 {
-    Schema::table('guest_reservation', function (Blueprint $table) {
-        $table->dropSoftDeletes();
-    });
+    Schema::rename('guest_reservations', 'guest_reservation');
 }
 
 };

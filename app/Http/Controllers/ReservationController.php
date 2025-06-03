@@ -116,4 +116,17 @@ class ReservationController extends Controller
         $reservation->delete();
         return redirect()->route('reservations.index')->with('success', 'Reservation deleted.');
     }
+    public function cancel(GuestReservation $reservation, Request $request)
+    {
+        $request->validate([
+            'reason' => 'required|string|max:255',
+        ]);
+
+        $reservation->update([
+            'cancelled_date' => now(),
+            'reason' => $request->reason,
+        ]);
+
+        return redirect()->route('reservations.index')->with('success', 'Reservation canceled.');
+    }
 }

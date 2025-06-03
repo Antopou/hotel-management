@@ -84,6 +84,13 @@
                         <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteReservationModal{{ $reservation->id }}">
                             <i class="bi bi-trash-fill"></i>
                         </button>
+                        {{-- Cancel --}}
+                        <form action="{{ route('reservations.cancel', $reservation->id) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="reason" value="Guest canceled the reservation.">
+                            <button type="submit" class="btn btn-warning btn-sm">Cancel</button>
+                        </form>
                     </td>
                 </tr>
 
@@ -109,6 +116,10 @@
                                     <dd class="col-sm-8">{{ $reservation->number_of_guest }}</dd>
                                     <dt class="col-sm-4">Status</dt>
                                     <dd class="col-sm-8">{{ $reservation->is_checkin ? 'Checked In' : 'Pending' }}</dd>
+                                    <dt class="col-sm-4">Cancellation Reason</dt>
+                                    <dd class="col-sm-8">{{ $reservation->reason ?? 'N/A' }}</dd>
+                                    <dt class="col-sm-4">Cancelled Date</dt>
+                                    <dd class="col-sm-8">{{ $reservation->cancelled_date ?? 'N/A' }}</dd>
                                 </dl>
                             </div>
                             <div class="modal-footer">
