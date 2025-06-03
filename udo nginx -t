@@ -1,0 +1,19 @@
+[0;1;32m●[0m php8.2-fpm.service - The PHP 8.2 FastCGI Process Manager
+     Loaded: loaded (/lib/systemd/system/php8.2-fpm.service; enabled; vendor preset: enabled)
+     Active: [0;1;32mactive (running)[0m since Tue 2025-06-03 15:57:20 UTC; 8min ago
+       Docs: man:php-fpm8.2(8)
+    Process: 101102 ExecStartPost=/usr/lib/php/php-fpm-socket-helper install /run/php/php-fpm.sock /etc/php/8.2/fpm/pool.d/www.conf 82 (code=exited, status=0/SUCCESS)
+   Main PID: 101098 (php-fpm8.2)
+     Status: "Processes active: 0, idle: 2, Requests: 0, slow: 0, Traffic: 0.00req/sec"
+      Tasks: 3 (limit: 1102)
+     Memory: 15.1M
+        CPU: 139ms
+     CGroup: /system.slice/php8.2-fpm.service
+             ├─101098 "php-fpm: master process (/etc/php/8.2/fpm/php-fpm.conf)" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" ""
+             ├─101100 "php-fpm: pool www" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" ""
+             └─101101 "php-fpm: pool www" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" ""
+
+Jun 03 15:57:20 ubuntu-s-1vcpu-1gb-sgp1-01 systemd[1]: Stopped The PHP 8.2 FastCGI Process Manager.
+Jun 03 15:57:20 ubuntu-s-1vcpu-1gb-sgp1-01 systemd[1]: php8.2-fpm.service: Consumed 22.644s CPU time.
+Jun 03 15:57:20 ubuntu-s-1vcpu-1gb-sgp1-01 systemd[1]: Starting The PHP 8.2 FastCGI Process Manager...
+Jun 03 15:57:20 ubuntu-s-1vcpu-1gb-sgp1-01 systemd[1]: Started The PHP 8.2 FastCGI Process Manager.
