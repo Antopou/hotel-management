@@ -34,7 +34,6 @@
         </div>
     @endif
 
-    <!-- Update Profile -->
     <div class="card mb-4">
         <div class="card-header"><strong>Update Profile Information</strong></div>
         <div class="card-body">
@@ -57,7 +56,6 @@
         </div>
     </div>
 
-    <!-- Change Password -->
     <div class="card mb-4">
         <div class="card-header"><strong>Change Password</strong></div>
         <div class="card-body">
@@ -80,7 +78,6 @@
         </div>
     </div>
 
-    <!-- Delete Account -->
     <div class="card border-danger">
         <div class="card-header text-danger"><strong>Delete Account</strong></div>
         <div class="card-body">
