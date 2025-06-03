@@ -6,9 +6,9 @@ use App\Models\Room;
 use App\Models\RoomType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StoreRoomRequest; // New Form Request
-use App\Http\Requests\UpdateRoomRequest; // New Form Request
-use Illuminate\Support\Facades\Log; // For logging errors if needed
+use App\Http\Requests\StoreRoomRequest;
+use App\Http\Requests\UpdateRoomRequest;
+use Illuminate\Support\Facades\Log;
 
 class RoomController extends Controller
 {
@@ -42,13 +42,6 @@ class RoomController extends Controller
 
         return view('rooms.index', compact('rooms', 'roomTypes', 'sortBy', 'direction'));
     }
-
-    // `create()` method is no longer strictly necessary if using modals only
-    // public function create()
-    // {
-    //     $roomTypes = RoomType::all();
-    //     return view('rooms.create', compact('roomTypes'));
-    // }
 
     public function store(StoreRoomRequest $request) // Using StoreRoomRequest for validation
     {

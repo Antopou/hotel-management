@@ -57,16 +57,9 @@
     {{-- Room List --}}
     @forelse ($rooms as $room)
         @php
-            $roomTypeImages = [
-                'Single Room' => asset('images/room_types/single.jpg'),
-                'Double Room' => asset('images/room_types/double.jpg'),
-                'Standard Room' => asset('images/room_types/standard.jpg'), // Corrected typo in previous response
-                'Deluxe Room' => asset('images/room_types/deluxe.jpg'),
-                'Junior Suite' => asset('images/room_types/junior.jpg'), // Added if you have this type
-                'Executive Suite' => asset('images/room_types/executive.jpg'), // Added if you have this type
-            ];
-            $roomTypeName = $room->roomType->name ?? 'default';
-            $imageUrl = $roomTypeImages[$roomTypeName] ?? asset('images/room_types/default.jpg');
+            $roomType = $room->roomType;
+            $roomTypeName = $roomType->name ?? 'N/A';
+            $imageUrl = $roomType && $roomType->image ? asset('storage/' . $roomType->image) : asset('images/room_types/default.jpg');
         @endphp
 
         <div class="border rounded mb-3 p-3 shadow-sm bg-white card-hover">
