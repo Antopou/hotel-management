@@ -6,7 +6,8 @@
     {{-- Page Title and Add Button --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="bold m-0">Guest Management</h3>
-        <a href="{{ route('guests.create') }}" class="btn btn-success">Add New</a>
+        <!-- Button to trigger Create Modal -->
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createGuestModal">Add New</button>
     </div>
 
     {{-- Toast Notifications --}}
@@ -194,6 +195,47 @@
     </table>
 
     {{ $guests->links('pagination::bootstrap-5') }}
+
+    <!-- Create Modal -->
+    <div class="modal fade" id="createGuestModal" tabindex="-1" aria-labelledby="createGuestLabel" aria-hidden="true">
+        <div class="modal-dialog custom-modal">
+            <div class="modal-content">
+                <form action="{{ route('guests.store') }}" method="POST">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createGuestLabel">Add New Guest</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label" for="name">Name</label>
+                            <input type="text" name="name" id="name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="tel">Phone</label>
+                            <input type="text" name="tel" id="tel" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="email">Email</label>
+                            <input type="email" name="email" id="email" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="gender">Gender</label>
+                            <select name="gender" id="gender" class="form-select">
+                                <option value="">-- Select --</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 

@@ -37,6 +37,7 @@ class GuestController extends Controller
             'name' => 'required|string|max:100',
             'email' => 'nullable|email',
             'tel' => 'nullable|string',
+            'gender' => 'nullable|in:Male,Female',
         ]);
 
         Guest::create([
@@ -44,6 +45,7 @@ class GuestController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'tel' => $request->tel,
+            'gender' => $request->gender,
             'created_by' => 1,
         ]);
 
@@ -66,12 +68,14 @@ class GuestController extends Controller
             'name' => 'required|string|max:100',
             'email' => 'nullable|email',
             'tel' => 'nullable|string',
+            'gender' => 'nullable|in:Male,Female',
         ]);
 
         $guest->update([
             'name' => $request->name,
             'email' => $request->email,
             'tel' => $request->tel,
+            'gender' => $request->gender,
             'modified_by' => 1,
         ]);
 

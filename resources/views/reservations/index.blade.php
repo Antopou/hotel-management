@@ -29,7 +29,57 @@
     {{-- Page Title and Add Button --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="bold m-0">Guest Reservations</h3>
-        <a href="{{ route('reservations.create') }}" class="btn btn-success">Add New</a>
+        <!-- Button to trigger Create Modal -->
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createReservationModal">Add New</button>
+    </div>
+
+    <!-- Create Reservation Modal -->
+    <div class="modal fade" id="createReservationModal" tabindex="-1" aria-labelledby="createReservationLabel" aria-hidden="true">
+        <div class="modal-dialog custom-modal">
+            <div class="modal-content">
+                <form action="{{ route('reservations.store') }}" method="POST">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createReservationLabel">Add New Reservation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Guest</label>
+                            <select name="guest_code" class="form-select" required>
+                                @foreach ($guests as $guest)
+                                    <option value="{{ $guest->guest_code }}">{{ $guest->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Room</label>
+                            <select name="room_code" class="form-select" required>
+                                @foreach ($rooms as $room)
+                                    <option value="{{ $room->room_code }}">{{ $room->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Check-in Date</label>
+                            <input type="datetime-local" name="checkin_date" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Check-out Date</label>
+                            <input type="datetime-local" name="checkout_date" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Number of Guests</label>
+                            <input type="number" name="number_of_guest" class="form-control" min="1" value="1" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     {{-- Filter/Search Form --}}

@@ -48,7 +48,7 @@ class CheckinController extends Controller
             'room_code' => 'required|exists:rooms,room_code',
             'reservation_ref' => 'nullable|exists:guest_reservation,reservation_code',
             'checkin_date' => 'required|date',
-            'checkout_date' => 'required|date|after:checkin_date',
+            'checkout_date' => 'nullable|date|after:checkin_date',
             'number_of_guest' => 'required|integer|min:1',
             'rate' => 'required|numeric|min:0',
             'total_payment' => 'nullable|numeric|min:0',
@@ -66,7 +66,7 @@ class CheckinController extends Controller
             'total_payment' => $request->total_payment ?? 0,
             'payment_method' => $request->payment_method,
             'number_of_guest' => $request->number_of_guest,
-            'is_checkout' => false,
+            'is_checkout' => $request->has('is_checkout'),
             'created_by' => 1,
         ]);
 

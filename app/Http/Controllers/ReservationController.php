@@ -35,7 +35,9 @@ class ReservationController extends Controller
         }
 
         $reservations = $query->latest()->paginate(10)->withQueryString();
-        return view('reservations.index', compact('reservations'));
+        $guests = Guest::all();
+        $rooms = Room::all();
+        return view('reservations.index', compact('reservations', 'guests', 'rooms'));
     }
 
     public function create()
