@@ -179,62 +179,62 @@
             transition: box-shadow 0.2s ease-in-out;
             transform: translateY(-2px);
         }
-.sidebar-user {
-    padding: 0.5rem 1rem;
-    border-top: 1px solid #dee2e6;
-    background-color: #f8f9fa;
-    position: relative;
-}
+        .sidebar-user {
+            padding: 0.5rem 1rem;
+            border-top: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+            position: relative;
+        }
 
-.sidebar-user-name {
-    display: inline-block;
-    transition: opacity 0.3s ease, max-width 0.3s ease;
-}
+        .sidebar-user-name {
+            display: inline-block;
+            transition: opacity 0.3s ease, max-width 0.3s ease;
+        }
 
-html:not(.expanded-sidebar) .sidebar-user-name {
-    opacity: 0;
-    max-width: 0;
-    overflow: hidden;
-}
+        html:not(.expanded-sidebar) .sidebar-user-name {
+            opacity: 0;
+            max-width: 0;
+            overflow: hidden;
+        }
 
-.toggle-icon {
-    cursor: pointer;
-    font-size: 0.7rem;
-    display: inline-block;
-    margin-left: 0.5rem;
-}
+        .toggle-icon {
+            cursor: pointer;
+            font-size: 0.7rem;
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
 
-.dropdown-menu-custom {
-    min-width: 200px;
-    z-index: 1055;
-    display: none;
-}
+        .dropdown-menu-custom {
+            min-width: 200px;
+            z-index: 1055;
+            display: none;
+        }
 
-/* Show dropdown when toggled */
-.sidebar-user.show .dropdown-menu-custom {
-    display: block;
-}
+        /* Show dropdown when toggled */
+        .sidebar-user.show .dropdown-menu-custom {
+            display: block;
+        }
 
-/* Expanded sidebar: show at bottom (logout area) */
-.expanded-sidebar .sidebar-user.show .dropdown-menu-custom {
-    position: absolute;
-    bottom: 60px; /* Match the height of the sidebar-user */
-    right: 0;
-    left: auto;
-    transform: translateY(0);
-}
+        /* Expanded sidebar: show at bottom (logout area) */
+        .expanded-sidebar .sidebar-user.show .dropdown-menu-custom {
+            position: absolute;
+            bottom: 60px; /* Match the height of the sidebar-user */
+            right: 0;
+            left: auto;
+            transform: translateY(0);
+        }
 
-/* Collapsed sidebar: show fully below icon */
-html:not(.expanded-sidebar) .sidebar-user.show .dropdown-menu-custom {
-    position: fixed;
-    left: 62px; /* Sidebar width */
-    top: unset;
-    bottom: unset;
-    transform: translateY(0);
-    
-    /* Correct placement - calculate with icon's position */
-    top: calc(var(--user-icon-top, 0) - 40px); /* 40px offset below the icon */
-}
+        /* Collapsed sidebar: show fully below icon */
+        html:not(.expanded-sidebar) .sidebar-user.show .dropdown-menu-custom {
+            position: fixed;
+            left: 62px; /* Sidebar width */
+            top: unset;
+            bottom: unset;
+            transform: translateY(0);
+            
+            /* Correct placement - calculate with icon's position */
+            top: calc(var(--user-icon-top, 0) - 40px); /* 40px offset below the icon */
+        }
 
     </style>
 </head>
