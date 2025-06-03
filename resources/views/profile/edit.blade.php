@@ -2,10 +2,6 @@
 
 @section('content')
 <div class="container">
-    {{-- Back Button --}}
-    <!-- @if(isset($backUrl))
-        <a href="{{ $backUrl }}" class="btn btn-secondary mb-3">Back</a>
-    @endif -->
 
     <div class="profile-header bg-primary text-white p-4 rounded mb-4 d-flex align-items-center">
         <div class="me-3">
