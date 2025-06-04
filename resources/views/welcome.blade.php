@@ -17,7 +17,7 @@
         }
         .login-left {
             flex: 1;
-            background: url('{{ asset("images/hotel.png") }}') center center/cover no-repeat;
+            background: url('{{ asset("images/hotel.jpg") }}') center center/cover no-repeat;
         }
         .login-right {
             flex: 1;

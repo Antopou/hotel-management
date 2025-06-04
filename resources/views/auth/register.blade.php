@@ -17,7 +17,7 @@
         }
         .register-left {
             flex: 1;
-            background: url('{{ asset("images/hotel.png") }}') center center/cover no-repeat;
+            background: url('{{ asset("images/hotel.jpg") }}') center center/cover no-repeat;
         }
         .register-right {
             flex: 1;
