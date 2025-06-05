@@ -26,6 +26,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('room-types', RoomTypeController::class);
     Route::resource('guests', GuestController::class);
     Route::resource('reservations', ReservationController::class);
+    Route::get('/reservations/checkin', [ReservationController::class, 'checkinPage'])->name('reservations.checkin.page');
+    Route::post('/reservations/{id}/checkin', [ReservationController::class, 'doCheckin'])->name('reservations.doCheckin');
     Route::resource('checkins', CheckinController::class);
     Route::put('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
 

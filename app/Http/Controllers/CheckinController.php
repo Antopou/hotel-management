@@ -121,4 +121,33 @@ class CheckinController extends Controller
         $checkin->delete();
         return redirect()->route('checkins.index')->with('success', 'Check-in record deleted.');
     }
+
+    public function checkinPage(Request $request)
+    {
+        // Show all reservations eligible for check-in (today or earlier, not checked-in)
+        $today = now()->startOfDay();
+        $reservations = GuestReservation::with(['guest', 'room'])
+            ->whereIn('status', ['confirmed', 'pending'])
+            ->whereDate('checkin_date', '<=', $today)
+            ->where('is_checkin', false)
+            ->orderBy('checkin_date')
+            ->get();
+
+        return view('reservations.checkin', compact('reservations'));
+    }
+
+    public function doCheckin(Request $request, $id)
+    {
+        $reservation = GuestReservation::findOrFail($id);
+        if ($reservation->status === 'checked-in') {
+            return back()->with('error', 'Already checked in.');
+        }
+
+        $reservation->status = 'checked-in';
+        $reservation->is_checkin = true;
+        $reservation->save();
+
+        return back()->with('success', 'Check-in successful for ' . ($reservation->guest->name ?? ''));
+    }
+
 }
