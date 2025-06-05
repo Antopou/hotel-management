@@ -82,12 +82,17 @@ class GuestFolioController extends Controller
 
     public function createForCheckin($checkin_code)
     {
-        $checkin = GuestCheckin::where('checkin_code', $checkin_code)->firstOrFail();
+        $checkin = GuestCheckin::with('room.roomType')->where('checkin_code', $checkin_code)->firstOrFail();
+
+        do {
+            $random = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+            $folioCode = 'FL-' . date('Ymd') . '-' . $random;
+        } while (GuestFolio::where('folio_code', $folioCode)->exists());
 
         $folio = GuestFolio::firstOrCreate(
             ['checkin_code' => $checkin->checkin_code],
             [
-                'folio_code' => (string) Str::uuid(),
+                'folio_code' => $folioCode,
                 'guest_code' => $checkin->guest_code,
                 'room_code' => $checkin->room_code,
                 'total_amount' => 0,
@@ -96,6 +101,26 @@ class GuestFolioController extends Controller
                 'currency' => 'USD'
             ]
         );
+
+        $pricePerNight = $checkin->room->roomType->price_per_night ?? 0;
+        $start = \Carbon\Carbon::parse($checkin->checkin_date);
+        $end = \Carbon\Carbon::parse($checkin->checkout_date);
+        $numberOfNights = $start->diffInDays($end);
+
+        $roomCharge = $pricePerNight * $numberOfNights;
+
+        $alreadyHasRoomCharge = $folio->items()->where('description', 'Room Charge')->exists();
+
+        if ($roomCharge > 0 && !$alreadyHasRoomCharge) {
+            $folio->items()->create([
+                'type' => 'charge',
+                'description' => 'Room Charge',
+                'amount' => $roomCharge,
+                'posted_at' => now(),
+            ]);
+            $folio->recalculateTotals();
+        }
+
         return redirect()->route('folios.show', $folio->folio_code);
     }
 

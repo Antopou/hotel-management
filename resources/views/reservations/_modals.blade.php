@@ -12,7 +12,7 @@
             <div class="modal-body">
                 <dl class="row">
                     <dt class="col-sm-4">Guest</dt>
-                    <dd class="col-sm-8">{{ $reservation->guest->name ?? 'N/A' }}</dd>
+                    <dd class="col-sm-8">{{ $reservation->guest?->name ?? 'N/A' }}</dd>
                     <dt class="col-sm-4">Room</dt>
                     <dd class="col-sm-8">{{ $reservation->room->name ?? 'N/A' }}</dd>
                     <dt class="col-sm-4">Check-in Date</dt>
@@ -52,9 +52,11 @@
                     <div class="mb-3">
                         <label class="form-label">Guest</label>
                         <select class="form-select" name="guest_code" disabled>
-                            <option value="{{ $reservation->guest->guest_code }}">{{ $reservation->guest->name }}</option>
+                            <option value="{{ $reservation->guest?->guest_code ?? 'N/A' }}">
+                                {{ $reservation->guest?->name ?? 'N/A' }}
+                            </option>
                         </select>
-                        <input type="hidden" name="guest_code" value="{{ $reservation->guest->guest_code }}">
+                        <input type="hidden" name="guest_code" value="{{ $reservation->guest?->guest_code ?? 'N/A' }}">
                     </div>
                     <!-- Room (readonly) -->
                     <div class="mb-3">

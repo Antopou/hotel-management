@@ -81,13 +81,9 @@
                         <a href="{{ route('folios.print', $folio->folio_code) }}" class="btn btn-outline-secondary btn-sm me-1" target="_blank" title="Print">
                             <i class="bi bi-printer"></i>
                         </a>
-                        <form action="{{ route('folios.destroy', $folio->folio_code) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this folio? This action cannot be undone.');">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-outline-danger btn-sm" type="submit">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteFolioModal{{ $folio->id }}">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
             @empty
@@ -100,6 +96,38 @@
             </tbody>
         </table>
     </div>
+
+    {{-- Delete Folio Modals --}}
+    @foreach($folios as $folio)
+        <!-- Delete Folio Modal -->
+        <div class="modal fade" id="deleteFolioModal{{ $folio->id }}" tabindex="-1" aria-labelledby="deleteFolioLabel{{ $folio->id }}" aria-hidden="true">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+                    <form action="{{ route('folios.destroy', $folio->folio_code) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteFolioLabel{{ $folio->id }}">Confirm Delete</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>
+                                Are you sure you want to delete folio
+                                <strong>#{{ $folio->folio_code ?? $folio->id }}</strong>
+                                for guest <strong>{{ $folio->guest->name ?? 'N/A' }}</strong>?
+                            </p>
+                            <p class="text-muted">This action cannot be undone.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endforeach
+
     {{ $folios->links('pagination::bootstrap-5') }}
 </div>
 @endsection

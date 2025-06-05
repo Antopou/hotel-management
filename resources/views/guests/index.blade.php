@@ -200,7 +200,7 @@
     <div class="modal fade" id="createGuestModal" tabindex="-1" aria-labelledby="createGuestLabel" aria-hidden="true">
         <div class="modal-dialog custom-modal">
             <div class="modal-content">
-                <form action="{{ route('guests.store') }}" method="POST">
+                <form id="createGuestForm" action="{{ route('guests.store') }}" method="POST">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="createGuestLabel">Add New Guest</h5>
@@ -251,6 +251,35 @@
 
         if (errorToastEl) {
             new bootstrap.Toast(errorToastEl, { autohide: true, delay: 3000 }).show();
+        }
+
+        // AJAX Guest Add
+        const createForm = document.getElementById('createGuestForm');
+        if(createForm) {
+            createForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Prepare form data
+                let formData = new FormData(createForm);
+
+                fetch(createForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': formData.get('_token')
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // You can append the new guest to your table here, or reload table via AJAX.
+                    // For demo, let's just reload:
+                    location.reload();
+                })
+                .catch(error => {
+                    alert('Failed to add guest. Please check your input.');
+                });
+            });
         }
     });
 </script>

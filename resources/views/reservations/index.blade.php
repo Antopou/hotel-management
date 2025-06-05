@@ -43,19 +43,19 @@
         <tbody>
         @forelse($reservations as $reservation)
             <tr>
-                <td>{{ $reservation->id }}</td>
-                <td>{{ $reservation->room->name ?? 'N/A' }}</td>
-                <td>{{ $reservation->guest->name ?? 'N/A' }}</td>
-                <td>{{ $reservation->checkin_date }}</td>
-                <td>{{ $reservation->checkout_date }}</td>
+                <td>{{ $reservation->id ?? 'N/A' }}</td>
+                <td>{{ $reservation->room?->name ?? 'N/A' }}</td>
+                <td>{{ $reservation->guest?->name ?? 'N/A' }}</td>
+                <td>{{ $reservation->checkin_date ?? 'N/A' }}</td>
+                <td>{{ $reservation->checkout_date ?? 'N/A' }}</td>
                 <td>
                     <span class="badge
-                        @if($reservation->status === 'checked-in') bg-success
-                        @elseif($reservation->status === 'pending') bg-secondary
-                        @elseif($reservation->status === 'cancelled') bg-danger
-                        @elseif($reservation->status === 'confirmed') bg-primary
+                        @if(($reservation->status ?? '') === 'checked-in') bg-success
+                        @elseif(($reservation->status ?? '') === 'pending') bg-secondary
+                        @elseif(($reservation->status ?? '') === 'cancelled') bg-danger
+                        @elseif(($reservation->status ?? '') === 'confirmed') bg-primary
                         @else bg-warning @endif">
-                        {{ ucfirst($reservation->status) }}
+                        {{ ucfirst($reservation->status ?? 'N/A') }}
                     </span>
                 </td>
                 <td>
@@ -77,7 +77,7 @@
                     </form>
                 </td>
             </tr>
-            {{-- View/Edit/Delete Modals --}}
+
             @include('reservations._modals', ['reservation' => $reservation])
         @empty
             <tr>
