@@ -75,13 +75,19 @@
                         {{ number_format($folio->total_amount, 2) }}
                     </td>
                     <td>
-                        <a href="{{ route('folios.show', $folio->folio_code) }}" class="btn btn-outline-dark btn-sm">
+                        <a href="{{ route('folios.show', $folio->folio_code) }}" class="btn btn-outline-dark btn-sm me-1">
                             <i class="bi bi-receipt"></i> View
                         </a>
-                        <a href="{{ route('folios.print', $folio->folio_code) }}" class="btn btn-outline-secondary btn-sm" target="_blank">
+                        <a href="{{ route('folios.print', $folio->folio_code) }}" class="btn btn-outline-secondary btn-sm me-1" target="_blank" title="Print">
                             <i class="bi bi-printer"></i>
                         </a>
-                        {{-- Add Edit, Void, Refund buttons as needed --}}
+                        <form action="{{ route('folios.destroy', $folio->folio_code) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this folio? This action cannot be undone.');">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-outline-danger btn-sm" type="submit">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
                     </td>
                 </tr>
             @empty

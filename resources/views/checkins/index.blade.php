@@ -69,9 +69,21 @@
                     <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCheckinModal{{ $checkin->id }}">
                         <i class="bi bi-trash-fill"></i>
                     </button>
-                    <a href="{{ route('folios.show', $checkin->checkin_code) }}" class="btn btn-outline-dark btn-sm">
-                        <i class="bi bi-receipt"></i> Folio
-                    </a>
+                    @php
+                        $folio = \App\Models\GuestFolio::where('checkin_code', $checkin->checkin_code)->first();
+                    @endphp
+                    @if($folio)
+                        <a href="{{ route('folios.show', $folio->folio_code) }}" class="btn btn-outline-dark btn-sm">
+                            <i class="bi bi-receipt"></i> Folio
+                        </a>
+                    @else
+                        <form method="POST" action="{{ route('folios.create.for.checkin', $checkin->checkin_code) }}" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-plus-circle"></i> Folio
+                            </button>
+                        </form>
+                    @endif
                 </td>
             </tr>
 

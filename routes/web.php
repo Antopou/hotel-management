@@ -36,14 +36,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/reservations/{id}/checkin', [ReservationController::class, 'doCheckin'])->name('reservations.doCheckin');
     Route::put('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
 
-    // Folios/Billing
     Route::prefix('folios')->name('folios.')->group(function () {
         Route::get('/', [GuestFolioController::class, 'index'])->name('index');
-        Route::get('/{reservation_code}', [GuestFolioController::class, 'show'])->name('show');
-        Route::get('/{folio}/print', [GuestFolioController::class, 'print'])->name('print');
-        Route::post('/{folio}/items', [GuestFolioController::class, 'storeItem'])->name('items.store');
+        Route::get('/{folio_code}', [GuestFolioController::class, 'show'])->name('show');
+        Route::get('/{folio_code}/print', [GuestFolioController::class, 'print'])->name('print');
+        Route::post('/{folio_code}/items', [GuestFolioController::class, 'storeItem'])->name('items.store');
         Route::delete('/items/{id}', [GuestFolioController::class, 'destroyItem'])->name('items.destroy');
-        // You can add payment routes here if needed
+        Route::delete('/{folio_code}', [GuestFolioController::class, 'destroy'])->name('destroy');
+        Route::post('/create-for-checkin/{checkin_code}', [GuestFolioController::class, 'createForCheckin'])->name('create.for.checkin'); // <--- THIS!
     });
 
 });

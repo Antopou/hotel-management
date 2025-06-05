@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 class GuestFolio extends Model
 {
     use HasFactory;
-    // use SoftDeletes; // Optional
 
     protected $fillable = [
         'folio_code',
@@ -61,4 +60,9 @@ class GuestFolio extends Model
     {
         return $this->total_amount - $this->paid_amount;
     }
+    public function getRouteKeyName()
+    {
+        return 'folio_code';
+    }
+
 }
