@@ -9,26 +9,40 @@
 
     {{-- Page Title and Add Button --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="bold m-0">Guest Check-ins</h3>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createCheckinModal">Add New</button>
+        <h3 class="bold m-0">Guest Check-ins</h3> {{-- Added text-primary for consistency --}}
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createCheckinModal">
+            <i class="bi bi-plus-circle-fill me-1"></i> Add New Check-in
+        </button>
     </div>
 
-    {{-- Filter/Search Form --}}
-    <form method="GET" action="{{ route('checkins.index') }}" class="row g-2 mb-3">
-        <div class="col-md-4">
-            <input type="text" name="guest" value="{{ request('guest') }}" class="form-control" placeholder="Search by Guest Name">
+    {{-- Filter/Search Form (NOW SAME UI AS RESERVATION MANAGEMENT) --}}
+    <div class="card shadow-sm mb-4"> {{-- Added card component --}}
+        <div class="card-body">
+            <form method="GET" action="{{ route('checkins.index') }}" class="row g-3 align-items-end"> {{-- Changed g-2 to g-3 for consistent spacing, added align-items-end --}}
+                <div class="col-md-4">
+                    <label for="filterGuestName" class="form-label">Guest Name</label> {{-- Added label --}}
+                    <input type="text" name="guest" id="filterGuestName" value="{{ request('guest') }}" class="form-control" placeholder="Search by Guest Name">
+                </div>
+                <div class="col-md-4">
+                    <label for="filterCheckinDate" class="form-label">Check-in Date</label> {{-- Added label --}}
+                    <input type="date" name="checkin_date" id="filterCheckinDate" value="{{ request('checkin_date') }}" class="form-control">
+                </div>
+                <div class="col-md-4 d-flex gap-2"> {{-- Adjusted for buttons on same line --}}
+                    <button type="submit" class="btn btn-primary flex-grow-1"> {{-- Changed w-100 to flex-grow-1 --}}
+                        <i class="bi bi-funnel me-1"></i> Filter
+                    </button>
+                    <a href="{{ route('checkins.index') }}" class="btn btn-outline-secondary flex-grow-1"> {{-- Changed w-100 to flex-grow-1 --}}
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                    </a>
+                </div>
+            </form>
         </div>
-        <div class="col-md-4">
-            <input type="date" name="checkin_date" value="{{ request('checkin_date') }}" class="form-control">
-        </div>
-        <div class="col-md-4 d-flex gap-2">
-            <button type="submit" class="btn btn-primary w-100">Filter</button>
-            <a href="{{ route('checkins.index') }}" class="btn btn-outline-secondary w-100">Reset</a>
-        </div>
-    </form>
+    </div>
+    {{-- END Filter/Search Form --}}
+
 
     {{-- Check-in Table --}}
-    <table class="table table-bordered table-hover">
+    <table class="table table-bordered table-hover table-striped"> {{-- Added table-striped for consistency --}}
         <thead>
             <tr>
                 <th>ID</th>
@@ -37,7 +51,7 @@
                 <th>Check-in</th>
                 <th>Check-out</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th class="text-center">Actions</th> {{-- Added text-center for consistency --}}
             </tr>
         </thead>
         <tbody>
@@ -46,44 +60,46 @@
                 <td>{{ $checkin->id }}</td>
                 <td>{{ $checkin->guest->name ?? 'N/A' }}</td>
                 <td>{{ $checkin->room->name ?? 'N/A' }}</td>
-                <td>{{ $checkin->checkin_date }}</td>
-                <td>{{ $checkin->checkout_date }}</td>
+                <td>{{ $checkin->checkin_date ? \Carbon\Carbon::parse($checkin->checkin_date)->format('M d, Y H:i') : 'N/A' }}</td> {{-- Formatted date --}}
+                <td>{{ $checkin->checkout_date ? \Carbon\Carbon::parse($checkin->checkout_date)->format('M d, Y H:i') : 'N/A' }}</td> {{-- Formatted date --}}
                 <td>
-                    <span class="badge 
-                        @if($checkin->is_checkout) bg-secondary 
-                        @else bg-success 
+                    <span class="badge text-white
+                        @if($checkin->is_checkout) bg-secondary
+                        @else bg-success
                         @endif">
                         {{ $checkin->is_checkout ? 'Checked Out' : 'In Stay' }}
                     </span>
                 </td>
-                <td>
-                    {{-- View --}}
-                    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewCheckinModal{{ $checkin->id }}">
-                        <i class="bi bi-eye-fill"></i>
-                    </button>
-                    {{-- Edit --}}
-                    <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editCheckinModal{{ $checkin->id }}">
-                        <i class="bi bi-pencil-square"></i>
-                    </button>
-                    {{-- Delete --}}
-                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCheckinModal{{ $checkin->id }}">
-                        <i class="bi bi-trash-fill"></i>
-                    </button>
-                    @php
-                        $folio = \App\Models\GuestFolio::where('checkin_code', $checkin->checkin_code)->first();
-                    @endphp
-                    @if($folio)
-                        <a href="{{ route('folios.show', $folio->folio_code) }}" class="btn btn-outline-dark btn-sm">
-                            <i class="bi bi-receipt"></i> Folio
-                        </a>
-                    @else
-                        <form method="POST" action="{{ route('folios.create.for.checkin', $checkin->checkin_code) }}" class="d-inline">
-                            @csrf
-                            <button type="submit" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-plus-circle"></i> Folio
-                            </button>
-                        </form>
-                    @endif
+                <td class="text-center"> {{-- Added text-center for consistency --}}
+                    <div class="d-flex justify-content-center gap-1"> {{-- Added gap-1 for consistency --}}
+                        {{-- View --}}
+                        <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewCheckinModal{{ $checkin->id }}" title="View Check-in Details"> {{-- Added title --}}
+                            <i class="bi bi-eye-fill"></i>
+                        </button>
+                        {{-- Edit --}}
+                        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editCheckinModal{{ $checkin->id }}" title="Edit Check-in"> {{-- Added title --}}
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        {{-- Delete --}}
+                        <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCheckinModal{{ $checkin->id }}" title="Delete Check-in"> {{-- Added title --}}
+                            <i class="bi bi-trash-fill"></i>
+                        </button>
+                        @php
+                            $folio = \App\Models\GuestFolio::where('checkin_code', $checkin->checkin_code)->first();
+                        @endphp
+                        @if($folio)
+                            <a href="{{ route('folios.show', $folio->folio_code) }}" class="btn btn-dark btn-sm" title="View Folio"> {{-- Added title --}}
+                                <i class="bi bi-receipt"></i> Folio
+                            </a>
+                        @else
+                            <form method="POST" action="{{ route('folios.create.for.checkin', $checkin->checkin_code) }}" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-primary btn-sm" title="Create Folio"> {{-- Added title --}}
+                                    <i class="bi bi-plus-circle"></i> Folio
+                                </button>
+                            </form>
+                        @endif
+                    </div>
                 </td>
             </tr>
 
@@ -91,7 +107,9 @@
         @empty
             <tr>
                 <td colspan="7">
-                    <div class="alert alert-info mb-0 text-center">No check-ins found.</div>
+                    <div class="alert alert-info mb-0 text-center">
+                        <i class="bi bi-info-circle me-2"></i> No check-ins found. {{-- Added icon --}}
+                    </div>
                 </td>
             </tr>
         @endforelse
@@ -102,7 +120,7 @@
 
     {{-- Create Check-in Modal --}}
     <div class="modal fade" id="createCheckinModal" tabindex="-1" aria-labelledby="createCheckinLabel" aria-hidden="true">
-        <div class="modal-dialog custom-modal">
+        <div class="modal-dialog modal-lg"> {{-- Changed custom-modal to modal-lg for wider modal --}}
             <div class="modal-content">
                 <form action="{{ route('checkins.store') }}" method="POST">
                     @csrf
@@ -111,68 +129,71 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        {{-- Guest Select with Add New --}}
-                        <div class="mb-3">
-                            <label class="form-label mb-1">Guest</label>
-                            <div class="d-flex">
-                                <select name="guest_code" class="form-select me-2 flex-grow-1" required id="guestSelect">
-                                    <option value="">-- Select Guest --</option>
-                                    @foreach ($guests as $guest)
-                                        <option value="{{ $guest->guest_code }}">{{ $guest->name }}</option>
+                        <div class="row g-3"> {{-- Applied row g-3 for consistent grid layout --}}
+                            {{-- Guest Select with Add New --}}
+                            <div class="col-md-6"> {{-- Used col-md-6 for two-column layout --}}
+                                <label for="guestSelect" class="form-label">Guest <span class="text-danger">*</span></label> {{-- Added for attribute to label --}}
+                                <div class="input-group"> {{-- Used input-group for button next to select --}}
+                                    <select name="guest_code" class="form-select" required id="guestSelect">
+                                        <option value="">-- Select Guest --</option>
+                                        @foreach ($guests as $guest)
+                                            <option value="{{ $guest->guest_code }}">{{ $guest->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addGuestModal" title="Add New Guest"> {{-- Changed button text to icon + text, removed inline style --}}
+                                        <i class="bi bi-person-plus-fill"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {{-- Room Select --}}
+                            <div class="col-md-6"> {{-- Used col-md-6 for two-column layout --}}
+                                <label for="roomSelect" class="form-label">Room <span class="text-danger">*</span></label> {{-- Added for attribute to label --}}
+                                <select name="room_code" class="form-select" required id="roomSelect"> {{-- Added id --}}
+                                    <option value="">-- Select Room --</option>
+                                    @foreach ($rooms as $room)
+                                        <option value="{{ $room->room_code }}">{{ $room->name }}</option>
                                     @endforeach
                                 </select>
-                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addGuestModal" style="white-space:nowrap;">
-                                    + Add New Guest
-                                </button>
                             </div>
-                        </div>
-                        {{-- Room Select --}}
-                        <div class="mb-3">
-                            <label class="form-label">Room</label>
-                            <select name="room_code" class="form-select" required>
-                                <option value="">-- Select Room --</option>
-                                @foreach ($rooms as $room)
-                                    <option value="{{ $room->room_code }}">{{ $room->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        {{-- Check-in, Duration, Check-out (calculated) --}}
-                        <div class="mb-3">
-                            <label class="form-label">Check-in Date</label>
-                            <input type="datetime-local" name="checkin_date" id="checkin_date" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Number of Nights</label>
-                            <input type="number" name="number_of_nights" id="number_of_nights" class="form-control" min="1" value="1" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Check-out Date</label>
-                            <input type="datetime-local" name="checkout_date" id="checkout_date" class="form-control" readonly required>
-                        </div>
-                        {{-- Number of Guests --}}
-                        <div class="mb-3">
-                            <label class="form-label">Number of Guests</label>
-                            <input type="number" name="number_of_guest" class="form-control" min="1" value="1" required>
-                        </div>
-                        {{-- Rate --}}
-                        <div class="mb-3">
-                            <label class="form-label">Rate</label>
-                            <input type="number" step="0.01" name="rate" class="form-control" value="0">
-                        </div>
-                        {{-- Total Payment --}}
-                        <div class="mb-3">
-                            <label class="form-label">Total Payment</label>
-                            <input type="number" step="0.01" name="total_payment" class="form-control" value="0">
-                        </div>
-                        {{-- Payment Method --}}
-                        <div class="mb-3">
-                            <label class="form-label">Payment Method</label>
-                            <input type="text" name="payment_method" class="form-control">
-                        </div>
-                        {{-- Mark as Checked Out --}}
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" name="is_checkout" value="1">
-                            <label class="form-check-label">Mark as Checked Out</label>
+                            {{-- Check-in, Duration, Check-out (calculated) --}}
+                            <div class="col-md-6"> {{-- Used col-md-6 for two-column layout --}}
+                                <label for="checkin_date" class="form-label">Check-in Date <span class="text-danger">*</span></label> {{-- Added for attribute to label --}}
+                                <input type="datetime-local" name="checkin_date" id="checkin_date" class="form-control" required>
+                            </div>
+                            <div class="col-md-6"> {{-- Used col-md-6 for two-column layout --}}
+                                <label for="number_of_nights" class="form-label">Number of Nights <span class="text-danger">*</span></label> {{-- Added for attribute to label --}}
+                                <input type="number" name="number_of_nights" id="number_of_nights" class="form-control" min="1" value="1" required>
+                            </div>
+                            <div class="col-md-6"> {{-- Used col-md-6 for two-column layout --}}
+                                <label for="checkout_date" class="form-label">Check-out Date</label> {{-- Added for attribute to label --}}
+                                <input type="datetime-local" name="checkout_date" id="checkout_date" class="form-control" readonly required>
+                            </div>
+                            {{-- Number of Guests --}}
+                            <div class="col-md-6"> {{-- Used col-md-6 for two-column layout --}}
+                                <label for="number_of_guest" class="form-label">Number of Guests <span class="text-danger">*</span></label> {{-- Added for attribute to label --}}
+                                <input type="number" name="number_of_guest" id="number_of_guest" class="form-control" min="1" value="1" required> {{-- Added id --}}
+                            </div>
+                            
+                            {{-- <div class="col-md-6">
+                                <label for="rate" class="form-label">Rate</label> 
+                                <input type="number" step="0.01" name="rate" id="rate" class="form-control" value="0">
+                            </div>
+                             --}}
+                            {{-- <div class="col-md-6">
+                                <label for="total_payment" class="form-label">Total Payment</label> 
+                                <input type="number" step="0.01" name="total_payment" id="total_payment" class="form-control" value="0">                            </div>
+                            <div class="col-md-6"> 
+                                <label for="payment_method" class="form-label">Payment Method</label> 
+                                <input type="text" name="payment_method" id="payment_method" class="form-control"> 
+                            </div> --}}
+
+                            {{-- Mark as Checked Out --}}
+                            <div class="col-12"> {{-- Kept as col-12 as it's a single checkbox spanning full width --}}
+                                <div class="form-check"> {{-- Changed mb-3 to be inside col for better spacing control --}}
+                                    <input class="form-check-input" type="checkbox" name="is_checkout" id="is_checkout" value="1"> {{-- Added id --}}
+                                    <label class="form-check-label" for="is_checkout">Mark as Checked Out</label> {{-- Added for attribute to label --}}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -184,7 +205,7 @@
         </div>
     </div>
 
-    {{-- Add Guest Modal --}}
+    {{-- Add Guest Modal (already has good, standard modal form UI) --}}
     <div class="modal fade" id="addGuestModal" tabindex="-1" aria-labelledby="addGuestLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -196,23 +217,24 @@
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label class="form-label">Guest Name</label>
-                            <input type="text" name="name" class="form-control" required>
+                            <label for="guestName" class="form-label">Guest Name <span class="text-danger">*</span></label> {{-- Added for attribute --}}
+                            <input type="text" name="name" id="guestName" class="form-control" required> {{-- Added id --}}
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control">
+                            <label for="guestEmail" class="form-label">Email</label> {{-- Added for attribute --}}
+                            <input type="email" name="email" id="guestEmail" class="form-control"> {{-- Added id --}}
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Phone</label>
-                            <input type="text" name="tel" class="form-control">
+                            <label for="guestPhone" class="form-label">Phone</label> {{-- Added for attribute --}}
+                            <input type="text" name="tel" id="guestPhone" class="form-control"> {{-- Added id --}}
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Gender</label>
-                            <select name="gender" class="form-select">
+                            <label for="guestGender" class="form-label">Gender</label> {{-- Added for attribute --}}
+                            <select name="gender" id="guestGender" class="form-select"> {{-- Added id --}}
                                 <option value="">-- Select --</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
+                                <option value="Other">Other</option>
                             </select>
                         </div>
                     </div>
@@ -254,6 +276,7 @@ $(function() {
     }
     document.getElementById('checkin_date').addEventListener('change', updateCheckoutDate);
     document.getElementById('number_of_nights').addEventListener('input', updateCheckoutDate);
+    // Initial call in case values are pre-filled (e.g., validation error)
     updateCheckoutDate();
 
     // AJAX Guest Add
@@ -275,12 +298,15 @@ $(function() {
                     $('#addGuestModal').modal('hide');
                     $form[0].reset();
                 } else {
-                    alert('Guest added, but no response data.');
+                    // Consider a more robust error message or toast notification here
+                    alert('Guest added, but no response data. Please refresh to see the new guest if not automatically selected.');
                     $('#addGuestModal').modal('hide');
                 }
             },
             error: function(xhr) {
-                alert('Failed to add guest. Please check your input.');
+                // More detailed error handling could be added here
+                alert('Failed to add guest. Please check your input or console for details.');
+                console.error('AJAX error:', xhr.responseText);
             }
         });
     });
