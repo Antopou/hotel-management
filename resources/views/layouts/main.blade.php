@@ -253,6 +253,11 @@
         <div class="sidebar-content d-flex flex-column flex-grow-1">
             <ul class="nav flex-column flex-grow-1">
                 <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                        <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('rooms.*') ? 'active' : '' }}" href="{{ route('rooms.index') }}">
                         <i class="bi bi-house-door-fill"></i> <span>Rooms</span>
                     </a>
