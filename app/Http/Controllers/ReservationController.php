@@ -29,7 +29,6 @@ class ReservationController extends Controller
         } elseif ($request->filled('date_to')) {
             $query->whereDate('checkin_date', '<=', $request->date_to);
         }
-        // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }

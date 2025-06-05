@@ -32,8 +32,8 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Guest</th>
                 <th>Room</th>
+                <th>Guest</th>
                 <th>Check-in</th>
                 <th>Check-out</th>
                 <th>Status</th>
@@ -44,8 +44,8 @@
         @forelse($reservations as $reservation)
             <tr>
                 <td>{{ $reservation->id }}</td>
-                <td>{{ $reservation->guest->name ?? 'N/A' }}</td>
                 <td>{{ $reservation->room->name ?? 'N/A' }}</td>
+                <td>{{ $reservation->guest->name ?? 'N/A' }}</td>
                 <td>{{ $reservation->checkin_date }}</td>
                 <td>{{ $reservation->checkout_date }}</td>
                 <td>
@@ -59,19 +59,16 @@
                     </span>
                 </td>
                 <td>
-                    {{-- View --}}
+                    {{-- Actions --}}
                     <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewReservationModal{{ $reservation->id }}">
                         <i class="bi bi-eye-fill"></i>
                     </button>
-                    {{-- Edit --}}
                     <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editReservationModal{{ $reservation->id }}">
                         <i class="bi bi-pencil-square"></i>
                     </button>
-                    {{-- Delete --}}
                     <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteReservationModal{{ $reservation->id }}">
                         <i class="bi bi-trash-fill"></i>
                     </button>
-                    {{-- Cancel --}}
                     <form action="{{ route('reservations.cancel', $reservation->id) }}" method="POST" class="d-inline">
                         @csrf
                         @method('PUT')

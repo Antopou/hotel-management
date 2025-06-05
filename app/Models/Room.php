@@ -34,9 +34,16 @@ class Room extends Model
         });
     }
 
-    /**
-     * Get the room type this room belongs to.
-     */
+    public function reservations()
+    {
+        return $this->hasMany(GuestReservation::class, 'room_code', 'room_code');
+    }
+
+    public function checkins()
+    {
+        return $this->hasMany(GuestCheckin::class, 'room_code', 'room_code');
+    }
+
     public function roomType()
     {
         return $this->belongsTo(RoomType::class, 'room_type_code', 'room_type_code');

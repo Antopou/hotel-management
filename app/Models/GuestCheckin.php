@@ -17,8 +17,9 @@ class GuestCheckin extends Model
         'modified_by', 'is_active'
     ];
 
-    public function guest() {
-    return $this->belongsTo(Guest::class, 'guest_code', 'guest_code');
+    public function guest()
+    {
+        return $this->belongsTo(Guest::class, 'guest_code', 'guest_code');
     }
 
     public function room() {
