@@ -86,6 +86,10 @@ class ReservationController extends Controller
             'created_by' => 1,
         ]);
 
+        // --- Set Room as reserved ---
+        $room = Room::where('room_code', $request->room_code)->first();
+        if ($room) $room->update(['status' => 'reserved']);
+
         return redirect()->route('reservations.index')->with('success', 'Reservation created.');
     }
 
@@ -174,6 +178,11 @@ class ReservationController extends Controller
             'reason' => $request->reason,
             'status' => 'cancelled',
         ]);
+
+        // --- Set Room as available again ---
+        $room = Room::where('room_code', $reservation->room_code)->first();
+        if ($room) $room->update(['status' => 'available']);
+
         return redirect()->route('reservations.index')->with('success', 'Reservation canceled.');
     }
 }

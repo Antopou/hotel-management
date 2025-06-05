@@ -67,9 +67,9 @@
                             <div class="text-muted small">
                                 <strong>Status:</strong>
                                 <span class="fw-bold text-{{
-                                    $room->status === 'Available' ? 'success' :
-                                    ($room->status === 'Occupied' ? 'danger' :
-                                    ($room->status === 'Cleaning' ? 'warning' : 'secondary'))
+                                    $room->status === 'available' ? 'success' :
+                                    ($room->status === 'occupied' ? 'danger' :
+                                    ($room->status === 'cleaning' ? 'warning' : 'secondary'))
                                 }}">{{ $room->status }}</span>
                             </div>
                         </div>

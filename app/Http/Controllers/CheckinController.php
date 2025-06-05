@@ -15,21 +15,16 @@ class CheckinController extends Controller
     {
         $query = GuestCheckin::with(['guest', 'room']);
 
-        // Filter by guest name
         if ($request->filled('guest')) {
             $query->whereHas('guest', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->guest . '%');
             });
         }
-
-        // Filter by room name
         if ($request->filled('room')) {
             $query->whereHas('room', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->room . '%');
             });
         }
-
-        // Filter by specific check-in date
         if ($request->filled('checkin_date')) {
             $query->whereDate('checkin_date', $request->checkin_date);
         }
@@ -46,7 +41,7 @@ class CheckinController extends Controller
         $request->validate([
             'guest_code' => 'required|exists:guests,guest_code',
             'room_code' => 'required|exists:rooms,room_code',
-            'reservation_ref' => 'nullable|exists:guest_reservation,reservation_code',
+            'reservation_ref' => 'nullable|exists:guest_reservations,reservation_code',
             'checkin_date' => 'required|date',
             'checkout_date' => 'nullable|date|after:checkin_date',
             'number_of_guest' => 'required|integer|min:1',
@@ -55,7 +50,7 @@ class CheckinController extends Controller
             'payment_method' => 'nullable|string',
         ]);
 
-        GuestCheckin::create([
+        $checkin = GuestCheckin::create([
             'checkin_code' => Str::uuid(),
             'reservation_ref' => $request->reservation_ref,
             'guest_code' => $request->guest_code,
@@ -69,6 +64,18 @@ class CheckinController extends Controller
             'is_checkout' => $request->has('is_checkout'),
             'created_by' => 1,
         ]);
+
+        // Set Room as occupied if no other ongoing checkins
+        $room = Room::where('room_code', $request->room_code)->first();
+        if ($room) {
+            $hasActive = GuestCheckin::where('room_code', $request->room_code)
+                ->where('is_checkout', false)
+                ->where('id', '!=', $checkin->id)
+                ->exists();
+            if (!$hasActive) {
+                $room->update(['status' => 'occupied']);
+            }
+        }
 
         return redirect()->route('checkins.index')->with('success', 'Guest checked in.');
     }
@@ -99,6 +106,9 @@ class CheckinController extends Controller
             'payment_method' => 'nullable|string',
         ]);
 
+        $oldRoomCode = $checkin->room_code;
+        $wasCheckedOut = $checkin->is_checkout;
+
         $checkin->update([
             'guest_code' => $request->guest_code,
             'room_code' => $request->room_code,
@@ -113,12 +123,50 @@ class CheckinController extends Controller
             'modified_by' => 1,
         ]);
 
+        // --- If checked out, set Room as available if no other active checkins ---
+        if (!$wasCheckedOut && $checkin->is_checkout) {
+            $hasOtherActive = GuestCheckin::where('room_code', $checkin->room_code)
+                ->where('is_checkout', false)
+                ->where('id', '!=', $checkin->id)
+                ->exists();
+            if (!$hasOtherActive) {
+                $room = Room::where('room_code', $checkin->room_code)->first();
+                if ($room) $room->update(['status' => 'available']);
+            }
+        }
+
+        // If room code was changed, update old room too!
+        if ($oldRoomCode !== $checkin->room_code) {
+            $hasOtherActive = GuestCheckin::where('room_code', $oldRoomCode)
+                ->where('is_checkout', false)
+                ->exists();
+            if (!$hasOtherActive) {
+                $room = Room::where('room_code', $oldRoomCode)->first();
+                if ($room) $room->update(['status' => 'available']);
+            }
+            // Mark new room as occupied
+            $room = Room::where('room_code', $checkin->room_code)->first();
+            if ($room) $room->update(['status' => 'occupied']);
+        }
+
         return redirect()->route('checkins.index')->with('success', 'Check-in updated.');
     }
 
     public function destroy(GuestCheckin $checkin)
     {
+        $room_code = $checkin->room_code;
         $checkin->delete();
+
+        // Set room as available if no other active checkins
+        $hasOtherActive = GuestCheckin::where('room_code', $room_code)
+            ->where('is_checkout', false)
+            ->exists();
+
+        if (!$hasOtherActive) {
+            $room = Room::where('room_code', $room_code)->first();
+            if ($room) $room->update(['status' => 'available']);
+        }
+
         return redirect()->route('checkins.index')->with('success', 'Check-in record deleted.');
     }
 
@@ -146,6 +194,12 @@ class CheckinController extends Controller
         $reservation->status = 'checked-in';
         $reservation->is_checkin = true;
         $reservation->save();
+
+        // Optionally set room status to occupied if not already
+        $room = Room::where('room_code', $reservation->room_code)->first();
+        if ($room && $room->status !== 'occupied') {
+            $room->update(['status' => 'occupied']);
+        }
 
         return back()->with('success', 'Check-in successful for ' . ($reservation->guest->name ?? ''));
     }

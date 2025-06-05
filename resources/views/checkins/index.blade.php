@@ -69,6 +69,9 @@
                     <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCheckinModal{{ $checkin->id }}">
                         <i class="bi bi-trash-fill"></i>
                     </button>
+                    <a href="{{ route('folios.show', $checkin->checkin_code) }}" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-receipt"></i> Folio
+                    </a>
                 </td>
             </tr>
 

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes; // <-- Add this for soft deletes
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class GuestReservation extends Model
 {
@@ -35,7 +35,6 @@ class GuestReservation extends Model
         return $this->belongsTo(Room::class, 'room_code', 'room_code');
     }
 
-    // Optional: Relationship to room type via room
     public function roomType()
     {
         return $this->hasOneThrough(RoomType::class, Room::class, 'room_code', 'room_type_code', 'room_code', 'room_type_code');

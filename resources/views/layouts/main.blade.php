@@ -277,6 +277,12 @@
                         <i class="bi bi-arrow-right-square-fill"></i> <span>Check-ins</span>
                     </a>
                 </li>
+                <!-- --- Folios Link Here --- -->
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('folios.*') ? 'active' : '' }}" href="{{ route('folios.index') }}">
+                        <i class="bi bi-receipt"></i> <span>Folios</span>
+                    </a>
+                </li>
             </ul>
             @auth
             <div class="sidebar-user dropdown w-100">
