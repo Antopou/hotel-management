@@ -13,7 +13,8 @@ class GuestReservation extends Model
     protected $fillable = [
         'reservation_code', 'guest_code', 'room_code', 'checkin_date', 'checkout_date',
         'cancelled_date', 'reason', 'rate', 'total_payment', 'payment_method',
-        'number_of_guest', 'is_checkin', 'created_by', 'modified_by', 'is_active'
+        'number_of_guest', 'is_checkin', 'created_by', 'modified_by', 'is_active',
+        'status',
     ];
 
     protected $casts = [

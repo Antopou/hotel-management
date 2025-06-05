@@ -40,7 +40,7 @@ class GuestController extends Controller
             'gender' => 'nullable|in:Male,Female',
         ]);
 
-        Guest::create([
+        $guest = Guest::create([
             'guest_code' => Str::uuid(),
             'name' => $request->name,
             'email' => $request->email,
@@ -49,7 +49,11 @@ class GuestController extends Controller
             'created_by' => 1,
         ]);
 
-        return redirect()->route('guests.index')->with('success', 'Guest added successfully.');
+        // Return JSON for AJAX
+        return response()->json([
+            'guest_code' => $guest->guest_code,
+            'name' => $guest->name
+        ]);
     }
 
     public function show(Guest $guest)
