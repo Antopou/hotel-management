@@ -138,13 +138,13 @@
 
     {{-- Create Reservation Modal --}}
     <div class="modal fade" id="createReservationModal" tabindex="-1" aria-labelledby="createReservationLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog custom-modal">
             <div class="modal-content">
                 <form action="{{ route('reservations.store') }}" method="POST">
                     @csrf
-                    <div class="modal-header">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="createReservationLabel">Add New Reservation</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="row g-3">
@@ -213,14 +213,15 @@
         </div>
     </div>
 
+    {{-- Add Guest Modal --}}
     <div class="modal fade" id="addGuestModal" tabindex="-1" aria-labelledby="addGuestLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <form action="{{ route('guests.store') }}" method="POST" id="addGuestForm">
                     @csrf
-                    <div class="modal-header">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="addGuestLabel">Add New Guest</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">

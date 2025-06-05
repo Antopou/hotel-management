@@ -45,9 +45,6 @@ class CheckinController extends Controller
             'checkin_date' => 'required|date',
             'checkout_date' => 'nullable|date|after:checkin_date',
             'number_of_guest' => 'required|integer|min:1',
-            'rate' => 'required|numeric|min:0',
-            'total_payment' => 'nullable|numeric|min:0',
-            'payment_method' => 'nullable|string',
         ]);
 
         $checkin = GuestCheckin::create([
@@ -57,9 +54,6 @@ class CheckinController extends Controller
             'room_code' => $request->room_code,
             'checkin_date' => $request->checkin_date,
             'checkout_date' => $request->checkout_date,
-            'rate' => $request->rate,
-            'total_payment' => $request->total_payment ?? 0,
-            'payment_method' => $request->payment_method,
             'number_of_guest' => $request->number_of_guest,
             'is_checkout' => $request->has('is_checkout'),
             'created_by' => 1,
@@ -101,9 +95,6 @@ class CheckinController extends Controller
             'checkin_date' => 'required|date',
             'checkout_date' => 'required|date|after:checkin_date',
             'number_of_guest' => 'required|integer|min:1',
-            'rate' => 'required|numeric|min:0',
-            'total_payment' => 'nullable|numeric|min:0',
-            'payment_method' => 'nullable|string',
         ]);
 
         $oldRoomCode = $checkin->room_code;
@@ -115,9 +106,6 @@ class CheckinController extends Controller
             'reservation_ref' => $request->reservation_ref,
             'checkin_date' => $request->checkin_date,
             'checkout_date' => $request->checkout_date,
-            'rate' => $request->rate,
-            'total_payment' => $request->total_payment,
-            'payment_method' => $request->payment_method,
             'number_of_guest' => $request->number_of_guest,
             'is_checkout' => $request->has('is_checkout'),
             'modified_by' => 1,

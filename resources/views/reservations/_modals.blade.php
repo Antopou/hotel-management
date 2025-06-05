@@ -5,9 +5,9 @@
 <div class="modal fade" id="viewReservationModal{{ $reservation->id }}" tabindex="-1" aria-labelledby="viewReservationLabel{{ $reservation->id }}" aria-hidden="true">
     <div class="modal-dialog custom-modal">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="viewReservationLabel{{ $reservation->id }}">Reservation Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <dl class="row">
@@ -43,9 +43,9 @@
             <form action="{{ route('reservations.update', $reservation->id) }}" method="POST">
                 @csrf
                 @method('PUT')
-                <div class="modal-header">
+                <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="editReservationLabel{{ $reservation->id }}">Edit Reservation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <!-- Guest (readonly) -->
@@ -108,7 +108,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </div>
             </form>

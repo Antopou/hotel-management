@@ -124,29 +124,22 @@
     {{-- Delete Bill Modals --}}
     @foreach($folios as $folio)
         <div class="modal fade" id="deleteFolioModal{{ $folio->id }}" tabindex="-1" aria-labelledby="deleteFolioLabel{{ $folio->id }}" aria-hidden="true">
-            <div class="modal-dialog modal-sm"> {{-- Changed modal-md to modal-sm for delete confirmation --}}
+            <div class="modal-dialog modal-md"> {{-- Changed to modal-md for consistency --}}
                 <div class="modal-content">
                     <form action="{{ route('folios.destroy', $folio->folio_code) }}" method="POST">
                         @csrf
                         @method('DELETE')
-                        <div class="modal-header bg-danger text-white"> {{-- Added bg-danger --}}
-                            <h5 class="modal-title" id="deleteFolioLabel{{ $folio->id }}">Confirm Deletion</h5> {{-- Changed title --}}
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button> {{-- Added btn-close-white --}}
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteFolioLabel{{ $folio->id }}">Confirm Delete</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                            <p class="text-center fs-5">
-                                <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i> Are you sure?
-                            </p>
-                            <p class="text-center">
-                                You are about to delete bill
-                                <strong>#{{ $folio->folio_code ?? $folio->id }}</strong>
-                                for guest <strong>{{ $folio->guest->name ?? 'N/A' }}</strong>.
-                            </p>
-                            <p class="text-center text-danger fw-bold">This action cannot be undone.</p>
+                            <p>Are you sure you want to delete the bill for <strong>{{ $folio->guest->name ?? 'N/A' }}</strong>?</p>
+                            <p class="text-muted">This action cannot be undone.</p>
                         </div>
-                        <div class="modal-footer justify-content-center"> {{-- Centered buttons --}}
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-danger">Yes, Delete Bill</button> {{-- Updated button text --}}
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger">Yes, Delete</button>
                         </div>
                     </form>
                 </div>

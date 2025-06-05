@@ -120,35 +120,35 @@
 
     {{-- Create Check-in Modal --}}
     <div class="modal fade" id="createCheckinModal" tabindex="-1" aria-labelledby="createCheckinLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg"> {{-- Changed custom-modal to modal-lg for wider modal --}}
+        <div class="modal-dialog custom-modal"> {{-- Use custom-modal for consistent modal width --}}
             <div class="modal-content">
-                <form action="{{ route('checkins.store') }}" method="POST">
+                <form action="{{ route('checkins.store') }}" method="POST" id="createCheckinForm">
                     @csrf
-                    <div class="modal-header">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="createCheckinLabel">Add New Check-in</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="row g-3"> {{-- Applied row g-3 for consistent grid layout --}}
+                        <div class="row g-3">
                             {{-- Guest Select with Add New --}}
-                            <div class="col-md-6"> {{-- Used col-md-6 for two-column layout --}}
-                                <label for="guestSelect" class="form-label">Guest <span class="text-danger">*</span></label> {{-- Added for attribute to label --}}
-                                <div class="input-group"> {{-- Used input-group for button next to select --}}
+                            <div class="col-md-6">
+                                <label for="guestSelect" class="form-label">Guest <span class="text-danger">*</span></label>
+                                <div class="input-group">
                                     <select name="guest_code" class="form-select" required id="guestSelect">
                                         <option value="">-- Select Guest --</option>
                                         @foreach ($guests as $guest)
                                             <option value="{{ $guest->guest_code }}">{{ $guest->name }}</option>
                                         @endforeach
                                     </select>
-                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addGuestModal" title="Add New Guest"> {{-- Changed button text to icon + text, removed inline style --}}
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addGuestModal" title="Add New Guest">
                                         <i class="bi bi-person-plus-fill"></i>
                                     </button>
                                 </div>
                             </div>
                             {{-- Room Select --}}
-                            <div class="col-md-6"> {{-- Used col-md-6 for two-column layout --}}
-                                <label for="roomSelect" class="form-label">Room <span class="text-danger">*</span></label> {{-- Added for attribute to label --}}
-                                <select name="room_code" class="form-select" required id="roomSelect"> {{-- Added id --}}
+                            <div class="col-md-6">
+                                <label for="roomSelect" class="form-label">Room <span class="text-danger">*</span></label>
+                                <select name="room_code" class="form-select" required id="roomSelect">
                                     <option value="">-- Select Room --</option>
                                     @foreach ($rooms as $room)
                                         <option value="{{ $room->room_code }}">{{ $room->name }}</option>
@@ -156,49 +156,37 @@
                                 </select>
                             </div>
                             {{-- Check-in, Duration, Check-out (calculated) --}}
-                            <div class="col-md-6"> {{-- Used col-md-6 for two-column layout --}}
-                                <label for="checkin_date" class="form-label">Check-in Date <span class="text-danger">*</span></label> {{-- Added for attribute to label --}}
+                            <div class="col-md-6">
+                                <label for="checkin_date" class="form-label">Check-in Date <span class="text-danger">*</span></label>
                                 <input type="datetime-local" name="checkin_date" id="checkin_date" class="form-control" required>
                             </div>
-                            <div class="col-md-6"> {{-- Used col-md-6 for two-column layout --}}
-                                <label for="number_of_nights" class="form-label">Number of Nights <span class="text-danger">*</span></label> {{-- Added for attribute to label --}}
+                            <div class="col-md-6">
+                                <label for="number_of_nights" class="form-label">Number of Nights <span class="text-danger">*</span></label>
                                 <input type="number" name="number_of_nights" id="number_of_nights" class="form-control" min="1" value="1" required>
                             </div>
-                            <div class="col-md-6"> {{-- Used col-md-6 for two-column layout --}}
-                                <label for="checkout_date" class="form-label">Check-out Date</label> {{-- Added for attribute to label --}}
+                            <div class="col-md-6">
+                                <label for="checkout_date" class="form-label">Check-out Date</label>
                                 <input type="datetime-local" name="checkout_date" id="checkout_date" class="form-control" readonly required>
                             </div>
                             {{-- Number of Guests --}}
-                            <div class="col-md-6"> {{-- Used col-md-6 for two-column layout --}}
-                                <label for="number_of_guest" class="form-label">Number of Guests <span class="text-danger">*</span></label> {{-- Added for attribute to label --}}
-                                <input type="number" name="number_of_guest" id="number_of_guest" class="form-control" min="1" value="1" required> {{-- Added id --}}
+                            <div class="col-md-6">
+                                <label for="number_of_guest" class="form-label">Number of Guests <span class="text-danger">*</span></label>
+                                <input type="number" name="number_of_guest" id="number_of_guest" class="form-control" min="1" value="1" required>
                             </div>
-                            
-                            {{-- <div class="col-md-6">
-                                <label for="rate" class="form-label">Rate</label> 
-                                <input type="number" step="0.01" name="rate" id="rate" class="form-control" value="0">
-                            </div>
-                             --}}
-                            {{-- <div class="col-md-6">
-                                <label for="total_payment" class="form-label">Total Payment</label> 
-                                <input type="number" step="0.01" name="total_payment" id="total_payment" class="form-control" value="0">                            </div>
-                            <div class="col-md-6"> 
-                                <label for="payment_method" class="form-label">Payment Method</label> 
-                                <input type="text" name="payment_method" id="payment_method" class="form-control"> 
-                            </div> --}}
-
                             {{-- Mark as Checked Out --}}
-                            <div class="col-12"> {{-- Kept as col-12 as it's a single checkbox spanning full width --}}
-                                <div class="form-check"> {{-- Changed mb-3 to be inside col for better spacing control --}}
-                                    <input class="form-check-input" type="checkbox" name="is_checkout" id="is_checkout" value="1"> {{-- Added id --}}
-                                    <label class="form-check-label" for="is_checkout">Mark as Checked Out</label> {{-- Added for attribute to label --}}
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_checkout" id="is_checkout" value="1">
+                                    <label class="form-check-label" for="is_checkout">Mark as Checked Out</label>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success">Create</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-save me-2"></i> Create
+                        </button>
                     </div>
                 </form>
             </div>

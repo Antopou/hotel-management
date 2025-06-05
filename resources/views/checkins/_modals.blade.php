@@ -2,9 +2,9 @@
 <div class="modal fade" id="viewCheckinModal{{ $checkin->id }}" tabindex="-1" aria-labelledby="viewCheckinLabel{{ $checkin->id }}" aria-hidden="true">
     <div class="modal-dialog custom-modal">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="viewCheckinLabel{{ $checkin->id }}">Check-in Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <dl class="row">
@@ -29,7 +29,7 @@
                 </dl>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -42,9 +42,9 @@
             <form action="{{ route('checkins.update', $checkin->id) }}" method="POST">
                 @csrf
                 @method('PUT')
-                <div class="modal-header">
+                <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="editCheckinLabel{{ $checkin->id }}">Edit Check-in</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -79,25 +79,13 @@
                         <label class="form-label">Guests</label>
                         <input type="number" name="number_of_guest" class="form-control" value="{{ $checkin->number_of_guest }}">
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Rate</label>
-                        <input type="number" step="0.01" name="rate" class="form-control" value="{{ $checkin->rate ?? 0 }}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Total Payment</label>
-                        <input type="number" step="0.01" name="total_payment" class="form-control" value="{{ $checkin->total_payment ?? 0 }}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Payment Method</label>
-                        <input type="text" name="payment_method" class="form-control" value="{{ $checkin->payment_method }}">
-                    </div>
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" name="is_checkout" value="1" {{ $checkin->is_checkout ? 'checked' : '' }}>
                         <label class="form-check-label">Mark as Checked Out</label>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </div>
             </form>
