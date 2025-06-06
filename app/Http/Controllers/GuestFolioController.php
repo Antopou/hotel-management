@@ -11,26 +11,38 @@ use Illuminate\Support\Str;
 
 class GuestFolioController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $folios = GuestFolio::with(['guest', 'room', 'checkin.guest', 'checkin.room', 'checkin.reservation'])->latest()->paginate(20);
+
+        if ($request->wantsJson()) {
+            return response()->json($folios);
+        }
+
         return view('folios.index', compact('folios'));
     }
-    public function show($folio_code)
+
+    public function show(Request $request, $folio_code)
     {
         $folio = GuestFolio::where('folio_code', $folio_code)->firstOrFail();
-
         $folio->load(['guest', 'checkin.guest', 'checkin.room']);
         $checkin = $folio->checkin;
         $items = $folio->items()->orderBy('posted_at')->get();
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'folio' => $folio,
+                'checkin' => $checkin,
+                'items' => $items,
+            ]);
+        }
+
         return view('folios.show', compact('checkin', 'folio', 'items'));
     }
 
-    public function print($folio_code)
+    public function print(Request $request, $folio_code)
     {
         $folio = GuestFolio::where('folio_code', $folio_code)->firstOrFail();
-
         $folio->load(['guest', 'checkin.guest', 'checkin.room']);
         $checkin = $folio->checkin;
         $items = $folio->items()->orderBy('posted_at')->get();
@@ -49,7 +61,7 @@ class GuestFolioController extends Controller
 
         $folio = GuestFolio::where('folio_code', $folio_code)->firstOrFail();
 
-        $folio->items()->create([
+        $item = $folio->items()->create([
             'type' => $request->type,
             'description' => $request->description,
             'amount' => $request->amount,
@@ -58,10 +70,18 @@ class GuestFolioController extends Controller
 
         $folio->recalculateTotals();
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Folio item added.',
+                'item' => $item,
+                'folio' => $folio->fresh(), // return updated folio
+            ], 201);
+        }
+
         return back()->with('success', 'Folio item added.');
     }
 
-    public function destroyItem($id)
+    public function destroyItem(Request $request, $id)
     {
         $item = GuestFolioItem::findOrFail($id);
         $folio = $item->folio;
@@ -69,18 +89,31 @@ class GuestFolioController extends Controller
 
         $folio->recalculateTotals();
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Folio item deleted.',
+                'folio' => $folio->fresh(),
+            ]);
+        }
+
         return back()->with('success', 'Folio item deleted.');
     }
 
-    public function destroy($folio_code)
+    public function destroy(Request $request, $folio_code)
     {
         $folio = GuestFolio::where('folio_code', $folio_code)->firstOrFail();
         $folio->delete();
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Folio deleted.'
+            ]);
+        }
+
         return redirect()->route('folios.index')->with('success', 'Folio deleted.');
     }
 
-    public function createForCheckin($checkin_code)
+    public function createForCheckin(Request $request, $checkin_code)
     {
         $checkin = GuestCheckin::with('room.roomType')->where('checkin_code', $checkin_code)->firstOrFail();
 
@@ -121,7 +154,14 @@ class GuestFolioController extends Controller
             $folio->recalculateTotals();
         }
 
+        if ($request->wantsJson()) {
+            // Return the new folio and items as JSON
+            return response()->json([
+                'message' => 'Folio created for check-in.',
+                'folio' => $folio->load(['items', 'guest', 'checkin']),
+            ], 201);
+        }
+
         return redirect()->route('folios.show', $folio->folio_code);
     }
-
 }

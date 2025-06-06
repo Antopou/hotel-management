@@ -11,10 +11,9 @@ use App\Models\Room;
 use App\Models\GuestCheckin;
 use App\Models\GuestFolio;
 
-
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // Stats
         $totalGuests = Guest::count();
@@ -38,11 +37,27 @@ class DashboardController extends Controller
             $revenues[] = $revenue;
         }
 
-
         // Recent Activity
         $latestReservations = GuestReservation::latest()->with(['guest', 'room'])->take(5)->get();
         $latestCheckins = GuestCheckin::latest()->with(['guest', 'room'])->take(5)->get();
 
+        // If API request, return JSON
+        if ($request->wantsJson()) {
+            return response()->json([
+                'totalGuests'        => $totalGuests,
+                'totalReservations'  => $totalReservations,
+                'totalRooms'         => $totalRooms,
+                'totalCheckins'      => $totalCheckins,
+                'totalFolios'        => $totalFolios,
+                'totalRevenue'       => $totalRevenue,
+                'latestReservations' => $latestReservations,
+                'latestCheckins'     => $latestCheckins,
+                'months'             => $months,
+                'revenues'           => $revenues,
+            ]);
+        }
+
+        // Otherwise, return the Blade view (web)
         return view('dashboard', compact(
             'totalGuests', 'totalReservations', 'totalRooms',
             'totalCheckins', 'totalFolios', 'totalRevenue',

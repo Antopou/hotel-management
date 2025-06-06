@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Guest;
@@ -23,6 +24,12 @@ class GuestController extends Controller
 
         $guests = $query->latest()->paginate(10)->withQueryString();
 
+        // API: Return paginated guest list as JSON
+        if ($request->wantsJson()) {
+            return response()->json($guests);
+        }
+
+        // Web: Return Blade view
         return view('guests.index', compact('guests'));
     }
 
@@ -33,7 +40,7 @@ class GuestController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'nullable|email',
             'tel' => 'nullable|string',
@@ -49,15 +56,26 @@ class GuestController extends Controller
             'created_by' => 1,
         ]);
 
-        // Return JSON for AJAX
-        return response()->json([
-            'guest_code' => $guest->guest_code,
-            'name' => $guest->name
-        ]);
+        // API: Return created guest JSON with 201 status
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Guest created successfully.',
+                'data' => $guest
+            ], 201);
+        }
+
+        // Web: Redirect to guest list with success message
+        return redirect()->route('guests.index')->with('success', 'Guest created successfully.');
     }
 
-    public function show(Guest $guest)
+    public function show(Request $request, Guest $guest)
     {
+        // API: Return single guest as JSON
+        if ($request->wantsJson()) {
+            return response()->json($guest);
+        }
+
+        // Web: Return Blade view
         return view('guests.show', compact('guest'));
     }
 
@@ -68,7 +86,7 @@ class GuestController extends Controller
 
     public function update(Request $request, Guest $guest)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'nullable|email',
             'tel' => 'nullable|string',
@@ -83,12 +101,30 @@ class GuestController extends Controller
             'modified_by' => 1,
         ]);
 
+        // API: Return updated guest as JSON
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Guest updated successfully.',
+                'data' => $guest
+            ]);
+        }
+
+        // Web: Redirect
         return redirect()->route('guests.index')->with('success', 'Guest updated successfully.');
     }
 
-    public function destroy(Guest $guest)
+    public function destroy(Request $request, Guest $guest)
     {
         $guest->delete();
+
+        // API: Return success JSON
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Guest deleted successfully.'
+            ]);
+        }
+
+        // Web: Redirect
         return redirect()->route('guests.index')->with('success', 'Guest deleted.');
     }
 }

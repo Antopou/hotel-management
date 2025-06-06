@@ -40,13 +40,23 @@ class RoomController extends Controller
 
         $roomTypes = RoomType::all();
 
+        // API: Return paginated room list as JSON
+        if ($request->wantsJson()) {
+            return response()->json([
+                'rooms' => $rooms,
+                'roomTypes' => $roomTypes,
+                'sortBy' => $sortBy,
+                'direction' => $direction,
+            ]);
+        }
+
+        // Web: Return Blade view
         return view('rooms.index', compact('rooms', 'roomTypes', 'sortBy', 'direction'));
     }
 
-    public function store(StoreRoomRequest $request) // Using StoreRoomRequest for validation
+    public function store(StoreRoomRequest $request)
     {
         try {
-            // Generate next room code
             $lastRoom = Room::orderBy('id', 'desc')->first();
             $nextNumber = 1;
 
@@ -56,39 +66,64 @@ class RoomController extends Controller
 
             $roomCode = 'ROOM-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
 
-            Room::create([
+            $room = Room::create([
                 'room_code' => $roomCode,
                 'name' => $request->name,
                 'room_type_code' => $request->room_type_code,
                 'status' => $request->status,
-                'created_by' => Auth::id(), // replaces auth()->id()
-                'is_active' => true, // Assuming default active state
+                'created_by' => Auth::id(),
+                'is_active' => true,
             ]);
 
+            // API: Return JSON response
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Room created successfully.',
+                    'room' => $room,
+                ], 201);
+            }
+
+            // Web: Redirect
             return redirect()->route('rooms.index')->with('success', 'Room created successfully.');
         } catch (\Exception $e) {
             Log::error("Error creating room: " . $e->getMessage());
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'error' => 'Failed to create room.',
+                    'details' => $e->getMessage(),
+                ], 500);
+            }
             return redirect()->route('rooms.index')->with('error', 'Failed to create room. Please try again.');
         }
     }
 
-    public function show(Room $room)
+    public function show(Request $request, Room $room)
     {
-        // This method is implicitly handled by the view modal in index.blade.php
-        // If you were to have a dedicated show page, this would return that view.
-        // For now, it's mostly for direct access or API.
         $room->load('roomType');
-        return view('rooms.show', compact('room')); // Assuming you have a rooms/show.blade.php
+
+        // API: Return room JSON
+        if ($request->wantsJson()) {
+            return response()->json($room);
+        }
+
+        // Web: Show blade view
+        return view('rooms.show', compact('room'));
     }
 
-    // `edit()` method is no longer strictly necessary if using modals only
-    // public function edit(Room $room)
+    // If you want to keep the edit form (not just modal)
+    // public function edit(Request $request, Room $room)
     // {
     //     $roomTypes = RoomType::all();
+    //     if ($request->wantsJson()) {
+    //         return response()->json([
+    //             'room' => $room->load('roomType'),
+    //             'roomTypes' => $roomTypes,
+    //         ]);
+    //     }
     //     return view('rooms.edit', compact('room', 'roomTypes'));
     // }
 
-    public function update(UpdateRoomRequest $request, Room $room) // Using UpdateRoomRequest for validation
+    public function update(UpdateRoomRequest $request, Room $room)
     {
         try {
             $room->update([
@@ -98,21 +133,50 @@ class RoomController extends Controller
                 'modified_by' => Auth::id(),
             ]);
 
+            // API: Return JSON response
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Room updated successfully.',
+                    'room' => $room,
+                ]);
+            }
+
+            // Web: Redirect
             return redirect()->route('rooms.index')->with('success', 'Room updated successfully.');
         } catch (\Exception $e) {
             Log::error("Error updating room ID {$room->id}: " . $e->getMessage());
-            // Flash a flag to re-open the edit modal if there's an error
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'error' => 'Failed to update room.',
+                    'details' => $e->getMessage(),
+                ], 500);
+            }
             return redirect()->back()->withInput()->withErrors($e->getMessage())->with('error', 'Failed to update room. Please try again.')->with('edit_modal_errors', true);
         }
     }
 
-    public function destroy(Room $room)
+    public function destroy(Request $request, Room $room)
     {
         try {
-            $room->delete(); // If SoftDeletes trait is used on Room model, this will soft delete
+            $room->delete(); // Soft delete if SoftDeletes trait is used
+
+            // API: Return JSON
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Room deleted successfully.'
+                ]);
+            }
+
+            // Web: Redirect
             return redirect()->route('rooms.index')->with('success', 'Room deleted successfully.');
         } catch (\Exception $e) {
             Log::error("Error deleting room ID {$room->id}: " . $e->getMessage());
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'error' => 'Failed to delete room.',
+                    'details' => $e->getMessage(),
+                ], 500);
+            }
             return redirect()->route('rooms.index')->with('error', 'Failed to delete room. Please try again.');
         }
     }

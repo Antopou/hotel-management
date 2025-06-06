@@ -11,14 +11,24 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    public function edit(Request $request): View
+    public function edit(Request $request)
     {
+        $user = Auth::user();
         $previousUrl = url()->previous();
 
         if ($previousUrl === route('profile.edit')) {
             $previousUrl = route('dashboard');
         }
 
+        // API: Return user data as JSON
+        if ($request->wantsJson()) {
+            return response()->json([
+                'user' => $user,
+                'backUrl' => $previousUrl,
+            ]);
+        }
+
+        // Web: Return Blade view
         return view('profile.edit', [
             'backUrl' => $previousUrl
         ]);
@@ -26,7 +36,7 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -44,14 +54,21 @@ class ProfileController extends Controller
 
         $user->save();
 
-        // Use the backUrl from the form input, or fallback to dashboard
         $backUrl = $request->input('backUrl', route('profile.edit'));
 
+        // API: Return updated user as JSON
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Profile updated successfully!',
+                'user' => $user,
+            ]);
+        }
+
+        // Web: Redirect as before
         return redirect($backUrl)->with('success', 'Profile updated successfully!');
     }
 
-
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request)
     {
         $request->validateWithBag('userDeletion', [
             'password' => ['required', 'current_password'],
@@ -64,6 +81,14 @@ class ProfileController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        // API: Return JSON confirmation
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Account deleted and logged out successfully.'
+            ]);
+        }
+
+        // Web: Redirect to home
         return Redirect::to('/');
     }
 }
