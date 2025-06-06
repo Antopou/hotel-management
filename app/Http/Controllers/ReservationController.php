@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\GuestReservation;
@@ -36,19 +37,36 @@ class ReservationController extends Controller
         $reservations = $query->latest()->paginate(10)->withQueryString();
         $guests = Guest::all();
         $rooms = Room::all();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'reservations' => $reservations,
+                'guests' => $guests,
+                'rooms' => $rooms,
+            ]);
+        }
+
         return view('reservations.index', compact('reservations', 'guests', 'rooms'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $guests = Guest::all();
         $rooms = Room::all();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'guests' => $guests,
+                'rooms' => $rooms,
+            ]);
+        }
+
         return view('reservations.create', compact('guests', 'rooms'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'guest_code' => 'required|exists:guests,guest_code',
             'room_code' => 'required|exists:rooms,room_code',
             'checkin_date' => 'required|date',
@@ -71,6 +89,11 @@ class ReservationController extends Controller
             ->exists();
 
         if ($conflict) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Room is already booked for the selected dates.',
+                ], 422);
+            }
             return back()->withInput()->withErrors(['room_code' => 'Room is already booked for the selected dates.']);
         }
 
@@ -90,24 +113,44 @@ class ReservationController extends Controller
         $room = Room::where('room_code', $request->room_code)->first();
         if ($room) $room->update(['status' => 'reserved']);
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Reservation created.',
+                'reservation' => $reservation,
+            ], 201);
+        }
+
         return redirect()->route('reservations.index')->with('success', 'Reservation created.');
     }
 
-    public function show(GuestReservation $reservation)
+    public function show(Request $request, GuestReservation $reservation)
     {
+        if ($request->wantsJson()) {
+            return response()->json($reservation->load(['guest', 'room']));
+        }
+
         return view('reservations.show', compact('reservation'));
     }
 
-    public function edit(GuestReservation $reservation)
+    public function edit(Request $request, GuestReservation $reservation)
     {
         $guests = Guest::all();
         $rooms = Room::all();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'reservation' => $reservation->load(['guest', 'room']),
+                'guests' => $guests,
+                'rooms' => $rooms,
+            ]);
+        }
+
         return view('reservations.edit', compact('reservation', 'guests', 'rooms'));
     }
 
     public function update(Request $request, GuestReservation $reservation)
     {
-        $request->validate([
+        $validated = $request->validate([
             'guest_code' => 'required|exists:guests,guest_code',
             'room_code' => 'required|exists:rooms,room_code',
             'checkin_date' => 'required|date',
@@ -133,6 +176,11 @@ class ReservationController extends Controller
             ->exists();
 
         if ($conflict) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Room is already booked for the selected dates.',
+                ], 422);
+            }
             return back()->withInput()->withErrors(['room_code' => 'Room is already booked for the selected dates.']);
         }
 
@@ -159,16 +207,30 @@ class ReservationController extends Controller
             'status' => $status,
         ]);
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Reservation updated.',
+                'reservation' => $reservation,
+            ]);
+        }
+
         return redirect()->route('reservations.index')->with('success', 'Reservation updated.');
     }
 
-    public function destroy(GuestReservation $reservation)
+    public function destroy(Request $request, GuestReservation $reservation)
     {
         $reservation->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Reservation deleted.'
+            ]);
+        }
+
         return redirect()->route('reservations.index')->with('success', 'Reservation deleted.');
     }
 
-    public function cancel(GuestReservation $reservation, Request $request)
+    public function cancel(Request $request, GuestReservation $reservation)
     {
         $request->validate([
             'reason' => 'required|string|max:255',
@@ -183,7 +245,12 @@ class ReservationController extends Controller
         $room = Room::where('room_code', $reservation->room_code)->first();
         if ($room) $room->update(['status' => 'available']);
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Reservation canceled.'
+            ]);
+        }
+
         return redirect()->route('reservations.index')->with('success', 'Reservation canceled.');
     }
 }
-

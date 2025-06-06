@@ -33,12 +33,19 @@ class CheckinController extends Controller
         $guests = Guest::all();
         $rooms = Room::all();
 
+        // Return JSON if API request
+        if ($request->wantsJson()) {
+            return response()->json([
+                'data' => $checkins
+            ]);
+        }
+
         return view('checkins.index', compact('checkins', 'guests', 'rooms'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'guest_code' => 'required|exists:guests,guest_code',
             'room_code' => 'required|exists:rooms,room_code',
             'reservation_ref' => 'nullable|exists:guest_reservations,reservation_code',
@@ -71,11 +78,26 @@ class CheckinController extends Controller
             }
         }
 
+        // API: Return JSON response
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Guest checked in.',
+                'data' => $checkin
+            ], 201);
+        }
+
+        // Web: Redirect
         return redirect()->route('checkins.index')->with('success', 'Guest checked in.');
     }
 
-    public function show(GuestCheckin $checkin)
+    public function show(Request $request, GuestCheckin $checkin)
     {
+        if ($request->wantsJson()) {
+            return response()->json([
+                'data' => $checkin->load(['guest', 'room'])
+            ]);
+        }
+
         return view('checkins.show', compact('checkin'));
     }
 
@@ -89,7 +111,7 @@ class CheckinController extends Controller
 
     public function update(Request $request, GuestCheckin $checkin)
     {
-        $request->validate([
+        $validated = $request->validate([
             'guest_code' => 'required|exists:guests,guest_code',
             'room_code' => 'required|exists:rooms,room_code',
             'checkin_date' => 'required|date',
@@ -111,7 +133,7 @@ class CheckinController extends Controller
             'modified_by' => 1,
         ]);
 
-        // --- If checked out, set Room as available if no other active checkins ---
+        // If checked out, set Room as available if no other active checkins
         if (!$wasCheckedOut && $checkin->is_checkout) {
             $hasOtherActive = GuestCheckin::where('room_code', $checkin->room_code)
                 ->where('is_checkout', false)
@@ -137,10 +159,18 @@ class CheckinController extends Controller
             if ($room) $room->update(['status' => 'occupied']);
         }
 
+        // API: Return JSON
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Check-in updated.',
+                'data' => $checkin
+            ]);
+        }
+
         return redirect()->route('checkins.index')->with('success', 'Check-in updated.');
     }
 
-    public function destroy(GuestCheckin $checkin)
+    public function destroy(Request $request, GuestCheckin $checkin)
     {
         $room_code = $checkin->room_code;
         $checkin->delete();
@@ -155,12 +185,19 @@ class CheckinController extends Controller
             if ($room) $room->update(['status' => 'available']);
         }
 
+        // API: Return JSON
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Check-in record deleted.'
+            ]);
+        }
+
         return redirect()->route('checkins.index')->with('success', 'Check-in record deleted.');
     }
 
+    // --- These are web only, but you can add API versions if needed ---
     public function checkinPage(Request $request)
     {
-        // Show all reservations eligible for check-in (today or earlier, not checked-in)
         $today = now()->startOfDay();
         $reservations = GuestReservation::with(['guest', 'room'])
             ->whereIn('status', ['confirmed', 'pending'])
@@ -176,6 +213,9 @@ class CheckinController extends Controller
     {
         $reservation = GuestReservation::findOrFail($id);
         if ($reservation->status === 'checked-in') {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Already checked in.'], 422);
+            }
             return back()->with('error', 'Already checked in.');
         }
 
@@ -183,13 +223,18 @@ class CheckinController extends Controller
         $reservation->is_checkin = true;
         $reservation->save();
 
-        // Optionally set room status to occupied if not already
         $room = Room::where('room_code', $reservation->room_code)->first();
         if ($room && $room->status !== 'occupied') {
             $room->update(['status' => 'occupied']);
         }
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Check-in successful',
+                'reservation' => $reservation
+            ]);
+        }
+
         return back()->with('success', 'Check-in successful for ' . ($reservation->guest->name ?? ''));
     }
-
 }
