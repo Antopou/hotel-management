@@ -15,14 +15,14 @@
     {{-- Filter/Search Form --}}
     <div class="card shadow-sm mb-4">
         <div class="card-body">
-            <h5 class="card-title text-primary mb-3">Filter Rooms</h5>
-            <form method="GET" action="{{ route('rooms.index') }}" class="row g-3">
-                <div class="col-md-4 col-lg-3">
-                    <label for="searchName" class="form-label visually-hidden">Room Name</label>
+            {{-- <h5 class="card-title text-primary mb-3">Filter Rooms</h5> --}}
+            <form method="GET" action="{{ route('rooms.index') }}" class="row g-3 align-items-end">
+                <div class="col-12 col-md-4 flex-grow-1">
+                    <label for="searchName" class="form-label">Room Name</label>
                     <input type="text" name="name" id="searchName" value="{{ request('name') }}" class="form-control" placeholder="Search by Room Name">
                 </div>
-                <div class="col-md-4 col-lg-3">
-                    <label for="roomTypeFilter" class="form-label visually-hidden">Room Type</label>
+                <div class="col-12 col-md-2 flex-grow-1">
+                    <label for="roomTypeFilter" class="form-label">Room Type</label>
                     <select name="room_type_code" id="roomTypeFilter" class="form-select">
                         <option value="">All Room Types</option>
                         @foreach ($roomTypes as $type)
@@ -32,8 +32,8 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-4 col-lg-3">
-                    <label for="statusFilter" class="form-label visually-hidden">Status</label>
+                <div class="col-12 col-md-2 flex-grow-1">
+                    <label for="statusFilter" class="form-label">Status</label>
                     <select name="status" id="statusFilter" class="form-select">
                         <option value="">All Statuses</option>
                         <option value="Available" {{ request('status') == 'Available' ? 'selected' : '' }}>Available</option>
@@ -42,11 +42,13 @@
                         <option value="Maintenance" {{ request('status') == 'Maintenance' ? 'selected' : '' }}>Maintenance</option>
                     </select>
                 </div>
-                <div class="col-12 col-lg-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-grow-1">
-                        <i class="bi bi-funnel me-2"></i> Filter
+                <div class="col-6 col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-2"></i> Filter
                     </button>
-                    <a href="{{ route('rooms.index') }}" class="btn btn-outline-secondary flex-grow-1">
+                </div>
+                <div class="col-6 col-md-2 d-grid">
+                    <a href="{{ route('rooms.index') }}" class="btn btn-outline-secondary w-100">
                         <i class="bi bi-arrow-counterclockwise me-2"></i> Reset
                     </a>
                 </div>

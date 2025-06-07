@@ -31,7 +31,7 @@
                 </div>
                 <div class="col-md-4 d-flex gap-2">
                     <button type="submit" class="btn btn-primary flex-grow-1">
-                        <i class="bi bi-funnel me-1"></i> Filter
+                        <i class="bi bi-search me-1"></i> Filter
                     </button>
                     <a href="{{ route('folios.index') }}" class="btn btn-outline-secondary flex-grow-1">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset

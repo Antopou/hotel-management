@@ -6,12 +6,16 @@ use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\CheckinController;
 use App\Http\Controllers\GuestFolioController;
-use App\Http\Controllers\ProfileController; 
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationController;
 
 Route::get('/', function () {
     return redirect()->route('login');
 });
+
+
+Route::get('/reports/revenue', [ReportController::class, 'revenue'])->name('reports.revenue');
 
 Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
 ->middleware(['auth', 'verified'])

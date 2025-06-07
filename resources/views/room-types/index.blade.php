@@ -15,19 +15,26 @@
     {{-- Search Form --}}
     <div class="card shadow-sm mb-4">
         <div class="card-body">
-            <h5 class="card-title text-primary mb-3">Search Room Types</h5>
-            <form method="GET" action="{{ route('room-types.index') }}" class="row g-3 justify-content-end">
-                <div class="col-md-6 col-lg-4">
-                    <label for="searchName" class="form-label visually-hidden">Room Type Name</label>
+            <form method="GET" action="{{ route('room-types.index') }}" class="row g-3 align-items-end">
+                <div class="col-12 col-md-4 flex-grow-1">
+                    <label for="searchName" class="form-label">Room Type Name</label>
                     <input type="text" name="name" id="searchName" class="form-control" placeholder="Search by Room Type Name" value="{{ request('name') }}">
                 </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary">
+                <div class="col-12 col-md-2 flex-grow-1">
+                    <label for="minPrice" class="form-label">Min Price</label>
+                    <input type="number" name="min_price" id="minPrice" class="form-control" placeholder="Min Price" value="{{ request('min_price') }}">
+                </div>
+                <div class="col-12 col-md-2 flex-grow-1">
+                    <label for="maxOccupancy" class="form-label">Max Occupancy</label>
+                    <input type="number" name="max_occupancy" id="maxOccupancy" class="form-control" placeholder="Max Guests" value="{{ request('max_occupancy') }}">
+                </div>
+                <div class="col-6 col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-search me-2"></i> Search
                     </button>
                 </div>
-                <div class="col-auto">
-                    <a href="{{ route('room-types.index') }}" class="btn btn-outline-secondary">
+                <div class="col-6 col-md-2 d-grid">
+                    <a href="{{ route('room-types.index') }}" class="btn btn-outline-secondary w-100">
                         <i class="bi bi-arrow-counterclockwise me-2"></i> Reset
                     </a>
                 </div>
