@@ -89,6 +89,11 @@
             height: 90vh;
             overflow-y: auto;
         }
+
+        #sidebar,
+        #sidebar * {
+            color: hsla(0, 0%, 0%, 0.764) !important;
+        }
     </style>
 </head>
 <body>
