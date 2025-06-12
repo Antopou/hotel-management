@@ -103,8 +103,9 @@ class RoomController extends Controller
         ]);
 
         try {
+            // Always store status as lowercase in the database
             $room->update([
-                'status' => $validated['status'],
+                'status' => strtolower($validated['status']),
                 'modified_by' => Auth::id(),
             ]);
 

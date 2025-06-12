@@ -71,7 +71,14 @@ class CheckinController extends Controller
             }
         }
 
-        return redirect()->route('checkins.index')->with('success', 'Guest checked in.');
+        // Detect redirect target
+        $redirectTo = $request->input('redirect_to');
+        if ($redirectTo === 'front-desk') {
+            return redirect()->route('frontdesk.index')->with('success', 'Check-in successful!');
+        }
+
+        // fallback to default
+        return redirect()->route('checkins.index')->with('success', 'Check-in successful!');
     }
 
     public function show(GuestCheckin $checkin)

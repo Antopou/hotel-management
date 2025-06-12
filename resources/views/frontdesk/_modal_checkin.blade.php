@@ -4,6 +4,7 @@
         <div class="modal-content">
             <form action="{{ route('checkins.store') }}" method="POST" id="quickCheckinForm">
                 @csrf
+                <input type="hidden" name="redirect_to" value="front-desk">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title" id="quickCheckinModalLabel">
                         <i class="bi bi-person-plus"></i> Walk-in Check-in
@@ -39,32 +40,32 @@
                         </div>
                         {{-- Check-in, Duration, Check-out (calculated) --}}
                         <div class="col-md-6">
-                            <label for="checkin_date" class="form-label">Check-in Date <span class="text-danger">*</span></label>
-                            <input type="datetime-local" name="checkin_date" id="checkin_date" class="form-control" value="{{ now()->format('Y-m-d\TH:i') }}" required>
+                            <label for="quick_checkin_date" class="form-label">Check-in Date <span class="text-danger">*</span></label>
+                            <input type="datetime-local" name="checkin_date" id="quick_checkin_date" class="form-control" value="{{ now()->format('Y-m-d\TH:i') }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="number_of_nights" class="form-label">Number of Nights <span class="text-danger">*</span></label>
-                            <input type="number" name="number_of_nights" id="number_of_nights" class="form-control" min="1" value="1" required>
+                            <label for="quick_number_of_nights" class="form-label">Number of Nights <span class="text-danger">*</span></label>
+                            <input type="number" name="number_of_nights" id="quick_number_of_nights" class="form-control" min="1" value="1" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="checkout_date" class="form-label">Check-out Date</label>
-                            <input type="datetime-local" name="checkout_date" id="checkout_date" class="form-control" readonly required>
+                            <label for="quick_checkout_date" class="form-label">Check-out Date</label>
+                            <input type="datetime-local" name="checkout_date" id="quick_checkout_date" class="form-control" readonly required>
                         </div>
                         {{-- Number of Guests --}}
                         <div class="col-md-6">
-                            <label for="number_of_guest" class="form-label">Number of Guests <span class="text-danger">*</span></label>
-                            <input type="number" name="number_of_guest" id="number_of_guest" class="form-control" min="1" value="1" required>
+                            <label for="quick_number_of_guest" class="form-label">Number of Guests <span class="text-danger">*</span></label>
+                            <input type="number" name="number_of_guest" id="quick_number_of_guest" class="form-control" min="1" value="1" required>
                         </div>
                         {{-- Notes --}}
                         <div class="col-12">
-                            <label for="notes" class="form-label">Notes</label>
-                            <textarea name="notes" id="notes" class="form-control" rows="2"></textarea>
+                            <label for="quick_notes" class="form-label">Notes</label>
+                            <textarea name="notes" id="quick_notes" class="form-control" rows="2"></textarea>
                         </div>
                         {{-- Mark as Checked Out --}}
                         <div class="col-12">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="is_checkout" id="is_checkout" value="1">
-                                <label class="form-check-label" for="is_checkout">Mark as Checked Out</label>
+                                <input class="form-check-input" type="checkbox" name="is_checkout" id="quick_is_checkout" value="1">
+                                <label class="form-check-label" for="quick_is_checkout">Mark as Checked Out</label>
                             </div>
                         </div>
                     </div>
@@ -123,3 +124,58 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+$(function() {
+    // --- Quick Check-in Modal: Auto-calculate checkout date ---
+    function updateQuickCheckoutDate() {
+        let checkin = $('#quick_checkin_date').val();
+        let nights = parseInt($('#quick_number_of_nights').val()) || 1;
+        if (checkin) {
+            let date = new Date(checkin);
+            date.setDate(date.getDate() + nights);
+            let y = date.getFullYear();
+            let m = ('0' + (date.getMonth()+1)).slice(-2);
+            let d = ('0' + date.getDate()).slice(-2);
+            let H = ('0' + date.getHours()).slice(-2);
+            let I = ('0' + date.getMinutes()).slice(-2);
+            $('#quick_checkout_date').val(`${y}-${m}-${d}T${H}:${I}`);
+        }
+    }
+    $('#quick_checkin_date, #quick_number_of_nights').on('change input', updateQuickCheckoutDate);
+    // Initial call
+    updateQuickCheckoutDate();
+
+    // --- Add Guest AJAX (for quick check-in modal) ---
+    $('#addGuestForm').submit(function(e) {
+        e.preventDefault();
+        var $form = $(this);
+        var data = $form.serialize();
+
+        $.ajax({
+            url: $form.attr('action'),
+            type: 'POST',
+            data: data,
+            headers: {'X-CSRF-TOKEN': $('input[name="_token"]').val()},
+            success: function(response) {
+                if (response && response.guest_code && response.name) {
+                    var newOption = new Option(response.name, response.guest_code, true, true);
+                    $('#guest_code').append(newOption).val(response.guest_code);
+                    $('#guest_code').trigger('change');
+                    $('#addGuestModal').modal('hide');
+                    $form[0].reset();
+                } else {
+                    alert('Guest added, but no response data. Please refresh to see the new guest if not automatically selected.');
+                    $('#addGuestModal').modal('hide');
+                }
+            },
+            error: function(xhr) {
+                alert('Failed to add guest. Please check your input or console for details.');
+                console.error('AJAX error:', xhr.responseText);
+            }
+        });
+    });
+});
+</script>
+@endpush

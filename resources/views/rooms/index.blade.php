@@ -36,10 +36,10 @@
                     <label for="statusFilter" class="form-label">Status</label>
                     <select name="status" id="statusFilter" class="form-select">
                         <option value="">All Statuses</option>
-                        <option value="Available" {{ request('status') == 'Available' ? 'selected' : '' }}>Available</option>
-                        <option value="Occupied" {{ request('status') == 'Occupied' ? 'selected' : '' }}>Occupied</option>
-                        <option value="Cleaning" {{ request('status') == 'Cleaning' ? 'selected' : '' }}>Cleaning</option>
-                        <option value="Maintenance" {{ request('status') == 'Maintenance' ? 'selected' : '' }}>Maintenance</option>
+                        <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Available</option>
+                        <option value="occupied" {{ request('status') == 'occupied' ? 'selected' : '' }}>Occupied</option>
+                        <option value="cleaning" {{ request('status') == 'cleaning' ? 'selected' : '' }}>Cleaning</option>
+                        <option value="maintenance" {{ request('status') == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
                     </select>
                 </div>
                 <div class="col-6 col-md-2 d-grid">
@@ -75,10 +75,10 @@
                         <p class="card-text small">
                             <strong>Status:</strong>
                             <span class="badge bg-{{
-                                $room->status === 'Available' ? 'success' :
-                                ($room->status === 'Occupied' ? 'danger' :
-                                ($room->status === 'Cleaning' ? 'warning' : 'secondary'))
-                            }} text-uppercase">{{ $room->status }}</span>
+                                $room->status === 'available' ? 'success' :
+                                ($room->status === 'occupied' ? 'danger' :
+                                ($room->status === 'cleaning' ? 'warning' : 'secondary'))
+                            }} text-uppercase">{{ ucfirst($room->status) }}</span>
                         </p>
                     </div>
                     <div class="card-footer bg-transparent border-0 pt-0 pb-3 d-flex justify-content-center gap-2">
@@ -130,10 +130,10 @@
                                         <dt class="col-sm-4 text-muted">Current Status:</dt>
                                         <dd class="col-sm-8">
                                             <span class="badge bg-{{
-                                                $room->status === 'Available' ? 'success' :
-                                                ($room->status === 'Occupied' ? 'danger' :
-                                                ($room->status === 'Cleaning' ? 'warning' : 'secondary'))
-                                            }} text-uppercase">{{ $room->status }}</span>
+                                                $room->status === 'available' ? 'success' :
+                                                ($room->status === 'occupied' ? 'danger' :
+                                                ($room->status === 'cleaning' ? 'warning' : 'secondary'))
+                                            }} text-uppercase">{{ ucfirst($room->status) }}</span>
                                         </dd>
 
                                         <dt class="col-sm-4 text-muted">Created By:</dt>
@@ -207,8 +207,8 @@
                         <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
                         <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
                             <option value="">Select status</option>
-                            @foreach (['Available', 'Occupied', 'Cleaning', 'Maintenance'] as $status)
-                                <option value="{{ $status }}" {{ old('status') == $status ? 'selected' : '' }}>{{ $status }}</option>
+                            @foreach (['available', 'occupied', 'cleaning', 'maintenance'] as $status)
+                                <option value="{{ $status }}" {{ old('status') == $status ? 'selected' : '' }}>{{ ucfirst($status) }}</option>
                             @endforeach
                         </select>
                         @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -257,8 +257,8 @@
                         <label for="editStatus" class="form-label">Status <span class="text-danger">*</span></label>
                         <select name="status" id="editStatus" class="form-select" required>
                             <option value="">Select status</option>
-                            @foreach (['Available', 'Occupied', 'Cleaning', 'Maintenance'] as $status)
-                                <option value="{{ $status }}">{{ $status }}</option>
+                            @foreach (['available', 'occupied', 'cleaning', 'maintenance'] as $status)
+                                <option value="{{ $status }}">{{ ucfirst($status) }}</option>
                             @endforeach
                         </select>
                         <div class="text-danger mt-1" id="editStatusError"></div>
