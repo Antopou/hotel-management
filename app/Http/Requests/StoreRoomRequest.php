@@ -14,7 +14,6 @@ class StoreRoomRequest extends FormRequest
     public function authorize()
     {
         // Set to true if you handle authorization via middleware/gates elsewhere
-        // Or implement specific authorization logic here (e.g., auth()->user()->can('create rooms'))
         return true;
     }
 
@@ -26,9 +25,9 @@ class StoreRoomRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|max:100|unique:rooms,name', // Added unique rule
+            'name' => 'required|string|max:100|unique:rooms,name',
             'room_type_code' => 'required|exists:room_types,room_type_code',
-            'status' => 'required|string|in:Available,Occupied,Cleaning,Maintenance',
+            'status' => 'required|string|in:available,occupied,cleaning,maintenance',
         ];
     }
 
@@ -43,5 +42,17 @@ class StoreRoomRequest extends FormRequest
             'name.unique' => 'A room with this name already exists.',
             'room_type_code.exists' => 'The selected room type is invalid.',
         ];
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation()
+    {
+        if ($this->has('status')) {
+            $this->merge([
+                'status' => strtolower($this->input('status'))
+            ]);
+        }
     }
 }
