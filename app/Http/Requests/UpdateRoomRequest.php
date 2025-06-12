@@ -35,7 +35,7 @@ class UpdateRoomRequest extends FormRequest
                 Rule::unique('rooms')->ignore($roomId), // Ignore current room's name for unique check
             ],
             'room_type_code' => 'required|exists:room_types,room_type_code',
-            'status' => 'required|string|in:Available,Occupied,Cleaning,Maintenance',
+            'status' => 'required|string|in:available,occupied,cleaning,maintenance',
         ];
     }
 

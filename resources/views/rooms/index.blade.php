@@ -227,7 +227,7 @@
 
 {{-- Single Edit Room Modal --}}
 <div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog custom-modal">
         <div class="modal-content">
             <form id="editRoomForm" method="POST">
                 @csrf

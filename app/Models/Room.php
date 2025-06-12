@@ -36,6 +36,14 @@ class Room extends Model
         });
     }
 
+    /**
+     * Always store status as lowercase in DB.
+     */
+    public function setStatusAttribute($value)
+    {
+        $this->attributes['status'] = strtolower($value);
+    }
+
     // Relationships
     public function reservations()
     {
@@ -83,7 +91,4 @@ class Room extends Model
             default => 'secondary',
         };
     }
-
-
-
 }
