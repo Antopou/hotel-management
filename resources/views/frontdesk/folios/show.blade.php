@@ -1,28 +1,31 @@
-@extends('layouts.main')
+@extends('layouts.main-nosidebar')
 
 @section('content')
 <div class="container py-4">
 
     {{-- Page Title and Action Buttons --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0 text-dark"> {{-- Changed to text-primary --}}
+        <h3 class="mb-0 text-dark">
             <i class="bi bi-receipt me-2"></i>
-            Bill #<span class="fw-bold">{{ $folio->folio_code ?? $folio->id }}</span> {{-- Changed to Bill # --}}
+            Bill #<span class="fw-bold">{{ $folio->folio_code ?? $folio->id }}</span>
         </h3>
         <div>
-            <a href="{{ route('folios.index') }}" class="btn btn-outline-secondary me-2"> {{-- Changed btn-light to btn-outline-secondary --}}
-                <i class="bi bi-arrow-left me-1"></i> Back to Bills List {{-- Updated text and added icon --}}
+            <a href="{{ route('frontdesk.index') }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left me-1"></i> Back
             </a>
-            <a href="{{ route('folios.print', $folio->folio_code ?? $folio->id) }}" class="btn btn-primary" target="_blank"> {{-- Changed btn-dark to btn-primary --}}
-                <i class="bi bi-printer me-1"></i> Print Bill {{-- Updated text and added icon --}}
+            <a href="{{ route('folios.print', $folio->folio_code ?? $folio->id) }}" class="btn btn-primary" target="_blank">
+                <i class="bi bi-printer me-1"></i> Print Bill
             </a>
+            <button type="button" class="btn btn-success ms-2" id="confirmBillBtn">
+                <i class="bi bi-check-circle me-1"></i> Confirm
+            </button>
         </div>
     </div>
 
     {{-- Bill Summary Card --}}
     <div class="card mb-4">
-        <div class="card-header bg-secondary text-white"> {{-- Added colored header --}}
-            <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i> Bill Details</h5> {{-- Added title and icon --}}
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i> Bill Details</h5>
         </div>
         <div class="card-body">
             <dl class="row mb-0">
@@ -32,13 +35,13 @@
                 <dt class="col-md-3 text-muted">Room</dt>
                 <dd class="col-md-9 fw-bold">{{ $folio->room->name ?? '-' }}</dd>
 
-                <dt class="col-md-3 text-muted">Bill Date</dt> {{-- Changed Folio Date to Bill Date --}}
-                <dd class="col-md-9 fw-bold">{{ $folio->created_at ? \Carbon\Carbon::parse($folio->created_at)->format('M d, Y H:i') : '-' }}</dd> {{-- Formatted date --}}
+                <dt class="col-md-3 text-muted">Bill Date</dt>
+                <dd class="col-md-9 fw-bold">{{ $folio->created_at ? \Carbon\Carbon::parse($folio->created_at)->format('M d, Y H:i') : '-' }}</dd>
 
-                <dt class="col-md-3 text-muted">Linked Check-in</dt> {{-- Changed Linked Reservation to Linked Check-in for accuracy --}}
+                <dt class="col-md-3 text-muted">Linked Check-in</dt>
                 <dd class="col-md-9">
                     @if($folio->checkin)
-                        <a href="{{ route('checkins.index', ['checkin_code' => $folio->checkin->checkin_code]) }}" class="fw-bold text-primary"> {{-- Link to Check-ins page --}}
+                        <a href="{{ route('checkins.index', ['checkin_code' => $folio->checkin->checkin_code]) }}" class="fw-bold text-primary">
                             <i class="bi bi-link-45deg me-1"></i> #{{ $folio->checkin->checkin_code ?? $folio->checkin->id }}
                         </a>
                         <small class="text-muted ms-2">
@@ -55,16 +58,16 @@
 
     {{-- Charges Table --}}
     <div class="card shadow-sm mb-3">
-        <div class="card-header text-black d-flex justify-content-between align-items-center"> {{-- Added colored header --}}
-            <h5 class="mb-0"><i class="bi bi-currency-dollar me-2"></i> Charges</h5> {{-- Added title and icon --}}
+        <div class="card-header text-black d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-currency-dollar me-2"></i> Charges</h5>
         </div>
         <div class="card-body p-0">
-            <table class="table mb-0 table-bordered table-hover table-striped"> {{-- Added table-striped --}}
-                <thead class="table"> {{-- Changed table-bordered to table-dark --}}
+            <table class="table mb-0 table-bordered table-hover table-striped">
+                <thead class="table">
                     <tr>
-                        <th style="width: 15%;">Date</th> {{-- Added width --}}
+                        <th style="width: 15%;">Date</th>
                         <th>Description</th>
-                        <th class="text-end" style="width: 15%;">Amount (USD)</th> {{-- Added width and currency --}}
+                        <th class="text-end" style="width: 15%;">Amount (USD)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -73,7 +76,7 @@
                         <td>{{ \Carbon\Carbon::parse($charge->posted_at)->format('M d, Y') }}</td>
                         <td>
                             {{ $charge->description }}
-                            @if($charge->description === 'Room Charge' && $folio->checkin) {{-- Check if checkin exists on folio --}}
+                            @if($charge->description === 'Room Charge' && $folio->checkin)
                                 <br>
                                 <small class="text-muted">
                                     {{ $folio->checkin->room->roomType->name ?? '' }}:
@@ -100,19 +103,19 @@
 
     {{-- Payments Table --}}
     <div class="card shadow-sm mb-4">
-        <div class="card-header text-black d-flex justify-content-between align-items-center #"> {{-- Added colored header --}}
-            <h5 class="mb-0"><i class="bi bi-wallet-fill me-2"></i> Payments</h5> {{-- Added title and icon --}}
-            <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#addPaymentModal"> {{-- Changed btn-primary to btn-light --}}
+        <div class="card-header text-black d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-wallet-fill me-2"></i> Payments</h5>
+            <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
                 <i class="bi bi-plus-circle-fill me-1"></i> Add Payment
             </button>
         </div>
         <div class="card-body p-0">
-            <table class="table mb-0 table-bordered table-hover table-striped"> {{-- Added table-striped --}}
-                <thead class="table"> {{-- Changed table-bordered to table-dark --}}
+            <table class="table mb-0 table-bordered table-hover table-striped">
+                <thead class="table">
                     <tr>
-                        <th style="width: 15%;">Date</th> {{-- Added width --}}
-                        <th>Reference/Method</th> {{-- Improved header text --}}
-                        <th class="text-end" style="width: 15%;">Amount (USD)</th> {{-- Added width and currency --}}
+                        <th style="width: 15%;">Date</th>
+                        <th>Reference/Method</th>
+                        <th class="text-end" style="width: 15%;">Amount (USD)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -143,10 +146,10 @@
         $balance = $totalCharges - $totalPayments;
         $balanceClass = $balance > 0 ? 'text-danger' : ($balance < 0 ? 'text-success' : 'text-primary');
     @endphp
-    <div class="card shadow-sm p-3"> {{-- Added card for totals --}}
+    <div class="card shadow-sm p-3">
         <div class="row">
             <div class="col-lg-6 offset-lg-6">
-                <table class="table table-borderless mb-0"> {{-- Removed table-borderless if you want lines --}}
+                <table class="table table-borderless mb-0">
                     <tr>
                         <th class="text-end fs-6">Total Charges:</th>
                         <td class="text-end fs-6 fw-bold text-info">{{ number_format($totalCharges, 2) }}</td>
@@ -155,7 +158,7 @@
                         <th class="text-end fs-6">Total Payments:</th>
                         <td class="text-end fs-6 fw-bold text-success">{{ number_format($totalPayments, 2) }}</td>
                     </tr>
-                    <tr class="border-top border-secondary"> {{-- Added border to separate totals from balance --}}
+                    <tr class="border-top border-secondary">
                         <th class="text-end fs-5">Balance Due:</th>
                         <td class="text-end fs-5 fw-bolder {{ $balanceClass }}">{{ number_format($balance, 2) }}</td>
                     </tr>
@@ -186,22 +189,22 @@
         <form action="{{ route('folios.items.store', $folio->folio_code) }}" method="POST">
           @csrf
           <div class="modal-content">
-            <div class="modal-header bg-success text-white"> {{-- Added colored header --}}
-              <h5 class="modal-title" id="addPaymentModalLabel"><i class="bi bi-plus-circle-fill me-2"></i> Add New Payment</h5> {{-- Added icon --}}
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button> {{-- Added btn-close-white --}}
+            <div class="modal-header bg-success text-white">
+              <h5 class="modal-title" id="addPaymentModalLabel"><i class="bi bi-plus-circle-fill me-2"></i> Add New Payment</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
               <input type="hidden" name="type" value="payment">
               <div class="mb-3">
-                <label for="paymentAmount" class="form-label">Amount (USD) <span class="text-danger">*</span></label> {{-- Added for, id, currency, required indicator --}}
+                <label for="paymentAmount" class="form-label">Amount (USD) <span class="text-danger">*</span></label>
                 <input type="number" step="0.01" name="amount" id="paymentAmount" class="form-control" required min="0.01">
               </div>
               <div class="mb-3">
-                <label for="paymentReference" class="form-label">Reference/Method</label> {{-- Added for, id --}}
+                <label for="paymentReference" class="form-label">Reference/Method</label>
                 <input type="text" name="reference" id="paymentReference" class="form-control" placeholder="Cash, Card, Bank Transfer, etc.">
               </div>
               <div class="mb-3">
-                <label for="paymentDescription" class="form-label">Description <span class="text-danger">*</span></label> {{-- Added for, id, required indicator --}}
+                <label for="paymentDescription" class="form-label">Description <span class="text-danger">*</span></label>
                 <input type="text" name="description" id="paymentDescription" class="form-control" value="Payment" required>
               </div>
             </div>
@@ -216,6 +219,15 @@
 </div>
 @endsection
 
-@section('scripts')
-{{-- No specific JS needed for this view unless you add dynamic features --}}
-@endsection
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('confirmBillBtn');
+    if (btn) {
+        btn.addEventListener('click', function() {
+            window.location.href = "{{ route('frontdesk.index') }}";
+        });
+    }
+});
+</script>
+@endpush

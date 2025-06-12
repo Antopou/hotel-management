@@ -6,6 +6,7 @@ use App\Models\GuestCheckin;
 use App\Models\GuestReservation;
 use App\Models\Guest;
 use App\Models\Room;
+use App\Models\GuestFolio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -38,6 +39,29 @@ class CheckinController extends Controller
 
     public function store(Request $request)
     {
+        // If reservation_id is present, auto-fill fields from reservation
+        if ($request->filled('reservation_id')) {
+            $reservation = GuestReservation::find($request->reservation_id);
+            if (!$reservation) {
+                return back()->with('error', 'Reservation not found.');
+            }
+
+            // Optionally, check if already checked in
+            if ($reservation->status === 'checked-in' || $reservation->is_checkin) {
+                return back()->with('error', 'This reservation is already checked in.');
+            }
+
+            // Fill request data from reservation
+            $request->merge([
+                'guest_code' => $reservation->guest_code,
+                'room_code' => $reservation->room_code,
+                'reservation_ref' => $reservation->reservation_code,
+                'checkin_date' => $reservation->checkin_date,
+                'checkout_date' => $reservation->checkout_date,
+                'number_of_guest' => $reservation->number_of_guest,
+            ]);
+        }
+
         $request->validate([
             'guest_code' => 'required|exists:guests,guest_code',
             'room_code' => 'required|exists:rooms,room_code',
@@ -71,6 +95,13 @@ class CheckinController extends Controller
             }
         }
 
+        // If reservation_id was used, update reservation status
+        if ($request->filled('reservation_id') && isset($reservation)) {
+            $reservation->status = 'checked-in';
+            $reservation->is_checkin = true;
+            $reservation->save();
+        }
+
         // Detect redirect target
         $redirectTo = $request->input('redirect_to');
         if ($redirectTo === 'front-desk') {
@@ -98,14 +129,52 @@ class CheckinController extends Controller
     {
         if ($request->has('is_checkout') && $request->keys() === ['_token', '_method', 'is_checkout']) {
             $checkin->is_checkout = true;
-            $checkin->checkout_date = now();
+            // Only update checkout_date if it's not set or is in the future
+            if (!$checkin->checkout_date) {
+                $checkin->checkout_date = now();
+            }
             $checkin->modified_by = 1;
             $checkin->save();
 
             $room = Room::where('room_code', $checkin->room_code)->first();
             if ($room) $room->update(['status' => 'cleaning']);
 
-            return back()->with('success', 'Guest checked out successfully.');
+            // --- Create GuestFolio if not exists ---
+            if (!$checkin->folio) {
+                $folioCode = 'FL-' . date('Ymd') . '-' . str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+                $folio = GuestFolio::create([
+                    'folio_code' => $folioCode,
+                    'guest_code' => $checkin->guest_code,
+                    'room_code' => $checkin->room_code,
+                    'checkin_code' => $checkin->checkin_code,
+                    'total_amount' => 0,
+                    'paid_amount' => 0,
+                    'status' => 'open',
+                    'currency' => 'USD'
+                ]);
+
+                // --- Calculate Room Charge Correctly ---
+                $roomType = optional(optional($room)->roomType);
+                $pricePerNight = $roomType->price_per_night ?? 0;
+                $nights = \Carbon\Carbon::parse($checkin->checkin_date)->diffInDays(\Carbon\Carbon::parse($checkin->checkout_date));
+                if ($nights < 1) $nights = 1; // At least 1 night
+                $totalRoomCharge = $pricePerNight * $nights;
+
+                \App\Models\GuestFolioItem::create([
+                    'folio_id'    => $folio->id,
+                    'type'        => 'charge',
+                    'description' => 'Room Charge',
+                    'amount'      => $totalRoomCharge,
+                    'posted_at'   => now(),
+                ]);
+                $folio->recalculateTotals();
+            } else {
+                $folio = $checkin->folio;
+            }
+
+            // Redirect to folio page for payment/settlement
+            return redirect()->route('frontdesk.folios.show', $folio->folio_code)
+                ->with('success', 'Guest checked out successfully. Please settle the bill.');
         }
 
         $request->validate([
@@ -155,6 +224,7 @@ class CheckinController extends Controller
 
         return redirect()->route('checkins.index')->with('success', 'Check-in updated.');
     }
+
 
 
     public function destroy(GuestCheckin $checkin)

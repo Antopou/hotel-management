@@ -20,7 +20,13 @@ class RoomType extends Model
         'image',
         'created_by',
         'modified_by',
-        'is_active'
+        'is_active',
+        // New amenity fields
+        'has_wifi',
+        'has_tv',
+        'has_ac',
+        'has_breakfast',
+        'has_parking',
     ];
 
     /**

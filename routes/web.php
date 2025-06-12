@@ -16,6 +16,9 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+
+Route::get('/frontdesk/folios/{folio_code}', [GuestFolioController::class, 'showFrontdesk'])->name('frontdesk.folios.show');
+
 // Classic frontdesk dashboard (stats, arrivals, departures, in-house, etc)
 Route::get('/front-desk', [FrontDeskController::class, 'index'])->name('frontdesk.index');
 
@@ -60,6 +63,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{folio_code}', [GuestFolioController::class, 'destroy'])->name('destroy');
         Route::post('/create-for-checkin/{checkin_code}', [GuestFolioController::class, 'createForCheckin'])->name('create.for.checkin');
     });
+
 });
 
 require __DIR__.'/auth.php';

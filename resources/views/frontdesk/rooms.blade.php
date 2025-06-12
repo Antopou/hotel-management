@@ -308,6 +308,17 @@
                                         </div>
                                     @endif
                                     
+                                    {{-- Show bill/folio after checkout --}}
+                                    @if($currentCheckin && $currentCheckin->is_checkout && $currentCheckin->folio)
+                                        <div class="alert alert-info d-flex align-items-center gap-2 mb-3">
+                                            <i class="bi bi-receipt fs-5"></i>
+                                            Bill generated:
+                                            <a href="{{ route('frontdesk.folios.show', $currentCheckin->folio->folio_code ?? $currentCheckin->folio->id) }}" class="btn btn-sm btn-primary ms-2" target="_blank">
+                                                <i class="bi bi-eye"></i> View Bill
+                                            </a>
+                                        </div>
+                                    @endif
+                                    
                                     @if($nextReservation)
                                         <div class="card border-primary mb-3">
                                             <div class="card-header bg-primary bg-opacity-10 text-primary">
@@ -350,10 +361,12 @@
                                                         >
                                                             <i class="bi bi-eye"></i> View
                                                         </button>
-                                                        @if(strtolower($room->status) === 'available')
-                                                            <form action="{{ route('checkins.store') }}" method="POST">
+                                                        {{-- Check-in button for reservation --}}
+                                                        @if(in_array(strtolower($nextReservation->status), ['confirmed', 'pending']))
+                                                            <form action="{{ route('checkins.store') }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="reservation_id" value="{{ $nextReservation->id }}">
+                                                                <input type="hidden" name="redirect_to" value="front-desk">
                                                                 <button type="submit" class="btn btn-sm btn-success">
                                                                     <i class="bi bi-person-check"></i> Check In
                                                                 </button>
@@ -392,9 +405,15 @@
                                                         <i class="bi bi-calendar-plus"></i> New Reservation
                                                     </button>
                                                     
-                                                    <button class="btn btn-warning">
+                                                <!-- FIXED BUTTON: Mark for Cleaning -->
+                                                <form action="{{ route('rooms.update-status', $room->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="hidden" name="status" value="Cleaning">
+                                                    <button type="submit" class="btn btn-warning w-100">
                                                         <i class="bi bi-bucket"></i> Mark for Cleaning
                                                     </button>
+                                                </form>
                                                 </div>
                                             </div>
                                         </div>
@@ -436,9 +455,12 @@
 @foreach($rooms as $room)
     @if($room->currentCheckin())
         @include('checkins._modals', ['checkin' => $room->currentCheckin()])
+        {{-- Add check-in detail modal for current check-in --}}
+        @include('frontdesk._modal_checkin_detail', ['checkin' => $room->currentCheckin()])
     @endif
     @if($room->nextReservation())
         @include('reservations._modals', ['reservation' => $room->nextReservation()])
+        @include('frontdesk._modal_reservation_detail', ['nextReservation' => $room->nextReservation()])
     @endif
 @endforeach
 

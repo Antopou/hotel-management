@@ -124,4 +124,14 @@ class GuestFolioController extends Controller
         return redirect()->route('folios.show', $folio->folio_code);
     }
 
+    public function showFrontdesk($folio_code)
+    {
+        $folio = GuestFolio::where('folio_code', $folio_code)->firstOrFail();
+        $folio->load(['guest', 'checkin.guest', 'checkin.room']);
+        $checkin = $folio->checkin;
+        $items = $folio->items()->orderBy('posted_at')->get();
+
+        // Use the new frontdesk/folios/show.blade.php
+        return view('frontdesk.folios.show', compact('checkin', 'folio', 'items'));
+    }
 }
