@@ -410,7 +410,7 @@
                                                 <form action="{{ route('rooms.update-status', $room->id) }}" method="POST">
                                                     @csrf
                                                     @method('PUT')
-                                                    <input type="hidden" name="status" value="available">
+                                                    <input type="hidden" name="status" value="Available">
                                                     <button type="submit" class="btn btn-success w-100">
                                                         <i class="bi bi-check-circle"></i> Mark as Available
                                                     </button>

@@ -89,6 +89,18 @@ class CheckinController extends Controller
 
     public function update(Request $request, GuestCheckin $checkin)
     {
+        if ($request->has('is_checkout') && $request->keys() === ['_token', '_method', 'is_checkout']) {
+            $checkin->is_checkout = true;
+            $checkin->checkout_date = now();
+            $checkin->modified_by = 1;
+            $checkin->save();
+
+            $room = Room::where('room_code', $checkin->room_code)->first();
+            if ($room) $room->update(['status' => 'cleaning']);
+
+            return back()->with('success', 'Guest checked out successfully.');
+        }
+
         $request->validate([
             'guest_code' => 'required|exists:guests,guest_code',
             'room_code' => 'required|exists:rooms,room_code',
@@ -111,7 +123,6 @@ class CheckinController extends Controller
             'modified_by' => 1,
         ]);
 
-        // --- If checked out, set Room as available if no other active checkins ---
         if (!$wasCheckedOut && $checkin->is_checkout) {
             $hasOtherActive = GuestCheckin::where('room_code', $checkin->room_code)
                 ->where('is_checkout', false)
@@ -123,7 +134,6 @@ class CheckinController extends Controller
             }
         }
 
-        // If room code was changed, update old room too!
         if ($oldRoomCode !== $checkin->room_code) {
             $hasOtherActive = GuestCheckin::where('room_code', $oldRoomCode)
                 ->where('is_checkout', false)
@@ -132,7 +142,6 @@ class CheckinController extends Controller
                 $room = Room::where('room_code', $oldRoomCode)->first();
                 if ($room) $room->update(['status' => 'available']);
             }
-            // Mark new room as occupied
             $room = Room::where('room_code', $checkin->room_code)->first();
             if ($room) $room->update(['status' => 'occupied']);
         }
@@ -140,12 +149,12 @@ class CheckinController extends Controller
         return redirect()->route('checkins.index')->with('success', 'Check-in updated.');
     }
 
+
     public function destroy(GuestCheckin $checkin)
     {
         $room_code = $checkin->room_code;
         $checkin->delete();
 
-        // Set room as available if no other active checkins
         $hasOtherActive = GuestCheckin::where('room_code', $room_code)
             ->where('is_checkout', false)
             ->exists();
@@ -160,7 +169,6 @@ class CheckinController extends Controller
 
     public function checkinPage(Request $request)
     {
-        // Show all reservations eligible for check-in (today or earlier, not checked-in)
         $today = now()->startOfDay();
         $reservations = GuestReservation::with(['guest', 'room'])
             ->whereIn('status', ['confirmed', 'pending'])
@@ -183,7 +191,6 @@ class CheckinController extends Controller
         $reservation->is_checkin = true;
         $reservation->save();
 
-        // Optionally set room status to occupied if not already
         $room = Room::where('room_code', $reservation->room_code)->first();
         if ($room && $room->status !== 'occupied') {
             $room->update(['status' => 'occupied']);
