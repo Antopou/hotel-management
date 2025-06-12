@@ -52,4 +52,10 @@ class GuestCheckin extends Model
         return $this->hasOne(\App\Models\GuestFolio::class, 'checkin_code', 'checkin_code');
     }
 
+    protected $casts = [
+    'checkin_date' => 'datetime',
+    'checkout_date' => 'datetime',
+];
+
+
 }

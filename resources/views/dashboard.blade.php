@@ -5,7 +5,9 @@
     {{-- Dashboard Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="bold m-0 ">Dashboard Overview</h3>
-        <button class="btn btn-primary shadow-sm"><i class="bi bi-file-earmark-bar-graph me-2"></i> View Full Reports</button>
+        <a href="{{ route('frontdesk.index') }}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-file-earmark-bar-graph me-2"></i> Go to Frontdesk
+        </a>
     </div>
 
     {{-- Filter Form --}}

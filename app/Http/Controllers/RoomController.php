@@ -7,7 +7,7 @@ use App\Models\RoomType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreRoomRequest;
-use App\Http\Requests\UpdateRoomRequest;
+use App\Http\Requests\UpdateRoomRequest; // You might create a new request for status updates if validation is different
 use Illuminate\Support\Facades\Log;
 
 class RoomController extends Controller
@@ -74,19 +74,9 @@ class RoomController extends Controller
 
     public function show(Room $room)
     {
-        // This method is implicitly handled by the view modal in index.blade.php
-        // If you were to have a dedicated show page, this would return that view.
-        // For now, it's mostly for direct access or API.
         $room->load('roomType');
         return view('rooms.show', compact('room')); // Assuming you have a rooms/show.blade.php
     }
-
-    // `edit()` method is no longer strictly necessary if using modals only
-    // public function edit(Room $room)
-    // {
-    //     $roomTypes = RoomType::all();
-    //     return view('rooms.edit', compact('room', 'roomTypes'));
-    // }
 
     public function update(UpdateRoomRequest $request, Room $room) // Using UpdateRoomRequest for validation
     {
@@ -101,10 +91,41 @@ class RoomController extends Controller
             return redirect()->route('rooms.index')->with('success', 'Room updated successfully.');
         } catch (\Exception $e) {
             Log::error("Error updating room ID {$room->id}: " . $e->getMessage());
-            // Flash a flag to re-open the edit modal if there's an error
             return redirect()->back()->withInput()->withErrors($e->getMessage())->with('error', 'Failed to update room. Please try again.')->with('edit_modal_errors', true);
         }
     }
+
+    // --- NEW METHOD FOR STATUS UPDATE ---
+    public function updateStatus(Request $request, Room $room)
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string', 'in:Available,Occupied,Cleaning,Maintenance'],
+        ]);
+
+        try {
+            $room->update([
+                'status' => $validated['status'],
+                'modified_by' => Auth::id(),
+            ]);
+
+            // Respond with success. For AJAX, a JSON response is common.
+            // For a direct form submission, redirect back.
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Room status updated successfully.', 'room' => $room], 200);
+            }
+
+            return redirect()->back()->with('success', 'Room status updated successfully.');
+
+        } catch (\Exception $e) {
+            Log::error("Error updating room status for ID {$room->id}: " . $e->getMessage());
+            // For AJAX, return a JSON error.
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Failed to update room status.', 'error' => $e->getMessage()], 500);
+            }
+            return redirect()->back()->with('error', 'Failed to update room status. Please try again.');
+        }
+    }
+    // --- END NEW METHOD ---
 
     public function destroy(Room $room)
     {

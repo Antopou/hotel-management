@@ -20,13 +20,15 @@ class Room extends Model
         'is_active',
     ];
 
-    /**
-     * Automatically generate a room_code if not provided.
-     */
+    protected $casts = [
+        'is_active' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     protected static function boot()
     {
         parent::boot();
-
         static::creating(function ($room) {
             if (empty($room->room_code)) {
                 $room->room_code = (string) Str::uuid();
@@ -34,6 +36,7 @@ class Room extends Model
         });
     }
 
+    // Relationships
     public function reservations()
     {
         return $this->hasMany(GuestReservation::class, 'room_code', 'room_code');
@@ -48,4 +51,39 @@ class Room extends Model
     {
         return $this->belongsTo(RoomType::class, 'room_type_code', 'room_type_code');
     }
+
+    // Helper: returns GuestCheckin model or null (NOT a relationship)
+    public function currentCheckin()
+    {
+        return $this->checkins()->where('is_checkout', false)->latest('checkin_date')->first();
+    }
+
+    public function futureReservations()
+    {
+        return $this->reservations()->where('checkin_date', '>=', now())->orderBy('checkin_date');
+    }
+
+    // Helper: returns next confirmed future reservation (or null)
+    public function nextReservation()
+    {
+        return $this->reservations()
+            ->where('status', 'confirmed')
+            ->where('checkin_date', '>=', now())
+            ->orderBy('checkin_date')
+            ->with('guest')
+            ->first();
+    }
+
+    public function getStatusColorAttribute()
+    {
+        return match(strtolower($this->status)) {
+            'available' => 'success',
+            'occupied' => 'danger',
+            'cleaning' => 'warning',
+            default => 'secondary',
+        };
+    }
+
+
+
 }

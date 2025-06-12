@@ -39,4 +39,5 @@ class GuestReservation extends Model
     {
         return $this->hasOneThrough(RoomType::class, Room::class, 'room_code', 'room_type_code', 'room_code', 'room_type_code');
     }
+    
 }
