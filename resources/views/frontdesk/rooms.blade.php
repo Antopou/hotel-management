@@ -1,10 +1,10 @@
-@extends('layouts.main')
+@extends('layouts.main-nosidebar')
 
 @section('content')
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-0">Room Management Dashboard</h2>
+            <h2 class="fw-bold mb-0"> Front Desk -Room Management</h2>
             <p class="text-muted mb-0">Real-time room status overview</p>
         </div>
         <div class="d-flex">
@@ -110,12 +110,11 @@
             @endphp
             
             <div class="col room-card" data-status="{{ strtolower($room->status) }}">
-                {{-- Make the entire card clickable by wrapping it in a div with data-bs-toggle --}}
                 <div 
                     class="card h-100 shadow-sm border-0 overflow-hidden room-card-inner clickable-card"
                     data-bs-toggle="modal"
                     data-bs-target="#roomDetailModal{{ $room->id }}"
-                    style="cursor: pointer;" {{-- Add pointer cursor for better UX --}}
+                    style="cursor: pointer;"
                 >
                     <div class="position-relative">
                         <img src="{{ $imageUrl }}" class="card-img-top" alt="{{ $roomTypeName }}" style="height: 180px; object-fit: cover;">
@@ -432,7 +431,6 @@
 </div>
 
 @include('frontdesk._modal_checkin', ['rooms' => $rooms, 'guests' => $guests])
-
 @include('frontdesk._modal_reservation', ['rooms' => $rooms, 'guests' => $guests])
 
 @foreach($rooms as $room)
@@ -447,24 +445,15 @@
 @endsection
 
 @push('scripts')
-<style>
-    /* Custom CSS for clickable cards and hover effect */
-    .clickable-card {
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-
-    .clickable-card:hover {
-        transform: translateY(-5px); /* Lifts the card slightly on hover */
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important; /* Stronger shadow on hover */
-    }
-
-    /* Adjust font size for larger icons in summary cards */
-    .summary-card-icon i {
-        font-size: 2.5rem; /* Adjust as needed */
-    }
-</style>
 <script>
 $(document).ready(function() {
+    // Set CSRF token for all AJAX requests
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
     // Room filtering
     $('[data-filter]').click(function(e) {
         e.preventDefault();
@@ -479,7 +468,7 @@ $(document).ready(function() {
         
         $('#filterDropdown').text($(this).text());
     });
-    
+
     // Set room code when quick check-in is opened from a room card
     $('#quickCheckinModal').on('show.bs.modal', function(event) {
         const button = $(event.relatedTarget);
@@ -488,7 +477,7 @@ $(document).ready(function() {
             $('#room_code').val(roomCode);
         }
     });
-    
+
     // Set room code when new reservation is opened from a room card
     $('#newReservationModal').on('show.bs.modal', function(event) {
         const button = $(event.relatedTarget);
@@ -497,10 +486,67 @@ $(document).ready(function() {
             $('#reservation_room_code').val(roomCode);
         }
     });
-    
+
     // Auto-focus guest search in modals
     $('#quickCheckinModal, #newReservationModal').on('shown.bs.modal', function() {
         $(this).find('select[name="guest_code"]').focus();
+    });
+
+    // AJAX for Add Guest form (required for modal no reload)
+    $('#addGuestForm').on('submit', function(e) {
+        e.preventDefault();
+
+        var $form = $(this);
+        var data = $form.serialize();
+        var url = $form.attr('action');
+        var $submitBtn = $form.find('button[type="submit"]');
+        $submitBtn.prop('disabled', true);
+
+        // Remove previous error
+        $form.find('.invalid-feedback').remove();
+        $form.find('.is-invalid').removeClass('is-invalid');
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: data,
+            success: function(response) {
+                if (response && response.guest_code && response.name) {
+                    // Close modal
+                    $('#addGuestModal').modal('hide');
+                    $form[0].reset();
+
+                    // Add guest to dropdowns
+                    var guestOption = new Option(
+                        response.name,
+                        response.guest_code,
+                        false, false
+                    );
+                    $('#reservation_guest_code').append(guestOption).trigger('change');
+                    $('#guest_code').append($(guestOption).clone()).trigger('change');
+                    
+                    // Optionally select new guest
+                    $('#reservation_guest_code').val(response.guest_code).trigger('change');
+                    $('#guest_code').val(response.guest_code).trigger('change');
+                }
+            },
+            error: function(xhr) {
+                // Show Laravel validation errors
+                if (xhr.status === 422) {
+                    var errors = xhr.responseJSON.errors;
+                    $.each(errors, function(key, value) {
+                        var $input = $form.find('[name="' + key + '"]');
+                        $input.addClass('is-invalid');
+                        $input.after('<div class="invalid-feedback">' + value[0] + '</div>');
+                    });
+                } else {
+                    alert('Something went wrong. Please try again.');
+                }
+            },
+            complete: function() {
+                $submitBtn.prop('disabled', false);
+            }
+        });
     });
 });
 </script>
