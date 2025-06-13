@@ -49,8 +49,6 @@
 
     {{-- Dashboard summary cards --}}
     <div class="row mb-4">
-        <!-- ... your dashboard cards code ... -->
-        {{-- (Leave this section as is) --}}
         <div class="col-md-3">
             <div class="card border-start border-4 border-primary">
                 <div class="card-body">
