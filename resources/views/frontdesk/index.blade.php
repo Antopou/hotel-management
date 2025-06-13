@@ -5,6 +5,32 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="bold m-0">Room Explorer (Front Desk)</h3>
     </div>
+    
+    <!-- Search and Filter Form -->
+    <form method="GET" action="{{ route('frontdesk.index') }}" class="row g-2 mb-4">
+        <div class="col-md-4">
+            <input type="text" name="name" class="form-control" placeholder="Search by room name" value="{{ request('name') }}">
+        </div>
+        <div class="col-md-3">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="floorFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    Filter by Floor
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="floorFilterDropdown">
+                    <li><a class="dropdown-item" href="#" data-floor="all">All Floors</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" data-floor="1">Floor 1</a></li>
+                    <li><a class="dropdown-item" href="#" data-floor="2">Floor 2</a></li>
+                    <li><a class="dropdown-item" href="#" data-floor="3">Floor 3</a></li>
+                    <!-- Add more floors as needed -->
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+    </form>
+    <!-- End Search and Filter Form -->
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 mb-4">
         @foreach ($rooms as $room)
@@ -12,8 +38,10 @@
                 $roomType = $room->roomType;
                 $roomTypeName = $roomType->name ?? 'N/A';
                 $imageUrl = $roomType && $roomType->image ? asset('storage/' . $roomType->image) : asset('images/room_types/default.jpg');
+                // Extract floor number from room name (assuming format like "Room 101" where 1 is floor)
+                $floorNumber = substr($room->name, -3, 1); // Gets the first digit of the 3-digit room number
             @endphp
-            <div class="col">
+            <div class="col room-card" data-status="{{ strtolower($room->status) }}" data-floor="{{ $floorNumber }}">
                 <div
                     class="card h-100 shadow-sm border-0 card-hover"
                     style="cursor:pointer"
@@ -197,3 +225,49 @@
     </div>
 </div>
 @endsection
+
+<script>
+// Extracts the floor number from a room name like "Room 201"
+function getFloorFromRoomName(roomName) {
+    // Matches the first digit after "Room "
+    const match = roomName.match(/\b(\d)\d{2}\b/);
+    return match ? match[1] : null;
+}
+
+// Filters rooms by floor
+function filterRoomsByFloor(rooms, floor) {
+    if (floor === "all") return rooms;
+    return rooms.filter(room => getFloorFromRoomName(room.name) === String(floor));
+}
+
+// Add event listeners for floor filter dropdown
+document.querySelectorAll('.dropdown-menu [data-floor]').forEach(item => {
+    item.addEventListener('click', function(e) {
+        e.preventDefault();
+        const selectedFloor = this.getAttribute('data-floor');
+        // 'rooms' should be your array of room objects
+        const filteredRooms = filterRoomsByFloor(rooms, selectedFloor);
+        renderRooms(filteredRooms);
+    });
+});
+</script>
+
+<script>
+$(document).ready(function() {
+    // Floor filtering
+    $('.dropdown-menu [data-floor]').click(function(e) {
+        e.preventDefault();
+        const floor = $(this).data('floor');
+        
+        // Update dropdown button text (keep icon/caret)
+        $('#floorFilterDropdown').html('<i class="bi bi-building"></i> ' + $(this).text());
+        
+        if(floor === 'all') {
+            $('.room-card').show();
+        } else {
+            $('.room-card').hide();
+            $(`.room-card[data-floor="${floor}"]`).show();
+        }
+    });
+});
+</script>

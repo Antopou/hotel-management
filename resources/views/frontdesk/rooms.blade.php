@@ -4,8 +4,8 @@
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-0"> Front Desk -Room Management</h2>
-            <p class="text-muted mb-0">Real-time room status overview</p>
+            <h2 class="fw-bold mb-0">Front Desk Dashboard</h2>
+            <p class="text-muted mb-0">Manage rooms, check-ins, and reservations in real time</p>
         </div>
         <div class="d-flex">
             <div class="dropdown me-2">
@@ -19,6 +19,19 @@
                     <li><a class="dropdown-item" href="#" data-filter="occupied">Occupied</a></li>
                     <li><a class="dropdown-item" href="#" data-filter="cleaning">Cleaning</a></li>
                     <li><a class="dropdown-item" href="#" data-filter="maintenance">Maintenance</a></li>
+                </ul>
+            </div>
+            <div class="dropdown me-2">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="floorFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-building"></i> Floor
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="floorFilterDropdown">
+                    <li><a class="dropdown-item" href="#" data-floor="all">All Floors</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" data-floor="1">Floor 1</a></li>
+                    <li><a class="dropdown-item" href="#" data-floor="2">Floor 2</a></li>
+                    <li><a class="dropdown-item" href="#" data-floor="3">Floor 3</a></li>
+                    <!-- Add more floors as needed -->
                 </ul>
             </div>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickCheckinModal">
@@ -107,9 +120,12 @@
                     'maintenance' => 'secondary'
                 ];
                 $statusColor = $statusColors[strtolower($room->status)] ?? 'secondary';
+
+                // Extract floor number from room name (e.g., "Room 101" => 1)
+                $floorNumber = substr($room->name, -3, 1);
             @endphp
             
-            <div class="col room-card" data-status="{{ strtolower($room->status) }}">
+            <div class="col room-card" data-status="{{ strtolower($room->status) }}" data-floor="{{ $floorNumber }}">
                 <div 
                     class="card h-100 shadow-sm border-0 overflow-hidden room-card-inner clickable-card"
                     data-bs-toggle="modal"
@@ -469,107 +485,43 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-    // Set CSRF token for all AJAX requests
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
+    let currentFloorFilter = 'all';
+    let currentStatusFilter = 'all';
+
+    // Set default filter button text (no icon)
+    $('#filterDropdown').text('All Rooms');
+    $('#floorFilterDropdown').text('All Floors');
+
+    // Floor filter
+    $('.dropdown-menu [data-floor]').click(function(e) {
+        e.preventDefault();
+        currentFloorFilter = $(this).data('floor');
+        $('#floorFilterDropdown').text($(this).text());
+        applyFilters();
     });
 
-    // Room filtering
-    $('[data-filter]').click(function(e) {
+    // Status filter
+    $('.dropdown-menu [data-filter]').click(function(e) {
         e.preventDefault();
-        const filter = $(this).data('filter');
-        
-        if(filter === 'all') {
-            $('.room-card').show();
-        } else {
-            $('.room-card').hide();
-            $(`.room-card[data-status="${filter}"]`).show();
-        }
-        
+        currentStatusFilter = $(this).data('filter');
         $('#filterDropdown').text($(this).text());
+        applyFilters();
     });
 
-    // Set room code when quick check-in is opened from a room card
-    $('#quickCheckinModal').on('show.bs.modal', function(event) {
-        const button = $(event.relatedTarget);
-        const roomCode = button.data('room-code');
-        if(roomCode) {
-            $('#room_code').val(roomCode);
+    // DO NOT call applyFilters or update dropdowns anywhere else!
+
+    function applyFilters() {
+        $('.room-card').show();
+
+        if(currentFloorFilter !== 'all') {
+            $('.room-card').not(`[data-floor="${currentFloorFilter}"]`).hide();
         }
-    });
-
-    // Set room code when new reservation is opened from a room card
-    $('#newReservationModal').on('show.bs.modal', function(event) {
-        const button = $(event.relatedTarget);
-        const roomCode = button.data('room-code');
-        if(roomCode) {
-            $('#reservation_room_code').val(roomCode);
+        if(currentStatusFilter !== 'all') {
+            $('.room-card').not(`[data-status="${currentStatusFilter}"]`).hide();
         }
-    });
+    }
 
-    // Auto-focus guest search in modals
-    $('#quickCheckinModal, #newReservationModal').on('shown.bs.modal', function() {
-        $(this).find('select[name="guest_code"]').focus();
-    });
-
-    // AJAX for Add Guest form (required for modal no reload)
-    $('#addGuestForm').on('submit', function(e) {
-        e.preventDefault();
-
-        var $form = $(this);
-        var data = $form.serialize();
-        var url = $form.attr('action');
-        var $submitBtn = $form.find('button[type="submit"]');
-        $submitBtn.prop('disabled', true);
-
-        // Remove previous error
-        $form.find('.invalid-feedback').remove();
-        $form.find('.is-invalid').removeClass('is-invalid');
-
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: data,
-            success: function(response) {
-                if (response && response.guest_code && response.name) {
-                    // Close modal
-                    $('#addGuestModal').modal('hide');
-                    $form[0].reset();
-
-                    // Add guest to dropdowns
-                    var guestOption = new Option(
-                        response.name,
-                        response.guest_code,
-                        false, false
-                    );
-                    $('#reservation_guest_code').append(guestOption).trigger('change');
-                    $('#guest_code').append($(guestOption).clone()).trigger('change');
-                    
-                    // Optionally select new guest
-                    $('#reservation_guest_code').val(response.guest_code).trigger('change');
-                    $('#guest_code').val(response.guest_code).trigger('change');
-                }
-            },
-            error: function(xhr) {
-                // Show Laravel validation errors
-                if (xhr.status === 422) {
-                    var errors = xhr.responseJSON.errors;
-                    $.each(errors, function(key, value) {
-                        var $input = $form.find('[name="' + key + '"]');
-                        $input.addClass('is-invalid');
-                        $input.after('<div class="invalid-feedback">' + value[0] + '</div>');
-                    });
-                } else {
-                    alert('Something went wrong. Please try again.');
-                }
-            },
-            complete: function() {
-                $submitBtn.prop('disabled', false);
-            }
-        });
-    });
+    // Room card click or modal open does not touch any filter!
 });
 </script>
 @endpush
