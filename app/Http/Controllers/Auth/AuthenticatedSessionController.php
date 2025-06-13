@@ -26,7 +26,7 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();  // Now works with LoginRequest
         $request->session()->regenerate();
-        return redirect()->intended(route('rooms.index'));  // Redirect to your intended page
+        return redirect()->intended(route('dashboard'));  // Redirect to your intended page
     }
 
     /**
