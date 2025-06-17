@@ -113,9 +113,9 @@
             <form method="GET" action="{{ route('front-desk.index') }}" class="d-flex align-items-center gap-2 mb-0 filter-form">
                 <select name="floor" class="form-select">
                     <option value="all" {{ request('floor', 'all') == 'all' ? 'selected' : '' }}>All Floors</option>
-                    <option value="1" {{ request('floor') == '1' ? 'selected' : '' }}>Floor 1</option>
-                    <option value="2" {{ request('floor') == '2' ? 'selected' : '' }}>Floor 2</option>
-                    <option value="3" {{ request('floor') == '3' ? 'selected' : '' }}>Floor 3</option>
+                    @foreach($floors as $floor)
+                        <option value="{{ $floor }}" {{ request('floor') == $floor ? 'selected' : '' }}>Floor {{ $floor }}</option>
+                    @endforeach
                 </select>
                 <select name="status" class="form-select">
                     <option value="all" {{ request('status', 'all') == 'all' ? 'selected' : '' }}>All Statuses</option>
