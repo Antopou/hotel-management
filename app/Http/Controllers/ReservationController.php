@@ -93,7 +93,14 @@ class ReservationController extends Controller
         }
         // If status is "occupied", "cleaning", or "maintenance", leave as is.
 
-        return redirect()->route('frontdesk.rooms')->with('success', 'Reservation created.');
+        $page = $request->input('page', 1);
+        $redirectTo = $request->input('redirect_to');
+        if ($redirectTo === 'front-desk') {
+            return redirect()->route('front-desk.index', array_merge($request->except(['_token', 'redirect_to']), ['page' => $page]))
+                ->with('success', 'Reservation created.');
+        }
+
+        return redirect()->route('front-desk.rooms')->with('success', 'Reservation created.');
     }
 
 

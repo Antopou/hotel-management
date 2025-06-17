@@ -132,6 +132,6 @@ class GuestFolioController extends Controller
         $items = $folio->items()->orderBy('posted_at')->get();
 
         // Use the new frontdesk/folios/show.blade.php
-        return view('frontdesk.folios.show', compact('checkin', 'folio', 'items'));
+        return view('front-desk.folios.show', compact('checkin', 'folio', 'items'));
     }
 }

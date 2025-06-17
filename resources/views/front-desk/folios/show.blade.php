@@ -10,7 +10,7 @@
             Bill #<span class="fw-bold">{{ $folio->folio_code ?? $folio->id }}</span>
         </h3>
         <div>
-            <a href="{{ route('frontdesk.index') }}" class="btn btn-outline-secondary me-2">
+            <a href="{{ route('front-desk.index') }}" class="btn btn-outline-secondary me-2">
                 <i class="bi bi-arrow-left me-1"></i> Back
             </a>
             <a href="{{ route('folios.print', $folio->folio_code ?? $folio->id) }}" class="btn btn-primary" target="_blank">
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var btn = document.getElementById('confirmBillBtn');
     if (btn) {
         btn.addEventListener('click', function() {
-            window.location.href = "{{ route('frontdesk.index') }}";
+            window.location.href = "{{ route('front-desk.index') }}";
         });
     }
 });

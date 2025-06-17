@@ -104,8 +104,10 @@ class CheckinController extends Controller
 
         // Detect redirect target
         $redirectTo = $request->input('redirect_to');
+        $page = $request->input('page', 1);
         if ($redirectTo === 'front-desk') {
-            return redirect()->route('frontdesk.index')->with('success', 'Check-in successful!');
+            return redirect()->route('front-desk.index', array_merge($request->except(['_token', 'redirect_to']), ['page' => $page]))
+                ->with('success', 'Check-in successful!');
         }
 
         // fallback to default
@@ -173,7 +175,7 @@ class CheckinController extends Controller
             }
 
             // Redirect to folio page for payment/settlement
-            return redirect()->route('frontdesk.folios.show', $folio->folio_code)
+            return redirect()->route('front-desk.folios.show', $folio->folio_code)
                 ->with('success', 'Guest checked out successfully. Please settle the bill.');
         }
 

@@ -7,7 +7,7 @@
     </div>
     
     <!-- Search and Filter Form -->
-    <form method="GET" action="{{ route('frontdesk.index') }}" class="row g-2 mb-4">
+    <form method="GET" action="{{ route('front-desk.index') }}" class="row g-2 mb-4">
         <div class="col-md-4">
             <input type="text" name="name" class="form-control" placeholder="Search by room name" value="{{ request('name') }}">
         </div>

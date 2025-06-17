@@ -120,7 +120,7 @@
                             <div class="alert alert-info d-flex align-items-center gap-2 mb-3">
                                 <i class="bi bi-receipt fs-5"></i>
                                 Bill generated:
-                                <a href="{{ route('frontdesk.folios.show', $currentCheckin->folio->folio_code ?? $currentCheckin->folio->id) }}" class="btn btn-sm btn-primary ms-2" target="_blank">
+                                <a href="{{ route('front-desk.folios.show', $currentCheckin->folio->folio_code ?? $currentCheckin->folio->id) }}" class="btn btn-sm btn-primary ms-2" target="_blank">
                                     <i class="bi bi-eye"></i> View Bill
                                 </a>
                             </div>

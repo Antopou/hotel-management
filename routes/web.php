@@ -17,13 +17,13 @@ Route::get('/', function () {
 });
 
 
-Route::get('/frontdesk/folios/{folio_code}', [GuestFolioController::class, 'showFrontdesk'])->name('frontdesk.folios.show');
+Route::get('/front-desk/folios/{folio_code}', [GuestFolioController::class, 'showFrontdesk'])->name('front-desk.folios.show');
 
 // Classic frontdesk dashboard (stats, arrivals, departures, in-house, etc)
-Route::get('/front-desk', [FrontDeskController::class, 'index'])->name('frontdesk.index');
+Route::get('/front-desk', [FrontDeskController::class, 'index'])->name('front-desk.index');
 
 // NEW! Front Desk Room Explorer grid
-Route::get('/front-desk/rooms', [FrontDeskController::class, 'index'])->name('frontdesk.rooms')->middleware('auth');
+Route::get('/front-desk/rooms', [FrontDeskController::class, 'index'])->name('front-desk.rooms')->middleware('auth');
 
 // Reports
 Route::get('/reports/revenue', [ReportController::class, 'revenue'])->name('reports.revenue');

@@ -5,6 +5,7 @@
             <form action="{{ route('checkins.store') }}" method="POST" id="quickCheckinForm">
                 @csrf
                 <input type="hidden" name="redirect_to" value="front-desk">
+                <input type="hidden" name="page" value="{{ request('page', 1) }}">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title" id="quickCheckinModalLabel">
                         <i class="bi bi-person-plus"></i> Walk-in Check-in

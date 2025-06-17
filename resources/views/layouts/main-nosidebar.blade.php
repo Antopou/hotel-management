@@ -122,7 +122,7 @@
         document.addEventListener("DOMContentLoaded", function () {
             const successToast = document.getElementById('successToast');
             const errorToast = document.getElementById('errorToast');
-            if (successToast) new bootstrap.Toast(successToast, { delay: 3000 }).show();
+            if (successToast) new bootstrap.Toast(successToast, { delay: 1000 }).show();
             if (errorToast) new bootstrap.Toast(errorToast, { delay: 3000 }).show();
         });
     </script>

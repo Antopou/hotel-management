@@ -5,6 +5,7 @@
             <form action="{{ route('reservations.store') }}" method="POST" id="newReservationForm">
                 @csrf
                 <input type="hidden" name="redirect_to" value="front-desk">
+                <input type="hidden" name="page" value="{{ request('page', 1) }}">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="newReservationModalLabel">
                         <i class="bi bi-calendar-plus"></i> New Reservation
