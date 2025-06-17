@@ -1,6 +1,7 @@
 @extends('layouts.main-nosidebar')
 
 @section('content')
+@include('partials.loader')
 <div class="container-fluid py-4">
     <style>
         /* Clean, modern cards */

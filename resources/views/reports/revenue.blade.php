@@ -1,12 +1,14 @@
 @extends('layouts.main') {{-- Extend your main layout --}}
 
 @section('content')
+@include('partials.loader')
 <div class="container-fluid py-4">
     {{-- Page Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="bold m-0">Revenue Report</h3>
-        {{-- Optional: Export button --}}
-        <button class="btn btn-success shadow-sm">
+        {{-- Export button --}}
+        <button class="btn btn-success shadow-sm"
+            onclick="window.location.href='{{ route('reports.revenue.export', request()->all()) }}'">
             <i class="bi bi-file-earmark-arrow-down me-2"></i> Export Report
         </button>
     </div>
@@ -86,7 +88,7 @@
         </div>
     </div>
 
-    {{-- Optional: Detailed Revenue Table (example structure) --}}
+    {{-- Detailed Revenue Table with Pagination --}}
     <div class="card shadow-sm border-0">
         <div class="card-body">
             <h5 class="card-title fw-bold mb-3">Revenue Breakdown</h5>
@@ -102,8 +104,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{-- Loop through your revenue data here --}}
-                        @forelse($revenueDetails ?? [] as $detail)
+                        @forelse($paginatedRevenueDetails ?? [] as $detail)
                             <tr>
                                 <td>{{ $detail['date_or_month'] }}</td>
                                 <td>${{ number_format($detail['room_revenue'], 2) }}</td>
@@ -119,6 +120,12 @@
                     </tbody>
                 </table>
             </div>
+            {{-- Pagination --}}
+            @if($paginatedRevenueDetails instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                <div class="mt-3">
+                    {{ $paginatedRevenueDetails->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
+                </div>
+            @endif
         </div>
     </div>
 
@@ -152,16 +159,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Chart.js for Revenue Trend Chart
-    // You'll need to pass 'revenue_labels' (e.g., dates or months) and 'revenue_data'
-    // from your controller. Assuming they are available in window.reportData.
     window.reportData = {
-        revenueLabels: @json($revenueLabels ?? []), // e.g., ['Jan', 'Feb', 'Mar'] or ['2023-01-01', '2023-01-02']
-        revenueValues: @json($revenueValues ?? [])  // e.g., [1000, 1200, 950]
+        revenueLabels: @json($revenueLabels ?? []),
+        revenueValues: @json($revenueValues ?? [])
     };
 
     if (window.reportData.revenueLabels.length > 0) {
         new Chart(document.getElementById('revenueTrendChart').getContext('2d'), {
-            type: 'line', // Can be 'bar' or 'line'
+            type: 'line',
             data: {
                 labels: window.reportData.revenueLabels,
                 datasets: [{
@@ -170,8 +175,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
                     borderColor: 'rgba(255, 99, 132, 1)',
                     borderWidth: 2,
-                    fill: true, // Fill area under the line
-                    tension: 0.4 // Smooth line curves
+                    fill: true,
+                    tension: 0.4
                 }]
             },
             options: {
@@ -193,7 +198,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 plugins: {
                     legend: {
-                        display: false // Hide legend if only one dataset
+                        display: false
                     }
                 }
             }
@@ -205,19 +210,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
 @push('styles')
 <style>
-/* Custom styles specific to reports page, if needed */
 #reportFilterForm {
     width: 100%;
     margin: 0;
-    flex-wrap: nowrap !important; /* Keep filter on one line horizontally */
-    overflow-x: auto; /* Allow scrolling if screen is too small */
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
 }
 .card-body {
-    padding: 1.25rem; /* Revert default padding for report cards if 0 !important is too restrictive */
+    padding: 1.25rem;
 }
-/* If you want the filter card body to have no padding, keep the global .card-body { padding: 0 !important; } from your main layout or apply it selectively.
-   For this specific report filter, you might want padding. You can add a specific ID or class to the filter card for targeted styling.
-   e.g., #reportFilterCard .card-body { padding: 0; }
-*/
 </style>
 @endpush

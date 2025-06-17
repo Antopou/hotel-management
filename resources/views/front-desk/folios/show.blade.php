@@ -1,6 +1,7 @@
 @extends('layouts.main-nosidebar')
 
 @section('content')
+@include('partials.loader')
 <div class="container py-4">
 
     {{-- Page Title and Action Buttons --}}

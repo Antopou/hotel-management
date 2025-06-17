@@ -45,6 +45,7 @@ class GuestFolioController extends Controller
             'type' => 'required|in:charge,payment',
             'description' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0.01',
+            'reference' => 'nullable|string|max:255', // Add this line
         ]);
 
         $folio = GuestFolio::where('folio_code', $folio_code)->firstOrFail();
@@ -53,6 +54,7 @@ class GuestFolioController extends Controller
             'type' => $request->type,
             'description' => $request->description,
             'amount' => $request->amount,
+            'reference' => $request->reference, // Save reference
             'posted_at' => now(),
         ]);
 

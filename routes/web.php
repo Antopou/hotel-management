@@ -27,6 +27,7 @@ Route::get('/front-desk/rooms', [FrontDeskController::class, 'index'])->name('fr
 
 // Reports
 Route::get('/reports/revenue', [ReportController::class, 'revenue'])->name('reports.revenue');
+Route::get('/reports/revenue/export', [ReportController::class, 'exportRevenue'])->name('reports.revenue.export');
 
 // Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])

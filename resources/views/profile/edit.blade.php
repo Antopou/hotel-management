@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@include('partials.loader')
 <div class="container">
 
     <div class="profile-header bg-primary text-white p-4 rounded mb-4 d-flex align-items-center">

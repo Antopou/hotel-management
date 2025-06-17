@@ -1,6 +1,7 @@
 @extends('layouts.main')
 
 @section('content')
+@include('partials.loader')
 <div class="container-fluid py-4">
     {{-- Dashboard Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
