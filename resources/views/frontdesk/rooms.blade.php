@@ -319,6 +319,20 @@ $(document).ready(function() {
     let currentFloorFilter = 'all';
     let currentStatusFilter = 'all';
 
+    // Restore view from localStorage
+    let savedView = localStorage.getItem('roomView') || 'card';
+    if (savedView === 'table') {
+        $('#cardView').hide();
+        $('#tableView').show();
+        $('#btnTableView').addClass('active');
+        $('#btnCardView').removeClass('active');
+    } else {
+        $('#tableView').hide();
+        $('#cardView').show();
+        $('#btnCardView').addClass('active');
+        $('#btnTableView').removeClass('active');
+    }
+
     // Floor filter
     $('.dropdown-menu [data-floor]').click(function(e) {
         e.preventDefault();
@@ -341,12 +355,14 @@ $(document).ready(function() {
         $('#cardView').show();
         $(this).addClass('active');
         $('#btnTableView').removeClass('active');
+        localStorage.setItem('roomView', 'card');
     });
     $('#btnTableView').click(function() {
         $('#cardView').hide();
         $('#tableView').show();
         $(this).addClass('active');
         $('#btnCardView').removeClass('active');
+        localStorage.setItem('roomView', 'table');
     });
 
     function applyFilters() {
