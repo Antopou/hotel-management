@@ -108,9 +108,9 @@
                                             </form>
                                         </div>
                                     </div>
-                                    <div class="alert alert-warning mt-2 mb-0 py-2 small">
+                                    {{-- <div class="alert alert-warning mt-2 mb-0 py-2 small">
                                         This room is currently occupied and can only be checked-in again after <b>{{ \Carbon\Carbon::parse($currentCheckin->checkout_date)->format('M d, Y H:i') }}</b>.
-                                    </div>
+                                    </div> --}}
                                 </div>
                             </div>
                         @endif

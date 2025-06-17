@@ -25,7 +25,7 @@
     <div id="app">
         <header class="bg-light py-3 mb-4">
             <div class="container d-flex justify-content-between align-items-center">
-                <h1 class="h5 m-0">Hotel Management</h1>
+                <h1 class="h5 m-0">Profile Page</h1>
             @if(isset($backUrl))
                 <a href="{{ $backUrl }}" class="btn btn-secondary mb-3">Back</a>
             @endif

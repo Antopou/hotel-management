@@ -18,7 +18,8 @@ class FrontDeskController extends Controller
                   ->where('checkin_date', '>=', Carbon::now())
                   ->orderBy('checkin_date')
                   ->with('guest');
-        }])->get();
+        }])
+        ->paginate(12); // Add pagination, 12 rooms per page
         
         $guests = Guest::orderBy('name')->get();
         

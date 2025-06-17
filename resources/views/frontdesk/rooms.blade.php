@@ -118,7 +118,7 @@
                 $roomType = $room->roomType;
                 $roomTypeName = $roomType->name ?? 'N/A';
                 $imageUrl = $roomType && $roomType->image ? asset('storage/' . $roomType->image) : asset('images/room_types/default.jpg');
-                $currentCheckin = $room->currentCheckin();
+                $currentCheckin = $room->currentCheckIn();
                 $nextReservation = $room->nextReservation();
                 $statusColors = [
                     'available' => 'success',
@@ -204,6 +204,9 @@
             {{-- <--- REMOVED @include('frontdesk._modal_room_detail', ['room' => $room]) FROM HERE! --}}
         @endforeach
     </div>
+    <div class="mt-4">
+        {{ $rooms->links() }}
+    </div>
 
     {{-- Table View --}}
     <div id="tableView" style="display:none;">
@@ -225,7 +228,7 @@
                     $roomType = $room->roomType;
                     $roomTypeName = $roomType->name ?? 'N/A';
                     $floorNumber = substr($room->name, -3, 1);
-                    $currentCheckin = $room->currentCheckin();
+                    $currentCheckin = $room->currentCheckIn();
                     $nextReservation = $room->nextReservation();
                     $statusColors = [
                         'available' => 'success',
@@ -267,6 +270,9 @@
             @endforeach
             </tbody>
         </table>
+        <div class="mt-4">
+            {{ $rooms->links() }}
+        </div>
     </div>
 
     {{-- <<<<<<<<<<<  NEW! Render all room detail modals HERE so they're always present >>>>>>>>>> --}}
@@ -275,7 +281,7 @@
             $roomType = $room->roomType;
             $roomTypeName = $roomType->name ?? 'N/A';
             $imageUrl = $roomType && $roomType->image ? asset('storage/' . $roomType->image) : asset('images/room_types/default.jpg');
-            $currentCheckin = $room->currentCheckin();
+            $currentCheckin = $room->currentCheckIn();
             $nextReservation = $room->nextReservation();
             $statusColors = [
                 'available' => 'success',

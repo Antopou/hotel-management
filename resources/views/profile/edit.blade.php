@@ -79,7 +79,14 @@
         <div class="card-body">
             <form method="POST" action="{{ route('profile.destroy') }}">
                 @csrf @method('DELETE')
-                <button class="btn btn-danger">Delete My Account</button>
+                <button class="btn btn-danger"
+                    @if(auth()->user()->id == 1) disabled title="This account cannot be deleted." @endif
+                >Delete My Account</button>
+                @if(auth()->user()->id == 1)
+                    <div class="text-danger mt-2 small">
+                        This account cannot be deleted.
+                    </div>
+                @endif
             </form>
         </div>
     </div>
