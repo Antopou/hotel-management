@@ -1,7 +1,38 @@
 @extends('layouts.main-nosidebar')
 
 @section('content')
-@include('partials.loader')
+{{-- Fullscreen Loader --}}
+<style>
+    #fullscreen-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(255,255,255,0.95);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        transition: opacity 0.5s;
+    }
+    #fullscreen-loader.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        color: #0d6efd;
+    }
+</style>
+<div id="fullscreen-loader">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+{{-- End Loader --}}
+
 <div class="container-fluid py-4">
     <style>
         /* Clean, modern cards */
@@ -348,6 +379,23 @@
 @endsection
 
 @push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const loader = document.getElementById('fullscreen-loader');
+    loader.classList.add('hidden');
+
+    document.querySelectorAll('a').forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && !href.startsWith('http') && !href.startsWith('#') && !link.hasAttribute('target')) {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                loader.classList.remove('hidden');
+                setTimeout(() => window.location.href = href, 200);
+            });
+        }
+    });
+});
+</script>
 <script>
 $(document).ready(function() {
     let currentFloorFilter = 'all';
