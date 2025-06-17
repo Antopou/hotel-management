@@ -172,7 +172,7 @@
                                 </div>
                             </div>
                         @endif
-                        @if($nextReservation && strtolower($room->status) === 'available')
+                        @if($nextReservation && in_array(strtolower($room->status), ['available', 'reserved']))
                             <div class="alert alert-info py-1 px-2 small mb-2">
                                 <div class="d-flex justify-content-between">
                                     <span>
@@ -249,7 +249,7 @@
                                 {{ $currentCheckin->guest->name ?? 'Guest' }}
                                 (In: {{ \Carbon\Carbon::parse($currentCheckin->checkin_date)->format('M d H:i') }})
                             </span>
-                        @elseif($nextReservation && strtolower($room->status) === 'available')
+                        @elseif($nextReservation && in_array(strtolower($room->status), ['available', 'reserved']))
                             <span class="text-info">
                                 Reserved for {{ $nextReservation->guest->name ?? 'Guest' }} 
                                 ({{ \Carbon\Carbon::parse($nextReservation->checkin_date)->format('M d') }})

@@ -61,11 +61,11 @@ class ReservationController extends Controller
         $conflict = GuestReservation::where('room_code', $request->room_code)
             ->where(function ($query) use ($request) {
                 $query->whereBetween('checkin_date', [$request->checkin_date, $request->checkout_date])
-                      ->orWhereBetween('checkout_date', [$request->checkin_date, $request->checkout_date])
-                      ->orWhere(function ($q) use ($request) {
-                          $q->where('checkin_date', '<=', $request->checkin_date)
+                    ->orWhereBetween('checkout_date', [$request->checkin_date, $request->checkout_date])
+                    ->orWhere(function ($q) use ($request) {
+                        $q->where('checkin_date', '<=', $request->checkin_date)
                             ->where('checkout_date', '>=', $request->checkout_date);
-                      });
+                    });
             })
             ->whereIn('status', ['pending', 'confirmed', 'checked-in'])
             ->exists();
@@ -86,12 +86,16 @@ class ReservationController extends Controller
             'created_by' => 1,
         ]);
 
-        // --- Set Room as reserved ---
+        // --- Set Room as reserved ONLY if currently available ---
         $room = Room::where('room_code', $request->room_code)->first();
-        if ($room) $room->update(['status' => 'reserved']);
+        if ($room && strtolower($room->status) === 'available') {
+            $room->update(['status' => 'reserved']);
+        }
+        // If status is "occupied", "cleaning", or "maintenance", leave as is.
 
-        return redirect()->route('reservations.index')->with('success', 'Reservation created.');
+        return redirect()->route('frontdesk.rooms')->with('success', 'Reservation created.');
     }
+
 
     public function show(GuestReservation $reservation)
     {

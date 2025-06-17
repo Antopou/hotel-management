@@ -206,7 +206,20 @@ class CheckinController extends Controller
                 ->exists();
             if (!$hasOtherActive) {
                 $room = Room::where('room_code', $checkin->room_code)->first();
-                if ($room) $room->update(['status' => 'available']);
+                if ($room) {
+                    // Check for next reservation
+                    $nextReservation = $room->reservations()
+                        ->where('checkin_date', '>=', now())
+                        ->whereIn('status', ['pending', 'confirmed'])
+                        ->orderBy('checkin_date')
+                        ->first();
+
+                    if ($nextReservation) {
+                        $room->update(['status' => 'reserved']);
+                    } else {
+                        $room->update(['status' => 'available']);
+                    }
+                }
             }
         }
 

@@ -71,15 +71,32 @@ class Room extends Model
         return $this->reservations()->where('checkin_date', '>=', now())->orderBy('checkin_date');
     }
 
-    // Helper: returns next confirmed future reservation (or null)
+    // Helper: returns the next reservation with status pending or confirmed
     public function nextReservation()
     {
         return $this->reservations()
-            ->where('status', 'confirmed')
-            ->where('checkin_date', '>=', now())
+            ->whereIn('status', ['pending', 'confirmed'])
             ->orderBy('checkin_date')
             ->with('guest')
             ->first();
+    }
+
+    // Helper: next available check-in date
+    public function nextAvailableDate()
+    {
+        // Find the latest ongoing or future checkout for this room
+        $latestCheckout = $this->checkins()
+            ->where('checkout_date', '>=', now())
+            ->orderByDesc('checkout_date')
+            ->first();
+
+        if ($latestCheckout) {
+            $checkout = \Carbon\Carbon::parse($latestCheckout->checkout_date);
+            return $checkout->copy()->addMinute(); // first minute after current guest leaves
+        }
+
+        // If no active/future checkin, room is available now
+        return now();
     }
 
     public function getStatusColorAttribute()

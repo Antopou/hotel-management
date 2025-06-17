@@ -13,7 +13,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="row g-3">
-                        {{-- Guest Select with Add New --}}
+                        <!-- Guest Select with Add New -->
                         <div class="col-md-6">
                             <label for="guest_code" class="form-label">Guest <span class="text-danger">*</span></label>
                             <div class="input-group">
@@ -28,17 +28,34 @@
                                 </button>
                             </div>
                         </div>
-                        {{-- Room Select --}}
+                        <!-- Room Select (ALL ROOMS, occupied disabled and labeled) -->
                         <div class="col-md-6">
                             <label for="room_code" class="form-label">Room <span class="text-danger">*</span></label>
                             <select name="room_code" id="room_code" class="form-select" required>
                                 <option value="">-- Select Room --</option>
-                                @foreach($rooms->where('status', 'available') as $availableRoom)
-                                    <option value="{{ $availableRoom->room_code }}">{{ $availableRoom->name }} ({{ $availableRoom->roomType->name ?? 'N/A' }})</option>
+                                @foreach($rooms as $room)
+                                    @php
+                                        $currentCheckin = $room->currentCheckin();
+                                        $isOccupied = $currentCheckin && !$currentCheckin->is_checkout;
+                                        $occupiedUntil = $isOccupied ? \Carbon\Carbon::parse($currentCheckin->checkout_date)->format('Y-m-d\TH:i') : '';
+                                    @endphp
+                                    <option
+                                        value="{{ $room->room_code }}"
+                                        data-status="{{ $room->status }}"
+                                        data-occupied="{{ $isOccupied ? '1' : '0' }}"
+                                        data-occupied-until="{{ $occupiedUntil }}"
+                                        {{ $isOccupied ? 'disabled' : '' }}
+                                    >
+                                        {{ $room->name }} ({{ $room->roomType->name ?? 'N/A' }}){{ $isOccupied ? ' - OCCUPIED until ' . \Carbon\Carbon::parse($currentCheckin->checkout_date)->format('M d, Y H:i') : '' }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
-                        {{-- Check-in, Duration, Check-out (calculated) --}}
+                        <!-- Warning if occupied -->
+                        <div id="quick-room-occupied-warning" style="display:none;">
+                            <div class="alert alert-danger mt-2 small"></div>
+                        </div>
+                        <!-- Check-in, Duration, Check-out (calculated) -->
                         <div class="col-md-6">
                             <label for="quick_checkin_date" class="form-label">Check-in Date <span class="text-danger">*</span></label>
                             <input type="datetime-local" name="checkin_date" id="quick_checkin_date" class="form-control" value="{{ now()->format('Y-m-d\TH:i') }}" required>
@@ -51,17 +68,17 @@
                             <label for="quick_checkout_date" class="form-label">Check-out Date</label>
                             <input type="datetime-local" name="checkout_date" id="quick_checkout_date" class="form-control" readonly required>
                         </div>
-                        {{-- Number of Guests --}}
+                        <!-- Number of Guests -->
                         <div class="col-md-6">
                             <label for="quick_number_of_guest" class="form-label">Number of Guests <span class="text-danger">*</span></label>
                             <input type="number" name="number_of_guest" id="quick_number_of_guest" class="form-control" min="1" value="1" required>
                         </div>
-                        {{-- Notes --}}
+                        <!-- Notes -->
                         <div class="col-12">
                             <label for="quick_notes" class="form-label">Notes</label>
                             <textarea name="notes" id="quick_notes" class="form-control" rows="2"></textarea>
                         </div>
-                        {{-- Mark as Checked Out --}}
+                        <!-- Mark as Checked Out -->
                         <div class="col-12">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="is_checkout" id="quick_is_checkout" value="1">
@@ -81,7 +98,7 @@
     </div>
 </div>
 
-<!-- Add Guest Modal -->
+<!-- Add Guest Modal (unchanged) -->
 <div class="modal fade" id="addGuestModal" tabindex="-1" aria-labelledby="addGuestLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -144,8 +161,23 @@ $(function() {
         }
     }
     $('#quick_checkin_date, #quick_number_of_nights').on('change input', updateQuickCheckoutDate);
-    // Initial call
     updateQuickCheckoutDate();
+
+    // Show warning if occupied room is selected (shouldn't happen if disabled, but safe)
+    $('#room_code').on('change', function() {
+        let selectedOption = $(this).find('option:selected');
+        let isOccupied = selectedOption.data('occupied') === 1 || selectedOption.data('occupied') === '1';
+        let occupiedUntil = selectedOption.data('occupied-until') || '';
+        if (isOccupied) {
+            $('#quick-room-occupied-warning .alert').text(
+                "This room is currently occupied and can't be checked in. Available after: " +
+                (occupiedUntil ? new Date(occupiedUntil).toLocaleString() : '')
+            );
+            $('#quick-room-occupied-warning').show();
+        } else {
+            $('#quick-room-occupied-warning').hide();
+        }
+    });
 
     // --- Add Guest AJAX (for quick check-in modal) ---
     $('#addGuestForm').submit(function(e) {
@@ -175,6 +207,17 @@ $(function() {
                 console.error('AJAX error:', xhr.responseText);
             }
         });
+    });
+
+    // On modal open, preselect room if triggered with data-room-code
+    $('#quickCheckinModal').on('show.bs.modal', function(event) {
+        let button = $(event.relatedTarget);
+        let roomCode = button && button.data('room-code');
+        if (roomCode) {
+            $('#room_code').val(roomCode).trigger('change');
+        } else {
+            $('#room_code').val('').trigger('change');
+        }
     });
 });
 </script>

@@ -58,6 +58,7 @@
                         @endif
                     </div>
                     <div class="col-md-7">
+                        {{-- CURRENT GUEST --}}
                         @if($currentCheckin && !$currentCheckin->is_checkout)
                             <div class="card border-danger mb-3">
                                 <div class="card-header bg-danger bg-opacity-10 text-danger">
@@ -107,9 +108,13 @@
                                             </form>
                                         </div>
                                     </div>
+                                    <div class="alert alert-warning mt-2 mb-0 py-2 small">
+                                        This room is currently occupied and can only be checked-in again after <b>{{ \Carbon\Carbon::parse($currentCheckin->checkout_date)->format('M d, Y H:i') }}</b>.
+                                    </div>
                                 </div>
                             </div>
                         @endif
+
                         {{-- Show bill/folio after checkout --}}
                         @if($currentCheckin && $currentCheckin->is_checkout && $currentCheckin->folio)
                             <div class="alert alert-info d-flex align-items-center gap-2 mb-3">
@@ -120,6 +125,8 @@
                                 </a>
                             </div>
                         @endif
+
+                        {{-- NEXT RESERVATION --}}
                         @if($nextReservation)
                             <div class="card border-primary mb-3">
                                 <div class="card-header bg-primary bg-opacity-10 text-primary">
@@ -159,59 +166,61 @@
                                             >
                                                 <i class="bi bi-eye"></i> View
                                             </button>
-                                            {{-- Check-in button for reservation --}}
+                                            {{-- Check-in button: disabled if occupied, enabled if not --}}
+                                            @php
+                                                $occupied = ($currentCheckin && !$currentCheckin->is_checkout);
+                                            @endphp
                                             @if(in_array(strtolower($nextReservation->status), ['confirmed', 'pending']))
-                                                <form action="{{ route('checkins.store') }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    <input type="hidden" name="reservation_id" value="{{ $nextReservation->id }}">
-                                                    <input type="hidden" name="redirect_to" value="front-desk">
-                                                    <button type="submit" class="btn btn-sm btn-success">
-                                                        <i class="bi bi-person-check"></i> Check In
+                                                @if(!$occupied)
+                                                    <form action="{{ route('checkins.store') }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        <input type="hidden" name="reservation_id" value="{{ $nextReservation->id }}">
+                                                        <input type="hidden" name="redirect_to" value="front-desk">
+                                                        <button type="submit" class="btn btn-sm btn-success">
+                                                            <i class="bi bi-person-check"></i> Check In
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <button class="btn btn-sm btn-secondary" disabled title="Room is occupied. Check-in available after {{ \Carbon\Carbon::parse($currentCheckin->checkout_date)->format('M d, Y H:i') }}">
+                                                        <i class="bi bi-person-check"></i> Check In (Occupied)
                                                     </button>
-                                                </form>
+                                                @endif
                                             @endif
                                         </div>
                                     </div>
+                                    @if($occupied)
+                                        <div class="alert alert-warning mt-2 mb-0 py-2 small">
+                                            Room is currently occupied. Next check-in allowed after <b>{{ \Carbon\Carbon::parse($currentCheckin->checkout_date)->format('M d, Y H:i') }}</b>.
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         @endif
-                        @if(strtolower($room->status) === 'available')
-                            <div class="card border-success">
+
+                        {{-- AVAILABLE & NO CURRENT/NEXT RESERVATION: Show quick action card --}}
+                        @php
+                            $isAvailable = strtolower($room->status) === 'available';
+                            $hasNoCheckin = !$currentCheckin || ($currentCheckin && $currentCheckin->is_checkout);
+                            $hasNoReservation = !$nextReservation;
+                        @endphp
+                        @if($isAvailable && $hasNoCheckin && $hasNoReservation)
+                            <div class="card border-success mb-3">
                                 <div class="card-header bg-success bg-opacity-10 text-success">
-                                    <h6 class="mb-0"><i class="bi bi-lightning-charge"></i> QUICK ACTIONS</h6>
+                                    <h6 class="mb-0"><i class="bi bi-lightning-charge"></i> ROOM AVAILABLE</h6>
                                 </div>
                                 <div class="card-body">
-                                    <div class="d-grid gap-2">
-                                        <button 
-                                            class="btn btn-success"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#quickCheckinModal"
-                                            data-room-code="{{ $room->room_code }}"
-                                            data-bs-dismiss="modal"
-                                        >
-                                            <i class="bi bi-person-plus"></i> Walk-in Check-in
-                                        </button>
-                                        <button 
-                                            class="btn btn-primary"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#newReservationModal"
-                                            data-room-code="{{ $room->room_code }}"
-                                            data-bs-dismiss="modal"
-                                        >
-                                            <i class="bi bi-calendar-plus"></i> New Reservation
-                                        </button>
-                                        <form action="{{ route('rooms.update-status', $room->id) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('PUT')
-                                            <input type="hidden" name="status" value="Cleaning">
-                                            <button type="submit" class="btn btn-warning w-100">
-                                                <i class="bi bi-bucket"></i> Mark for Cleaning
-                                            </button>
-                                        </form>
-                                    </div>
+                                    <p>
+                                        This room is currently available. You can:
+                                    </p>
+                                    <ul class="mb-0">
+                                        <li>Check in a walk-in guest immediately</li>
+                                        <li>Or make a new reservation for a future date</li>
+                                    </ul>
                                 </div>
                             </div>
                         @endif
+
+                        {{-- Cleaning/Maintenance Notice --}}
                         @if(in_array(strtolower($room->status), ['cleaning', 'maintenance']))
                             <div class="card border-warning">
                                 <div class="card-header bg-warning bg-opacity-10 text-warning">
@@ -232,9 +241,55 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            {{-- FOOTER BUTTONS --}}
+            <div class="modal-footer d-flex flex-wrap gap-2 justify-content-end">
+                {{-- Walk-in Check-in (only if available) --}}
+                @php $isAvailable = strtolower($room->status) === 'available'; @endphp
+                <button
+                    class="btn btn-success"
+                    data-bs-toggle="modal"
+                    data-bs-target="#quickCheckinModal"
+                    data-room-code="{{ $room->room_code }}"
+                    data-bs-dismiss="modal"
+                    {{ $isAvailable ? '' : 'disabled title=Only available for rooms with status=Available' }}
+                >
+                    <i class="bi bi-person-plus"></i> Walk-in Check-in
+                </button>
+                {{-- Reservation always enabled --}}
+                <button
+                    class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#newReservationModal"
+                    data-room-code="{{ $room->room_code }}"
+                    data-bs-dismiss="modal"
+                >
+                    <i class="bi bi-calendar-plus"></i> New Reservation
+                </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+$(function() {
+    // When "New Reservation" modal is opened, auto-select this room
+    $('#newReservationModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var roomCode = button.data('room-code');
+        if(roomCode) {
+            $('#reservation_room_code').val(roomCode).trigger('change');
+        }
+    });
+    // When "Walk-in Check-in" modal is opened, auto-select this room
+    $('#quickCheckinModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var roomCode = button.data('room-code');
+        if(roomCode) {
+            $('#room_code').val(roomCode).trigger('change');
+        }
+    });
+});
+</script>
+@endpush

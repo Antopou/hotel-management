@@ -23,7 +23,7 @@ Route::get('/frontdesk/folios/{folio_code}', [GuestFolioController::class, 'show
 Route::get('/front-desk', [FrontDeskController::class, 'index'])->name('frontdesk.index');
 
 // NEW! Front Desk Room Explorer grid
-Route::get('/front-desk/rooms', [FrontDeskController::class, 'roomExplorer'])->name('frontdesk.rooms')->middleware('auth');
+Route::get('/front-desk/rooms', [FrontDeskController::class, 'index'])->name('frontdesk.rooms')->middleware('auth');
 
 // Reports
 Route::get('/reports/revenue', [ReportController::class, 'revenue'])->name('reports.revenue');

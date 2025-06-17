@@ -13,7 +13,6 @@
                 </div>
                 <div class="modal-body">
                     <div class="row g-3">
-
                         <div class="col-md-6">
                             <label for="reservation_guest_code" class="form-label">Guest <span class="text-danger">*</span></label>
                             <div class="input-group">
@@ -34,14 +33,23 @@
                             <select name="room_code" id="reservation_room_code" class="form-select" required>
                                 <option value="">-- Select Room --</option>
                                 @foreach ($rooms as $room)
-                                    <option value="{{ $room->room_code }}">{{ $room->name }} ({{ $room->roomType->name ?? 'N/A' }})</option>
+                                    <option value="{{ $room->room_code }}"
+                                        data-next-available="{{ $room->nextAvailableDate()->format('Y-m-d\TH:i') }}"
+                                        data-status="{{ $room->status }}">
+                                        {{ $room->name }} ({{ $room->roomType->name ?? 'N/A' }})
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
-
+                        <div id="room-occupied-warning" style="display: none;">
+                            <div class="alert alert-warning mt-2 small">
+                                This room is currently occupied. Your reservation will start after the current guest checks out.
+                            </div>
+                        </div>
                         <div class="col-md-6">
                             <label for="reservation_checkin_date" class="form-label">Check-in Date <span class="text-danger">*</span></label>
-                            <input type="datetime-local" name="checkin_date" id="reservation_checkin_date" class="form-control" required>
+                            <input type="datetime-local" name="checkin_date" id="reservation_checkin_date" class="form-control"
+                                value="{{ now()->format('Y-m-d\TH:i') }}" required>
                         </div>
                         <div class="col-md-6">
                             <label for="reservation_number_of_nights" class="form-label">Number of Nights <span class="text-danger">*</span></label>
@@ -132,7 +140,33 @@
 @push('scripts')
 <script>
 $(function() {
-    // --- Reservation Modal: Auto-calculate checkout date ---
+    // 1. When a room is selected, update check-in date and warning
+    $('#reservation_room_code').on('change', function() {
+        let selectedOption = $(this).find('option:selected');
+        let suggestedCheckin = selectedOption.data('next-available') || '{{ now()->format('Y-m-d\TH:i') }}';
+        $('#reservation_checkin_date').val(suggestedCheckin);
+
+        let roomStatus = selectedOption.data('status') || '';
+        if (roomStatus.toLowerCase() === 'occupied') {
+            $('#room-occupied-warning').show();
+        } else {
+            $('#room-occupied-warning').hide();
+        }
+    });
+
+    // 2. Auto-select room based on data-room-code when modal is opened
+    $('#newReservationModal').on('show.bs.modal', function(event) {
+        let button = $(event.relatedTarget); // Button that triggered the modal
+        let roomCode = button && button.data('room-code');
+        if (roomCode) {
+            $('#reservation_room_code').val(roomCode).trigger('change');
+        }
+    });
+
+    // On page load, trigger change to set correct warning and check-in date
+    $('#reservation_room_code').trigger('change');
+
+    // 3. Reservation Modal: Auto-calculate checkout date
     function updateReservationCheckoutDate() {
         let checkin = $('#reservation_checkin_date').val();
         let nights = parseInt($('#reservation_number_of_nights').val()) || 1;
@@ -150,7 +184,7 @@ $(function() {
     $('#reservation_checkin_date, #reservation_number_of_nights').on('change input', updateReservationCheckoutDate);
     updateReservationCheckoutDate();
 
-    // --- Add Guest AJAX (for reservation modal) ---
+    // 4. Add Guest AJAX (for reservation modal)
     $('#addGuestForm').submit(function(e) {
         e.preventDefault();
         var $form = $(this);
