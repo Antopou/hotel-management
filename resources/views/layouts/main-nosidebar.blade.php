@@ -84,6 +84,11 @@
         .summary-card-icon i {
             font-size: 2.5rem; /* Adjust as needed */
         }
+
+        .page-link {
+            font-size: 1rem !important;
+            padding: 0.375rem 0.75rem !important;
+        }
     </style>
 </head>
 <body>

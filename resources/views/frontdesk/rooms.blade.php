@@ -205,7 +205,7 @@
         @endforeach
     </div>
     <div class="mt-4">
-        {{ $rooms->links() }}
+        {{ $rooms->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
     </div>
 
     {{-- Table View --}}
@@ -271,7 +271,7 @@
             </tbody>
         </table>
         <div class="mt-4">
-            {{ $rooms->links() }}
+            {{ $rooms->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
         </div>
     </div>
 
