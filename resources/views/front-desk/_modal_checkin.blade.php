@@ -21,7 +21,9 @@
                                 <select name="guest_code" id="guest_code" class="form-select" required>
                                     <option value="">-- Select Guest --</option>
                                     @foreach ($guests as $guest)
-                                        <option value="{{ $guest->guest_code }}">{{ $guest->name }} ({{ $guest->phone }})</option>
+                                        <option value="{{ $guest->guest_code }}">
+                                            {{ $guest->name }}@if($guest->phone) ({{ $guest->phone }})@endif
+                                        </option>
                                     @endforeach
                                 </select>
                                 <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addGuestModal" title="Add New Guest">
