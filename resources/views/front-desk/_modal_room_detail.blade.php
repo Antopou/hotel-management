@@ -26,9 +26,11 @@
                                         </span>
                                     </dd>
                                     <dt class="col-sm-5">Capacity:</dt>
-                                    <dd class="col-sm-7">{{ $roomType->capacity ?? 'N/A' }} persons</dd>
+                                    <dd class="col-sm-7">{{ $roomType->max_occupancy ?? 'N/A' }} persons</dd>
                                     <dt class="col-sm-5">Price:</dt>
-                                    <dd class="col-sm-7">{{ $roomType ? ($roomType->price) : 'N/A' }}/night</dd>
+                                    <dd class="col-sm-7">
+                                        {{ $roomType ? number_format($roomType->price_per_night, 2) : 'N/A' }}/night
+                                    </dd>
                                 </dl>
                             </div>
                         </div>
