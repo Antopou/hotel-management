@@ -58,8 +58,8 @@ class ProfileController extends Controller
         ]);
         $user = Auth::user();
         if ($request->hasFile('profile_photo')) {
-            $path = $request->file('profile_photo')->store('profile-photos', 'public');
-            $user->profile_photo_url = '/storage/' . $path;
+            $path = $request->file('profile_photo')->store('profile_images', 'public');
+            $user->profile_image = $path;
             $user->save();
         }
         return back()->with('success', 'Profile photo updated!');

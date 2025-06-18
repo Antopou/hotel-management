@@ -57,4 +57,20 @@ class User extends Authenticatable
         }
         return asset('images/default-avatar.png');
     }
+
+    /**
+     * Accessor for profile image URL.
+     */
+    public function getProfileImageUrlAttribute()
+    {
+        if ($this->profile_image) {
+            // If already starts with http or /storage, return as is
+            if (str_starts_with($this->profile_image, 'http') || str_starts_with($this->profile_image, '/storage')) {
+                return asset($this->profile_image);
+            }
+            // Otherwise, assume it's in storage
+            return asset('storage/' . $this->profile_image);
+        }
+        return asset('images/default-avatar.png');
+    }
 }

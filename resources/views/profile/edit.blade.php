@@ -20,7 +20,7 @@
                 <form action="{{ route('profile.photo') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="position-relative d-inline-block mb-3">
-                        <img src="{{ Auth::user()->profile_photo_url ?? asset('images/default-avatar.png') }}"
+                        <img src="{{ Auth::user()->profile_image_url }}"
                              alt="Profile Photo"
                              class="rounded-circle border border-3 border-primary shadow"
                              style="width: 100px; height: 100px; object-fit: cover;">
