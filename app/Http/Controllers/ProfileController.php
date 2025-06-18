@@ -20,7 +20,8 @@ class ProfileController extends Controller
         }
 
         return view('profile.edit', [
-            'backUrl' => $previousUrl
+            'backUrl' => $previousUrl,
+            'user' => Auth::user()
         ]);
     }
 
@@ -50,6 +51,19 @@ class ProfileController extends Controller
         return redirect($backUrl)->with('success', 'Profile updated successfully!');
     }
 
+    public function updatePhoto(Request $request)
+    {
+        $request->validate([
+            'profile_photo' => 'image|max:2048'
+        ]);
+        $user = Auth::user();
+        if ($request->hasFile('profile_photo')) {
+            $path = $request->file('profile_photo')->store('profile-photos', 'public');
+            $user->profile_photo_url = '/storage/' . $path;
+            $user->save();
+        }
+        return back()->with('success', 'Profile photo updated!');
+    }
 
     public function destroy(Request $request): RedirectResponse
     {

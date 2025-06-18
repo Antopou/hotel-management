@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'profile_photo_url', // <-- Add this line
     ];
 
     /**
@@ -44,5 +45,16 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Accessor for profile photo URL.
+     */
+    public function getProfilePhotoUrlAttribute($value)
+    {
+        if ($value) {
+            return asset($value);
+        }
+        return asset('images/default-avatar.png');
     }
 }
