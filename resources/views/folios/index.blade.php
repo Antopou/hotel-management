@@ -31,11 +31,11 @@
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Total Folios</h6>
-                        <h2 class="card-title mb-0 fw-bold">{{ $folios->total() }}</h2>
+                        <h6 class="card-subtitle mb-2" style="color: #e0e7ff;">Total Folios</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $folios->total() }}</h2>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-receipt fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-receipt fs-2" style="color: #6366f1;"></i>
                     </div>
                 </div>
             </div>
@@ -47,11 +47,11 @@
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Total Revenue</h6>
-                        <h2 class="card-title mb-0 fw-bold">${{ number_format($totalRevenue ?? 0, 2) }}</h2>
+                        <h6 class="card-subtitle mb-2" style="color: #e0ffe0;">Total Revenue</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">${{ number_format($totalRevenue ?? 0, 2) }}</h2>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-currency-dollar fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-currency-dollar fs-2" style="color: #10b981;"></i>
                     </div>
                 </div>
             </div>
@@ -63,11 +63,11 @@
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Pending Payment</h6>
-                        <h2 class="card-title mb-0 fw-bold">${{ number_format($pendingPayments ?? 0, 2) }}</h2>
+                        <h6 class="card-subtitle mb-2" style="color: #fde4ff;">Pending Payment</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">${{ number_format($pendingPayments ?? 0, 2) }}</h2>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-clock fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-clock fs-2" style="color: #f43f5e;"></i>
                     </div>
                 </div>
             </div>
@@ -79,11 +79,11 @@
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Avg. Folio Value</h6>
-                        <h2 class="card-title mb-0 fw-bold">${{ number_format($avgFolioValue ?? 0, 2) }}</h2>
+                        <h6 class="card-subtitle mb-2" style="color: #e0f7fa;">Avg. Folio Value</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">${{ number_format($avgFolioValue ?? 0, 2) }}</h2>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-graph-up fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-graph-up fs-2" style="color: #0ea5e9;"></i>
                     </div>
                 </div>
             </div>

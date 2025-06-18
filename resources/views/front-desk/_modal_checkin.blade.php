@@ -1,99 +1,58 @@
 <!-- Quick Check-in Modal -->
 <div class="modal fade" id="quickCheckinModal" tabindex="-1" aria-labelledby="quickCheckinModalLabel" aria-hidden="true">
-    <div class="modal-dialog custom-modal">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form action="{{ route('checkins.store') }}" method="POST" id="quickCheckinForm">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fs-4" id="quickCheckinModalLabel">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Quick Check-in
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('checkins.store') }}" method="POST">
                 @csrf
-                <input type="hidden" name="redirect_to" value="front-desk">
-                <input type="hidden" name="page" value="{{ request('page', 1) }}">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="quickCheckinModalLabel">
-                        <i class="bi bi-person-plus"></i> Walk-in Check-in
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
+                <div class="modal-body" style="font-size: 1rem;">
                     <div class="row g-3">
-                        <!-- Guest Select with Add New -->
                         <div class="col-md-6">
-                            <label for="guest_code" class="form-label">Guest <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <select name="guest_code" id="guest_code" class="form-select" required>
-                                    <option value="">-- Select Guest --</option>
-                                    @foreach ($guests as $guest)
-                                        <option value="{{ $guest->guest_code }}">
-                                            {{ $guest->name }}@if($guest->phone) ({{ $guest->phone }})@endif
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addGuestModal" title="Add New Guest">
-                                    <i class="bi bi-person-plus-fill"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <!-- Room Select (ALL ROOMS, occupied disabled and labeled) -->
-                        <div class="col-md-6">
-                            <label for="room_code" class="form-label">Room <span class="text-danger">*</span></label>
-                            <select name="room_code" id="room_code" class="form-select" required>
-                                <option value="">-- Select Room --</option>
-                                @foreach($rooms as $room)
-                                    @php
-                                        $currentCheckin = $room->currentCheckin();
-                                        $isOccupied = $currentCheckin && !$currentCheckin->is_checkout;
-                                        $occupiedUntil = $isOccupied ? \Carbon\Carbon::parse($currentCheckin->checkout_date)->format('Y-m-d\TH:i') : '';
-                                    @endphp
-                                    <option
-                                        value="{{ $room->room_code }}"
-                                        data-status="{{ $room->status }}"
-                                        data-occupied="{{ $isOccupied ? '1' : '0' }}"
-                                        data-occupied-until="{{ $occupiedUntil }}"
-                                        {{ $isOccupied ? 'disabled' : '' }}
-                                    >
-                                        {{ $room->name }} ({{ $room->roomType->name ?? 'N/A' }}){{ $isOccupied ? ' - OCCUPIED until ' . \Carbon\Carbon::parse($currentCheckin->checkout_date)->format('M d, Y H:i') : '' }}
-                                    </option>
+                            <label for="guest_id" class="form-label fw-semibold">Guest <span class="text-danger">*</span></label>
+                            <select class="form-select" id="guest_id" name="guest_id" required style="font-size: 1rem; padding: 0.75rem;">
+                                <option value="">Select Guest</option>
+                                @foreach($guests ?? [] as $guest)
+                                    <option value="{{ $guest->id }}">{{ $guest->name }} - {{ $guest->email }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <!-- Warning if occupied -->
-                        <div id="quick-room-occupied-warning" style="display:none;">
-                            <div class="alert alert-danger mt-2 small"></div>
-                        </div>
-                        <!-- Check-in, Duration, Check-out (calculated) -->
                         <div class="col-md-6">
-                            <label for="quick_checkin_date" class="form-label">Check-in Date <span class="text-danger">*</span></label>
-                            <input type="datetime-local" name="checkin_date" id="quick_checkin_date" class="form-control" value="{{ now()->format('Y-m-d\TH:i') }}" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="quick_number_of_nights" class="form-label">Number of Nights <span class="text-danger">*</span></label>
-                            <input type="number" name="number_of_nights" id="quick_number_of_nights" class="form-control" min="1" value="1" required>
+                            <label for="room_id" class="form-label fw-semibold">Room <span class="text-danger">*</span></label>
+                            <select class="form-select" id="room_id" name="room_id" required style="font-size: 1rem; padding: 0.75rem;">
+                                <option value="">Select Room</option>
+                                @foreach($rooms->where('status', 'available') ?? [] as $room)
+                                    <option value="{{ $room->id }}">{{ $room->name }} - {{ $room->roomType->name ?? 'N/A' }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-md-6">
-                            <label for="quick_checkout_date" class="form-label">Check-out Date</label>
-                            <input type="datetime-local" name="checkout_date" id="quick_checkout_date" class="form-control" readonly required>
+                            <label for="checkin_date" class="form-label fw-semibold">Check-in Date <span class="text-danger">*</span></label>
+                            <input type="datetime-local" class="form-control" id="checkin_date" name="checkin_date" 
+                                   value="{{ now()->format('Y-m-d\TH:i') }}" required style="font-size: 1rem; padding: 0.75rem;">
                         </div>
-                        <!-- Number of Guests -->
                         <div class="col-md-6">
-                            <label for="quick_number_of_guest" class="form-label">Number of Guests <span class="text-danger">*</span></label>
-                            <input type="number" name="number_of_guest" id="quick_number_of_guest" class="form-control" min="1" value="1" required>
+                            <label for="checkout_date" class="form-label fw-semibold">Check-out Date <span class="text-danger">*</span></label>
+                            <input type="datetime-local" class="form-control" id="checkout_date" name="checkout_date" 
+                                   value="{{ now()->addDay()->format('Y-m-d\TH:i') }}" required style="font-size: 1rem; padding: 0.75rem;">
                         </div>
-                        <!-- Notes -->
                         <div class="col-12">
-                            <label for="quick_notes" class="form-label">Notes</label>
-                            <textarea name="notes" id="quick_notes" class="form-control" rows="2"></textarea>
-                        </div>
-                        <!-- Mark as Checked Out -->
-                        <div class="col-12">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="is_checkout" id="quick_is_checkout" value="1">
-                                <label class="form-check-label" for="quick_is_checkout">Mark as Checked Out</label>
-                            </div>
+                            <label for="notes" class="form-label fw-semibold">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                      placeholder="Any special requests or notes..." style="font-size: 1rem; padding: 0.75rem;"></textarea>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success">
-                        <i class="bi bi-save me-2"></i> Create
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="font-size: 1rem; padding: 0.75rem 1.5rem;">
+                        <i class="bi bi-x-circle me-2"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-success" style="font-size: 1rem; padding: 0.75rem 1.5rem;">
+                        <i class="bi bi-check-circle me-2"></i>Check In
                     </button>
                 </div>
             </form>

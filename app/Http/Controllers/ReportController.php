@@ -14,7 +14,7 @@ class ReportController extends Controller
     public function revenue(Request $request)
     {
         // 1. Get filter parameters
-        $period = $request->input('period', 'all_time');
+        $period = $request->input('period', 'this_month'); // Changed default to this_month
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
@@ -107,10 +107,12 @@ class ReportController extends Controller
         if ($startDate && $endDate) {
             $totalDaysInPeriod = $startDate->diffInDays($endDate) + 1; // +1 to include both start and end day
         } elseif ($period === 'all_time') {
-            // For 'all_time', RevPAR becomes less meaningful without a fixed period.
-            // You might want to define a default period or calculate based on the first/last checkin/checkout dates
-            // For now, setting it to 0 if no specific period is selected
-            $totalDaysInPeriod = 0;
+            // For 'all_time', calculate based on actual data range
+            if (!empty($revenueByDate)) {
+                $firstDate = Carbon::parse(min(array_keys($revenueByDate)));
+                $lastDate = Carbon::parse(max(array_keys($revenueByDate)));
+                $totalDaysInPeriod = $firstDate->diffInDays($lastDate) + 1;
+            }
         }
 
         $totalAvailableRoomNights = ($totalRoomsInHotel > 0 && $totalDaysInPeriod > 0)
@@ -121,6 +123,10 @@ class ReportController extends Controller
                   ? $totalRevenue / $totalAvailableRoomNights
                   : 0;
 
+        // Calculate occupancy rate
+        $occupancyRate = ($totalAvailableRoomNights > 0)
+                        ? ($totalNightsOccupied / $totalAvailableRoomNights) * 100
+                        : 0;
 
         // --- Prepare Data for Chart & Detailed Table ---
         $revenueLabels = [];
@@ -136,15 +142,16 @@ class ReportController extends Controller
 
             // For chart labels (e.g., 'Jan 01')
             $revenueLabels[] = $carbonDate->format('M d');
-            $revenueValues[] = $total;
+            $revenueValues[] = round($total, 2);
 
             // For detailed table
             $revenueDetails[] = [
                 'date_or_month' => $carbonDate->format('Y-m-d'),
-                'room_revenue' => $total,
+                'formatted_date' => $carbonDate->format('M d, Y'),
+                'room_revenue' => round($total, 2),
                 'fb_revenue' => 0, // Placeholder for F&B - integrate from GuestFolio if available
                 'other_revenue' => 0, // Placeholder for Other - integrate from GuestFolio if available
-                'total_revenue' => $total, // This total is based on room revenue only here
+                'total_revenue' => round($total, 2), // This total is based on room revenue only here
             ];
         }
 
@@ -160,21 +167,53 @@ class ReportController extends Controller
             ['path' => request()->url(), 'query' => request()->query()]
         );
 
+        // Additional metrics for the modern dashboard
+        $totalBookings = $checkinsForCalculation->count();
+        $totalGuests = $checkinsForCalculation->sum('guest_count') ?: $checkinsForCalculation->count();
+        
+        // Monthly comparison data for charts
+        $monthlyRevenue = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $month = Carbon::now()->subMonths($i);
+            $monthStart = $month->copy()->startOfMonth();
+            $monthEnd = $month->copy()->endOfMonth();
+            
+            $monthlyTotal = 0;
+            foreach ($revenueByDate as $date => $revenue) {
+                $revenueDate = Carbon::parse($date);
+                if ($revenueDate->between($monthStart, $monthEnd)) {
+                    $monthlyTotal += $revenue;
+                }
+            }
+            
+            $monthlyRevenue[] = [
+                'month' => $month->format('M Y'),
+                'revenue' => round($monthlyTotal, 2)
+            ];
+        }
+
         // 4. Pass data to the view
         return view('reports.revenue', compact(
             'totalRevenue',
             'averageDailyRate',
             'revPar',
+            'occupancyRate',
+            'totalBookings',
+            'totalGuests',
             'revenueLabels',
             'revenueValues',
-            'paginatedRevenueDetails' // <-- use this in the view
+            'monthlyRevenue',
+            'paginatedRevenueDetails',
+            'period',
+            'startDate',
+            'endDate'
         ));
     }
 
     public function exportRevenue(Request $request)
     {
         // Repeat the same logic as in revenue() to get $revenueDetails
-        $period = $request->input('period', 'all_time');
+        $period = $request->input('period', 'this_month');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $dateRange = $this->getDateRange($request, $period, $startDate, $endDate);
@@ -225,7 +264,7 @@ class ReportController extends Controller
             $fullNights = $checkinDate->diffInDays($checkoutDate);
 
             if ($fullNights <= 0) {
-                if ($roomRevenue > 0 && $checkinDate->between($startDate, $endDate)) {
+                if ($roomRevenue > 0 && $startDate && $endDate && $checkinDate->between($startDate, $endDate)) {
                     $formattedDate = $checkinDate->format('Y-m-d');
                     $revenueByDate[$formattedDate] = ($revenueByDate[$formattedDate] ?? 0) + $roomRevenue;
                     $totalNightsOccupied++;
@@ -251,35 +290,6 @@ class ReportController extends Controller
             }
         }
 
-        // --- Finalize Key Metrics ---
-        // Sum up the total revenue from the daily aggregation
-        $totalRevenue = array_sum($revenueByDate);
-
-        // ADR (Average Daily Rate): Total Revenue / Total Number of Occupied Room Nights
-        $averageDailyRate = ($totalNightsOccupied > 0)
-                            ? $totalRevenue / $totalNightsOccupied
-                            : 0;
-
-        // RevPAR (Revenue Per Available Room): Total Revenue / Total Available Room Nights
-        $totalDaysInPeriod = 0;
-        if ($startDate && $endDate) {
-            $totalDaysInPeriod = $startDate->diffInDays($endDate) + 1; // +1 to include both start and end day
-        } elseif ($period === 'all_time') {
-            // For 'all_time', RevPAR becomes less meaningful without a fixed period.
-            // You might want to define a default period or calculate based on the first/last checkin/checkout dates
-            // For now, setting it to 0 if no specific period is selected
-            $totalDaysInPeriod = 0;
-        }
-
-        $totalAvailableRoomNights = ($totalRoomsInHotel > 0 && $totalDaysInPeriod > 0)
-                                    ? $totalRoomsInHotel * $totalDaysInPeriod
-                                    : 0;
-
-        $revPar = ($totalAvailableRoomNights > 0)
-                  ? $totalRevenue / $totalAvailableRoomNights
-                  : 0;
-
-
         // --- Prepare Data for CSV Export ---
         $revenueDetails = [];
 
@@ -293,10 +303,10 @@ class ReportController extends Controller
             // For CSV export
             $revenueDetails[] = [
                 'date_or_month' => $carbonDate->format('Y-m-d'),
-                'room_revenue' => $total,
+                'room_revenue' => round($total, 2),
                 'fb_revenue' => 0, // Placeholder for F&B - integrate from GuestFolio if available
                 'other_revenue' => 0, // Placeholder for Other - integrate from GuestFolio if available
-                'total_revenue' => $total, // This total is based on room revenue only here
+                'total_revenue' => round($total, 2), // This total is based on room revenue only here
             ];
         }
 
@@ -328,7 +338,6 @@ class ReportController extends Controller
 
     /**
      * Helper function to determine date range based on period filter.
-     * (No changes needed here as it handles the $request object correctly)
      */
     protected function getDateRange(Request $request, $period, $startDate = null, $endDate = null)
     {

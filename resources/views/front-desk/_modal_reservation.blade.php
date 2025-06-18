@@ -140,6 +140,75 @@
     </div>
 </div>
 
+<div class="modal fade" id="quickReservationModal" tabindex="-1" aria-labelledby="quickReservationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fs-4" id="quickReservationModalLabel">
+                    <i class="bi bi-calendar-plus me-2"></i>Quick Reservation
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('reservations.store') }}" method="POST">
+                @csrf
+                <div class="modal-body" style="font-size: 1rem;">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="res_guest_id" class="form-label fw-semibold">Guest <span class="text-danger">*</span></label>
+                            <select class="form-select" id="res_guest_id" name="guest_id" required style="font-size: 1rem; padding: 0.75rem;">
+                                <option value="">Select Guest</option>
+                                @foreach($guests ?? [] as $guest)
+                                    <option value="{{ $guest->id }}">{{ $guest->name }} - {{ $guest->email }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="res_room_id" class="form-label fw-semibold">Room <span class="text-danger">*</span></label>
+                            <select class="form-select" id="res_room_id" name="room_id" required style="font-size: 1rem; padding: 0.75rem;">
+                                <option value="">Select Room</option>
+                                @foreach($rooms ?? [] as $room)
+                                    <option value="{{ $room->id }}">{{ $room->name }} - {{ $room->roomType->name ?? 'N/A' }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="res_checkin_date" class="form-label fw-semibold">Check-in Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="res_checkin_date" name="checkin_date" 
+                                   value="{{ now()->format('Y-m-d') }}" required style="font-size: 1rem; padding: 0.75rem;">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="res_checkout_date" class="form-label fw-semibold">Check-out Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="res_checkout_date" name="checkout_date" 
+                                   value="{{ now()->addDay()->format('Y-m-d') }}" required style="font-size: 1rem; padding: 0.75rem;">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="res_adults" class="form-label fw-semibold">Adults</label>
+                            <input type="number" class="form-control" id="res_adults" name="adults" value="1" min="1" style="font-size: 1rem; padding: 0.75rem;">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="res_children" class="form-label fw-semibold">Children</label>
+                            <input type="number" class="form-control" id="res_children" name="children" value="0" min="0" style="font-size: 1rem; padding: 0.75rem;">
+                        </div>
+                        <div class="col-12">
+                            <label for="res_notes" class="form-label fw-semibold">Special Requests</label>
+                            <textarea class="form-control" id="res_notes" name="notes" rows="3" 
+                                      placeholder="Any special requests or notes..." style="font-size: 1rem; padding: 0.75rem;"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="font-size: 1rem; padding: 0.75rem 1.5rem;">
+                        <i class="bi bi-x-circle me-2"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" style="font-size: 1rem; padding: 0.75rem 1.5rem;">
+                        <i class="bi bi-check-circle me-2"></i>Create Reservation
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 $(function() {

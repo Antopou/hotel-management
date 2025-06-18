@@ -28,35 +28,39 @@
 <!-- Date Range Filter -->
 <div class="card mb-4">
     <div class="card-body">
-        <form method="GET" action="{{ route('reports.revenue') }}" class="row g-3">
-            <div class="col-md-3">
-                <label for="start_date" class="form-label">Start Date</label>
-                <input type="date" name="start_date" id="start_date" value="{{ request('start_date', now()->startOfMonth()->format('Y-m-d')) }}" 
-                       class="form-control">
-            </div>
-            <div class="col-md-3">
-                <label for="end_date" class="form-label">End Date</label>
-                <input type="date" name="end_date" id="end_date" value="{{ request('end_date', now()->format('Y-m-d')) }}" 
-                       class="form-control">
-            </div>
-            <div class="col-md-3">
-                <label for="room_type" class="form-label">Room Type</label>
-                <select name="room_type" id="room_type" class="form-select">
-                    <option value="">All Room Types</option>
-                    @foreach($roomTypes ?? [] as $type)
-                        <option value="{{ $type->id }}" {{ request('room_type') == $type->id ? 'selected' : '' }}>
-                            {{ $type->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-3 d-flex align-items-end gap-2">
-                <button type="submit" class="btn btn-primary flex-fill">
-                    <i class="bi bi-search me-2"></i>Generate Report
-                </button>
-                <button type="button" class="btn btn-outline-secondary" onclick="setQuickDate('today')">Today</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="setQuickDate('week')">Week</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="setQuickDate('month')">Month</button>
+        <form method="GET" action="{{ route('reports.revenue') }}">
+            <div class="row g-3">
+                <div class="col-12 col-md-3">
+                    <label for="start_date" class="form-label">Start Date</label>
+                    <input type="date" name="start_date" id="start_date" value="{{ request('start_date', now()->startOfMonth()->format('Y-m-d')) }}" 
+                           class="form-control">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label for="end_date" class="form-label">End Date</label>
+                    <input type="date" name="end_date" id="end_date" value="{{ request('end_date', now()->format('Y-m-d')) }}" 
+                           class="form-control">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label for="room_type" class="form-label">Room Type</label>
+                    <select name="room_type" id="room_type" class="form-select">
+                        <option value="">All Room Types</option>
+                        @foreach($roomTypes ?? [] as $type)
+                            <option value="{{ $type->id }}" {{ request('room_type') == $type->id ? 'selected' : '' }}>
+                                {{ $type->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-12 col-md-3 d-flex flex-column align-items-start justify-content-end">
+                    <div class="mb-2 w-100 d-flex gap-2 flex-wrap">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setQuickDate('today')">Today</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setQuickDate('week')">Week</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setQuickDate('month')">Month</button>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-search me-2"></i>Generate Report
+                    </button>
+                </div>
             </div>
         </form>
     </div>
@@ -69,15 +73,15 @@
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Total Revenue</h6>
-                        <h2 class="card-title mb-0 fw-bold">${{ number_format($totalRevenue ?? 0, 2) }}</h2>
-                        <small class="text-white-50">
+                        <h6 class="card-subtitle mb-2" style="color: #e0e7ff;">Total Revenue</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">${{ number_format($totalRevenue ?? 0, 2) }}</h2>
+                        <small style="color: #e0e7ff;">
                             <i class="bi bi-arrow-up me-1"></i>
                             +12% from last period
                         </small>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-currency-dollar fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-currency-dollar fs-2" style="color: #6366f1;"></i>
                     </div>
                 </div>
             </div>
@@ -89,14 +93,14 @@
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Room Revenue</h6>
-                        <h2 class="card-title mb-0 fw-bold">${{ number_format($roomRevenue ?? 0, 2) }}</h2>
-                        <small class="text-white-50">
+                        <h6 class="card-subtitle mb-2" style="color: #e0ffe0;">Room Revenue</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">${{ number_format($roomRevenue ?? 0, 2) }}</h2>
+                        <small style="color: #e0ffe0;">
                             {{ number_format(($roomRevenue ?? 0) / ($totalRevenue ?? 1) * 100, 1) }}% of total
                         </small>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-house-door fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-house-door fs-2" style="color: #10b981;"></i>
                     </div>
                 </div>
             </div>
@@ -108,15 +112,15 @@
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Average Daily Rate</h6>
-                        <h2 class="card-title mb-0 fw-bold">${{ number_format($averageDailyRate ?? 0, 2) }}</h2>
-                        <small class="text-white-50">
+                        <h6 class="card-subtitle mb-2" style="color: #fde4ff;">Average Daily Rate</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">${{ number_format($averageDailyRate ?? 0, 2) }}</h2>
+                        <small style="color: #fde4ff;">
                             <i class="bi bi-arrow-up me-1"></i>
                             +5% from last period
                         </small>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-graph-up fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-graph-up fs-2" style="color: #f43f5e;"></i>
                     </div>
                 </div>
             </div>
@@ -128,15 +132,15 @@
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Occupancy Rate</h6>
-                        <h2 class="card-title mb-0 fw-bold">{{ number_format($occupancyRate ?? 0, 1) }}%</h2>
-                        <small class="text-white-50">
+                        <h6 class="card-subtitle mb-2" style="color: #e0f7fa;">Occupancy Rate</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">{{ number_format($occupancyRate ?? 0, 1) }}%</h2>
+                        <small style="color: #e0f7fa;">
                             <i class="bi bi-arrow-up me-1"></i>
                             +3% from last period
                         </small>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-pie-chart fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-pie-chart fs-2" style="color: #0ea5e9;"></i>
                     </div>
                 </div>
             </div>
@@ -352,4 +356,21 @@ function exportExcel() {
     window.open(`${window.location.pathname}?${params.toString()}`, '_blank');
 }
 </script>
+@endpush
+
+@push('styles')
+<style>
+/* Remove horizontal scroll and make filter responsive */
+@media (max-width: 991.98px) {
+    .card-body form .col-md-3,
+    .card-body form .col-12 {
+        min-width: 100% !important;
+    }
+    .card-body form .d-flex {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+}
+</style>
 @endpush

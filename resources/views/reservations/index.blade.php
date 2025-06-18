@@ -21,15 +21,15 @@
 <!-- Stats Cards -->
 <div class="row g-4 mb-4">
     <div class="col-xl-3 col-md-6">
-        <div class="card border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="card border-0" style="background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);">
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Total Reservations</h6>
-                        <h2 class="card-title mb-0 fw-bold">{{ $reservations->total() }}</h2>
+                        <h6 class="card-subtitle mb-2" style="color: #e0e7ff;">Total Reservations</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $reservations->total() }}</h2>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-calendar-check fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-calendar-check fs-2" style="color: #6366f1;"></i>
                     </div>
                 </div>
             </div>
@@ -37,15 +37,15 @@
     </div>
     
     <div class="col-xl-3 col-md-6">
-        <div class="card border-0" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <div class="card border-0" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e42 100%);">
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Pending</h6>
-                        <h2 class="card-title mb-0 fw-bold">{{ $pendingCount ?? 0 }}</h2>
+                        <h6 class="card-subtitle mb-2" style="color: #fff7e6;">Pending</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $pendingCount ?? 0 }}</h2>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-clock fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-clock fs-2" style="color: #f59e42;"></i>
                     </div>
                 </div>
             </div>
@@ -53,15 +53,15 @@
     </div>
     
     <div class="col-xl-3 col-md-6">
-        <div class="card border-0" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+        <div class="card border-0" style="background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);">
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Confirmed</h6>
-                        <h2 class="card-title mb-0 fw-bold">{{ $confirmedCount ?? 0 }}</h2>
+                        <h6 class="card-subtitle mb-2" style="color: #e0f7fa;">Confirmed</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $confirmedCount ?? 0 }}</h2>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-check-circle fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-check-circle fs-2" style="color: #0ea5e9;"></i>
                     </div>
                 </div>
             </div>
@@ -69,15 +69,15 @@
     </div>
     
     <div class="col-xl-3 col-md-6">
-        <div class="card border-0" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+        <div class="card border-0" style="background: linear-gradient(135deg, #34d399 0%, #6ee7b7 100%);">
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Today's Arrivals</h6>
-                        <h2 class="card-title mb-0 fw-bold">{{ $todayArrivals ?? 0 }}</h2>
+                        <h6 class="card-subtitle mb-2" style="color: #e0ffe0;">Today's Arrivals</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $todayArrivals ?? 0 }}</h2>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-calendar-event fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-calendar-event fs-2" style="color: #34d399;"></i>
                     </div>
                 </div>
             </div>

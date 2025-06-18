@@ -25,11 +25,12 @@
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Total Rooms</h6>
-                        <h2 class="card-title mb-0 fw-bold">{{ $rooms->total() }}</h2>
+                        <h6 class="card-subtitle mb-2" style="color: #e0e7ff;">Total Rooms</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $rooms->total() }}</h2>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-door-open fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center"
+                         style="background: #fff;">
+                        <i class="bi bi-door-open fs-2" style="color: #6366f1;"></i>
                     </div>
                 </div>
             </div>
@@ -41,11 +42,12 @@
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Available</h6>
-                        <h2 class="card-title mb-0 fw-bold">{{ $availableRooms ?? 0 }}</h2>
+                        <h6 class="card-subtitle mb-2" style="color: #e0ffe0;">Available</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $availableRooms ?? 0 }}</h2>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-check-circle fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center"
+                         style="background: #fff;">
+                        <i class="bi bi-check-circle fs-2" style="color: #10b981;"></i>
                     </div>
                 </div>
             </div>
@@ -57,11 +59,12 @@
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Occupied</h6>
-                        <h2 class="card-title mb-0 fw-bold">{{ $occupiedRooms ?? 0 }}</h2>
+                        <h6 class="card-subtitle mb-2" style="color: #fde4ff;">Occupied</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $occupiedRooms ?? 0 }}</h2>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-person-fill fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center"
+                         style="background: #fff;">
+                        <i class="bi bi-person-fill fs-2" style="color: #f43f5e;"></i>
                     </div>
                 </div>
             </div>
@@ -73,11 +76,12 @@
             <div class="card-body text-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Maintenance</h6>
-                        <h2 class="card-title mb-0 fw-bold">{{ $maintenanceRooms ?? 0 }}</h2>
+                        <h6 class="card-subtitle mb-2" style="color: #fff7e6;">Maintenance</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $maintenanceRooms ?? 0 }}</h2>
                     </div>
-                    <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                        <i class="bi bi-tools fs-2"></i>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center"
+                         style="background: #fff;">
+                        <i class="bi bi-tools fs-2" style="color: #f59e0b;"></i>
                     </div>
                 </div>
             </div>
