@@ -2,15 +2,54 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\GuestCheckin; // Use GuestCheckin model
-use App\Models\Room; // Assuming this is your Room model
+use App\Models\GuestCheckin;
+use App\Models\GuestFolioItem;
+use App\Models\Room;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
+    public function index()
+    {
+        // Total Revenue (this month)
+        $totalRevenue = GuestFolioItem::where('type', 'charge')
+            ->whereMonth('posted_at', now()->month)
+            ->whereYear('posted_at', now()->year)
+            ->sum('amount');
+
+        // Occupancy Rate (current month)
+        $totalRooms = Room::count();
+        $totalNights = now()->daysInMonth * $totalRooms;
+        $occupiedNights = GuestCheckin::whereMonth('checkin_date', now()->month)
+            ->whereYear('checkin_date', now()->year)
+            ->get()
+            ->sum(function($checkin) {
+                $checkinDate = Carbon::parse($checkin->checkin_date);
+                $checkoutDate = $checkin->checkout_date ? Carbon::parse($checkin->checkout_date) : now();
+                return $checkinDate->diffInDays($checkoutDate);
+            });
+        $occupancyRate = $totalNights > 0 ? ($occupiedNights / $totalNights) * 100 : 0;
+
+        // Total Bookings (this month)
+        $totalBookings = GuestCheckin::whereMonth('checkin_date', now()->month)
+            ->whereYear('checkin_date', now()->year)
+            ->count();
+
+        // Average ADR (Average Daily Rate, this month)
+        $adr = $occupiedNights > 0 ? ($totalRevenue / $occupiedNights) : 0;
+
+        return view('reports.index', [
+            'totalRevenue' => $totalRevenue,
+            'occupancyRate' => $occupancyRate,
+            'totalBookings' => $totalBookings,
+            'averageADR' => $adr,
+        ]);
+    }
+
     public function revenue(Request $request)
     {
         // 1. Get filter parameters
@@ -129,29 +168,42 @@ class ReportController extends Controller
                         : 0;
 
         // --- Prepare Data for Chart & Detailed Table ---
-        $revenueLabels = [];
-        $revenueValues = [];
-        $revenueDetails = [];
+        $chartLabels = [];
+        $chartData = [];
+        $roomTypeLabels = [];
+        $roomTypeData = [];
+        $roomTypeRevenue = [];
 
-        // Sort by date for proper chronological display
-        ksort($revenueByDate);
-
-        // Fill chart and table data
+        // For chart (trend)
         foreach ($revenueByDate as $date => $total) {
             $carbonDate = Carbon::parse($date);
+            $chartLabels[] = $carbonDate->format('M d');
+            $chartData[] = round($total, 2);
+        }
 
-            // For chart labels (e.g., 'Jan 01')
-            $revenueLabels[] = $carbonDate->format('M d');
-            $revenueValues[] = round($total, 2);
+        // For room type chart
+        foreach ($checkinsForCalculation as $checkin) {
+            $roomType = $checkin->room->roomType->name ?? 'Unknown';
+            $folio = $checkin->folio;
+            $roomRevenue = $folio ? $folio->items->where('type', 'charge')->sum('amount') : 0;
+            $roomTypeRevenue[$roomType] = ($roomTypeRevenue[$roomType] ?? 0) + $roomRevenue;
+        }
+        foreach ($roomTypeRevenue as $type => $amount) {
+            $roomTypeLabels[] = $type;
+            $roomTypeData[] = round($amount, 2);
+        }
 
-            // For detailed table
-            $revenueDetails[] = [
-                'date_or_month' => $carbonDate->format('Y-m-d'),
-                'formatted_date' => $carbonDate->format('M d, Y'),
-                'room_revenue' => round($total, 2),
-                'fb_revenue' => 0, // Placeholder for F&B - integrate from GuestFolio if available
-                'other_revenue' => 0, // Placeholder for Other - integrate from GuestFolio if available
-                'total_revenue' => round($total, 2), // This total is based on room revenue only here
+        // For table (Revenue Details)
+        $revenueDetails = [];
+        foreach ($revenueByDate as $date => $total) {
+            $carbonDate = Carbon::parse($date);
+            $revenueDetails[] = (object)[
+                'date' => $carbonDate->format('Y-m-d'),
+                'room_type_name' => 'All Types', // You can group by room type if needed
+                'rooms_sold' => null, // Optional: fill if you want
+                'average_rate' => $total, // Or calculate as needed
+                'revenue' => $total,
+                'occupancy_rate' => null, // Optional: fill if you want
             ];
         }
 
@@ -167,46 +219,28 @@ class ReportController extends Controller
             ['path' => request()->url(), 'query' => request()->query()]
         );
 
-        // Additional metrics for the modern dashboard
-        $totalBookings = $checkinsForCalculation->count();
-        $totalGuests = $checkinsForCalculation->sum('guest_count') ?: $checkinsForCalculation->count();
-        
-        // Monthly comparison data for charts
-        $monthlyRevenue = [];
-        for ($i = 11; $i >= 0; $i--) {
-            $month = Carbon::now()->subMonths($i);
-            $monthStart = $month->copy()->startOfMonth();
-            $monthEnd = $month->copy()->endOfMonth();
-            
-            $monthlyTotal = 0;
-            foreach ($revenueByDate as $date => $revenue) {
-                $revenueDate = Carbon::parse($date);
-                if ($revenueDate->between($monthStart, $monthEnd)) {
-                    $monthlyTotal += $revenue;
-                }
-            }
-            
-            $monthlyRevenue[] = [
-                'month' => $month->format('M Y'),
-                'revenue' => round($monthlyTotal, 2)
-            ];
+        // Room Revenue for summary card
+        $roomRevenue = array_sum($roomTypeData);
+
+        // Export logic
+        if ($request->get('export') === 'excel') {
+            // Implement Excel export here (see below)
+        }
+        if ($request->get('export') === 'pdf') {
+            // Implement PDF export here (see below)
         }
 
-        // 4. Pass data to the view
         return view('reports.revenue', compact(
             'totalRevenue',
+            'roomRevenue',
             'averageDailyRate',
-            'revPar',
             'occupancyRate',
-            'totalBookings',
-            'totalGuests',
-            'revenueLabels',
-            'revenueValues',
-            'monthlyRevenue',
-            'paginatedRevenueDetails',
-            'period',
-            'startDate',
-            'endDate'
+            'chartLabels',
+            'chartData',
+            'roomTypeLabels',
+            'roomTypeData',
+            'revenueDetails',
+            'paginatedRevenueDetails' // <-- add this line
         ));
     }
 
@@ -311,29 +345,42 @@ class ReportController extends Controller
         }
 
         // CSV Export
-        $filename = 'revenue_report_' . now()->format('Ymd_His') . '.csv';
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"$filename\"",
-        ];
+        if ($request->get('format') === 'csv') {
+            $filename = 'revenue_report_' . now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"$filename\"",
+            ];
 
-        $callback = function() use ($revenueDetails) {
-            $handle = fopen('php://output', 'w');
-            // Header row
-            fputcsv($handle, ['Date / Month', 'Room Revenue', 'F&B Revenue', 'Other Revenue', 'Total Revenue']);
-            foreach ($revenueDetails as $detail) {
-                fputcsv($handle, [
-                    $detail['date_or_month'],
-                    $detail['room_revenue'],
-                    $detail['fb_revenue'],
-                    $detail['other_revenue'],
-                    $detail['total_revenue'],
-                ]);
-            }
-            fclose($handle);
-        };
+            $callback = function() use ($revenueDetails) {
+                $handle = fopen('php://output', 'w');
+                // Header row
+                fputcsv($handle, ['Date / Month', 'Room Revenue', 'F&B Revenue', 'Other Revenue', 'Total Revenue']);
+                foreach ($revenueDetails as $detail) {
+                    fputcsv($handle, [
+                        $detail['date_or_month'],
+                        $detail['room_revenue'],
+                        $detail['fb_revenue'],
+                        $detail['other_revenue'],
+                        $detail['total_revenue'],
+                    ]);
+                }
+                fclose($handle);
+            };
 
-        return response()->stream($callback, 200, $headers);
+            return response()->stream($callback, 200, $headers);
+        }
+
+        // PDF Export
+        if ($request->get('format') === 'pdf') {
+            $pdf = Pdf::loadView('reports.export_revenue_pdf', [
+                'revenueDetails' => $revenueDetails,
+            ]);
+            return $pdf->download('revenue_report_' . now()->format('Ymd_His') . '.pdf');
+        }
+
+        // Default: redirect back or show error
+        return back()->with('error', 'Invalid export format.');
     }
 
     /**

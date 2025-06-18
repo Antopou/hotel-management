@@ -116,7 +116,7 @@
                     </a>
                 </li>
                 <li class="nav-item mb-1">
-                    <a href="{{ route('reports.revenue') }}" class="nav-link d-flex align-items-center rounded-3 {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                    <a href="{{ route('reports.index') }}" class="nav-link d-flex align-items-center rounded-3 {{ request()->routeIs('reports.*') ? 'active' : '' }}">
                         <div class="nav-icon me-3">
                             <i class="bi bi-graph-up-arrow"></i>
                         </div>

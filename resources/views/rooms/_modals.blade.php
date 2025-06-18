@@ -20,15 +20,22 @@
                             <dt class="col-sm-5">Room Type</dt>
                             <dd class="col-sm-7">{{ $room->roomType->name ?? 'N/A' }}</dd>
                             <dt class="col-sm-5">Floor</dt>
-                            <dd class="col-sm-7">{{ $room->floor ?? 'N/A' }}</dd>
-                            <dt class="col-sm-5">Capacity</dt>
-                            <dd class="col-sm-7">{{ $room->capacity ?? 0 }} Guests</dd>
+                            <dd class="col-sm-7">
+                                @php
+                                    // Extract floor from room name (e.g., "Room 203" => 2)
+                                    preg_match('/\d+/', $room->name, $matches);
+                                    $floor = isset($matches[0]) ? substr($matches[0], 0, 1) : 'N/A';
+                                @endphp
+                                {{ $floor }}
+                            </dd>
+                            <dt class="col-sm-5">Price per Night</dt>
+                            <dd class="col-sm-7">
+                                ${{ number_format($room->roomType->price_per_night ?? 0, 2) }}
+                            </dd>
                         </dl>
                     </div>
                     <div class="col-md-6">
                         <dl class="row">
-                            <dt class="col-sm-5">Price per Night</dt>
-                            <dd class="col-sm-7">${{ number_format($room->price ?? 0, 2) }}</dd>
                             <dt class="col-sm-5">Status</dt>
                             <dd class="col-sm-7">
                                 @php
@@ -41,9 +48,17 @@
                                 <span class="badge bg-{{ $statusClass }}">{{ ucfirst($room->status ?? 'available') }}</span>
                             </dd>
                             <dt class="col-sm-5">Size</dt>
-                            <dd class="col-sm-7">{{ $room->size ?? 'N/A' }} sqft</dd>
+                            <dd class="col-sm-7">
+                                {{ $room->roomType->size ? $room->roomType->size . ' sqft' : 'N/A' }}
+                            </dd>
                             <dt class="col-sm-5">Bed Type</dt>
-                            <dd class="col-sm-7">{{ $room->bed_type ?? 'Standard' }}</dd>
+                            <dd class="col-sm-7">
+                                {{ $room->roomType->bed_type ?? 'Standard' }}
+                            </dd>
+                            <dt class="col-sm-5">Capacity</dt>
+                            <dd class="col-sm-7">
+                                {{ $room->roomType->max_occupancy ?? 0 }} Guests
+                            </dd>
                         </dl>
                     </div>
                 </div>

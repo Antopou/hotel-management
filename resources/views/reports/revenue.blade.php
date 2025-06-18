@@ -9,19 +9,14 @@
 
 @section('content')
 <div class="page-header d-flex justify-content-between align-items-center">
+    <h1>Revenue Report</h1>
     <div>
-        <h1 class="page-title">Revenue Report</h1>
-        <p class="page-subtitle">Analyze your hotel's financial performance</p>
-    </div>
-    <div class="d-flex gap-2">
-        <button class="btn btn-outline-primary" onclick="exportReport()">
-            <i class="bi bi-download me-2"></i>
-            Export PDF
-        </button>
-        <button class="btn btn-outline-success" onclick="exportExcel()">
-            <i class="bi bi-file-earmark-excel me-2"></i>
-            Export Excel
-        </button>
+        <a href="{{ route('reports.revenue.export', array_merge(request()->all(), ['format' => 'csv'])) }}" class="btn btn-outline-primary me-2">
+            <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV
+        </a>
+        <a href="{{ route('reports.revenue.export', array_merge(request()->all(), ['format' => 'pdf'])) }}" class="btn btn-outline-danger">
+            <i class="bi bi-file-earmark-pdf"></i> Export PDF
+        </a>
     </div>
 </div>
 

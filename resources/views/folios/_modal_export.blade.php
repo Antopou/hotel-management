@@ -11,7 +11,7 @@
                     <div class="mb-3">
                         <label class="form-label">Export Format</label>
                         <select name="format" class="form-select">
-                            <option value="excel">Excel (.xlsx)</option>
+                            {{-- <option value="excel">Excel (.xlsx)</option> --}}
                             <option value="csv">CSV (.csv)</option>
                             <option value="pdf">PDF (.pdf)</option>
                         </select>

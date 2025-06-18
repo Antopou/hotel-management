@@ -17,10 +17,7 @@
             <i class="bi bi-download me-2"></i>
             Export
         </button>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createFolioModal">
-            <i class="bi bi-plus-circle me-2"></i>
-            New Folio
-        </button>
+        {{-- Removed New Folio button --}}
     </div>
 </div>
 
@@ -140,6 +137,7 @@
                         <th>Total Amount</th>
                         <th>Balance</th>
                         <th>Status</th>
+                        <th>Notes</th> <!-- Add this -->
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -202,6 +200,7 @@
                                 {{ ucfirst($folio->status ?? 'open') }}
                             </span>
                         </td>
+                        <td>{{ $folio->notes }}</td> <!-- Add this -->
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
                                 <a href="{{ route('folios.show', $folio->folio_code) }}" class="btn btn-outline-info" title="View Details">
@@ -210,12 +209,10 @@
                                 <a href="{{ route('folios.print', $folio->folio_code) }}" class="btn btn-outline-primary" title="Print" target="_blank">
                                     <i class="bi bi-printer"></i>
                                 </a>
-                                <button class="btn btn-outline-success" onclick="addPayment('{{ $folio->folio_code }}')" title="Add Payment">
+                                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addPaymentModal{{ $folio->id }}" title="Add Payment">
                                     <i class="bi bi-credit-card"></i>
                                 </button>
-                                <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editFolioModal{{ $folio->id }}" title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
+                                {{-- Removed Edit button --}}
                             </div>
                         </td>
                     </tr>
@@ -223,14 +220,12 @@
                     @include('folios._modals', ['folio' => $folio])
                 @empty
                     <tr>
-                        <td colspan="8" class="text-center py-5">
+                        <td colspan="9" class="text-center py-5">
                             <div class="text-muted">
                                 <i class="bi bi-receipt fs-1 d-block mb-3 text-muted"></i>
                                 <h5>No folios found</h5>
                                 <p>Start by creating your first folio</p>
-                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createFolioModal">
-                                    <i class="bi bi-plus-circle me-2"></i>Create Folio
-                                </button>
+                                {{-- Removed Create Folio button --}}
                             </div>
                         </td>
                     </tr>
@@ -248,7 +243,7 @@
 </div>
 @endif
 
-@include('folios._modal_create')
+{{-- Remove @include('folios._modal_create') --}}
 @include('folios._modal_export')
 @endsection
 

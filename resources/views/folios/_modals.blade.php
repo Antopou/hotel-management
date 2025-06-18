@@ -72,7 +72,7 @@
                         <label class="form-label">Payment Amount <span class="text-danger">*</span></label>
                         <input type="number" name="amount" class="form-control" step="0.01" min="0.01" required>
                         <div class="form-text">
-                            Outstanding Balance: ${{ number_format(($folio->total_amount ?? 0) - ($folio->total_paid ?? 0), 2) }}
+                            Outstanding Balance: ${{ number_format(($folio->total_amount ?? 0) - ($folio->paid_amount ?? 0), 2) }}
                         </div>
                     </div>
                     <div class="mb-3">

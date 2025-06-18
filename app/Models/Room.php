@@ -18,6 +18,7 @@ class Room extends Model
         'created_by',
         'modified_by',
         'is_active',
+        'description', // <-- Add this line
     ];
 
     protected $casts = [

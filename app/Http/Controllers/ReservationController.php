@@ -78,6 +78,7 @@ class ReservationController extends Controller
             'checkout_date' => 'required|date|after:checkin_date',
             'number_of_guest' => 'required|integer|min:1',
             'status' => 'nullable|string|in:pending,confirmed,checked-in,checked-out,cancelled',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         // Check for double-booking
@@ -118,6 +119,7 @@ class ReservationController extends Controller
             'is_checkin' => false,
             'created_by' => 1,
             'total_amount' => $total_amount,
+            'note' => $request->notes, // <-- Save notes to note column
         ]);
 
         // --- Set Room as reserved ONLY if currently available ---
@@ -162,6 +164,7 @@ class ReservationController extends Controller
             'number_of_guest' => 'required|integer|min:1',
             'status' => ['nullable', Rule::in(['pending', 'confirmed', 'checked-in', 'cancelled', 'no-show', 'checked-out'])],
             'is_checkin' => 'nullable|boolean',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         // Prevent editing to double-booked dates
@@ -213,6 +216,7 @@ class ReservationController extends Controller
             'is_checkin' => $isCheckin,
             'status' => $status,
             'total_amount' => $total_amount,
+            'note' => $request->notes, // <-- Save notes to note column
         ]);
 
         return redirect()->route('reservations.index')->with('success', 'Reservation updated.');

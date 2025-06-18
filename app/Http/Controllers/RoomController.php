@@ -68,8 +68,8 @@ class RoomController extends Controller
                 'room_code' => $roomCode,
                 'name' => $request->name,
                 'room_type_code' => $request->room_type_code,
-                // Always save as lowercase
                 'status' => strtolower($request->status),
+                'description' => $request->description, // <-- Add this line
                 'created_by' => Auth::id(),
                 'is_active' => true,
             ]);
