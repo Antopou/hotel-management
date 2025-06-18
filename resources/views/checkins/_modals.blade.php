@@ -1,6 +1,6 @@
 {{-- View Check-in Modal --}}
 <div class="modal fade" id="viewCheckinModal{{ $checkin->id }}" tabindex="-1" aria-labelledby="viewCheckinLabel{{ $checkin->id }}" aria-hidden="true">
-    <div class="modal-dialog custom-modal">
+    <div class="modal-dialog modal-lg"> <!-- Changed to modal-lg -->
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="viewCheckinLabel{{ $checkin->id }}">Check-in Details</h5>
@@ -37,7 +37,7 @@
 
 {{-- Edit Check-in Modal --}}
 <div class="modal fade" id="editCheckinModal{{ $checkin->id }}" tabindex="-1" aria-labelledby="editCheckinLabel{{ $checkin->id }}" aria-hidden="true">
-    <div class="modal-dialog custom-modal">
+    <div class="modal-dialog modal-lg"> <!-- Changed to modal-lg -->
         <div class="modal-content">
             <form action="{{ route('checkins.update', $checkin->id) }}" method="POST">
                 @csrf

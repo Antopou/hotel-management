@@ -11,17 +11,33 @@ class GuestController extends Controller
     {
         $query = Guest::query();
 
-        if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+        // Search by name, email, or phone
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%")
+                  ->orWhere('tel', 'like', "%$search%");
+            });
         }
-        if ($request->filled('tel')) {
-            $query->where('tel', 'like', '%' . $request->tel . '%');
-        }
+
+        // Filter by gender
         if ($request->filled('gender')) {
             $query->where('gender', $request->gender);
         }
 
-        $guests = $query->latest()->paginate(10)->withQueryString();
+        // Sorting
+        if ($request->filled('sort')) {
+            $sort = $request->sort;
+            if (in_array($sort, ['name', 'created_at', 'email'])) {
+                $query->orderBy($sort, 'asc');
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        // With checkins count
+        $guests = $query->withCount('checkins')->latest()->paginate(10)->withQueryString();
 
         return view('guests.index', compact('guests'));
     }
@@ -49,11 +65,14 @@ class GuestController extends Controller
             'created_by' => 1,
         ]);
 
-        // Return JSON for AJAX
-        return response()->json([
-            'guest_code' => $guest->guest_code,
-            'name' => $guest->name
-        ]);
+        if ($request->ajax()) {
+            return response()->json([
+                'guest_code' => $guest->guest_code,
+                'name' => $guest->name
+            ]);
+        }
+
+        return redirect()->route('guests.index')->with('success', 'Guest added successfully.');
     }
 
     public function show(Guest $guest)

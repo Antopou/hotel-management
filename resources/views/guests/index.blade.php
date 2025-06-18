@@ -12,9 +12,8 @@
         <h1 class="page-title">Guest Management</h1>
         <p class="page-subtitle">Manage your hotel guests and their information</p>
     </div>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createGuestModal">
-        <i class="bi bi-person-plus me-2"></i>
-        Add New Guest
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGuestModal">
+        <i class="bi bi-person-plus me-2"></i>Add New Guest
     </button>
 </div>
 
@@ -147,7 +146,7 @@
                 <i class="bi bi-people fs-1 text-muted d-block mb-3"></i>
                 <h5>No guests found</h5>
                 <p class="text-muted">Start by adding your first guest</p>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createGuestModal">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGuestModal">
                     <i class="bi bi-person-plus me-2"></i>Add New Guest
                 </button>
             </div>

@@ -3,7 +3,7 @@
 
 {{-- View Guest Modal --}}
 <div class="modal fade" id="viewGuestModal{{ $guest->id }}" tabindex="-1" aria-labelledby="viewGuestLabel{{ $guest->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg"> <!-- modal-lg for large size -->
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="viewGuestLabel{{ $guest->id }}">Guest Details</h5>
@@ -60,7 +60,7 @@
 
 {{-- Edit Guest Modal --}}
 <div class="modal fade" id="editGuestModal{{ $guest->id }}" tabindex="-1" aria-labelledby="editGuestLabel{{ $guest->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg"> <!-- modal-lg for large size -->
         <div class="modal-content">
             <form action="{{ route('guests.update', $guest->id) }}" method="POST">
                 @csrf

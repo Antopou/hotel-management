@@ -42,7 +42,9 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <h6 class="card-subtitle mb-2" style="color: #fff7e6;">Pending</h6>
-                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $pendingCount ?? 0 }}</h2>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">
+                            {{ $pendingCount ?? \App\Models\GuestReservation::where('status', 'pending')->count() }}
+                        </h2>
                     </div>
                     <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
                         <i class="bi bi-clock fs-2" style="color: #f59e42;"></i>
@@ -58,7 +60,9 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <h6 class="card-subtitle mb-2" style="color: #e0f7fa;">Confirmed</h6>
-                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $confirmedCount ?? 0 }}</h2>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">
+                            {{ $confirmedCount ?? \App\Models\GuestReservation::where('status', 'confirmed')->count() }}
+                        </h2>
                     </div>
                     <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
                         <i class="bi bi-check-circle fs-2" style="color: #0ea5e9;"></i>
@@ -74,7 +78,9 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <h6 class="card-subtitle mb-2" style="color: #e0ffe0;">Today's Arrivals</h6>
-                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $todayArrivals ?? 0 }}</h2>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">
+                            {{ $todayArrivals ?? \App\Models\GuestReservation::whereDate('checkin_date', now()->toDateString())->count() }}
+                        </h2>
                     </div>
                     <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
                         <i class="bi bi-calendar-event fs-2" style="color: #34d399;"></i>
@@ -133,7 +139,7 @@
                         <th>Check-out</th>
                         <th>Nights</th>
                         <th>Status</th>
-                        <th>Total</th>
+                        <th>Total</th> <!-- Add this line -->
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -171,7 +177,10 @@
                             </div>
                         </td>
                         <td>
-                            <span class="badge bg-light text-dark">{{ $reservation->number_of_nights ?? 0 }} {{ Str::plural('Night', $reservation->number_of_nights ?? 0) }}</span>
+                            <span class="badge bg-light text-dark">
+                                {{ $reservation->number_of_nights }}
+                                {{ Str::plural('Night', $reservation->number_of_nights) }}
+                            </span>
                         </td>
                         <td>
                             @php
@@ -187,7 +196,9 @@
                             </span>
                         </td>
                         <td>
-                            <strong>${{ number_format($reservation->total_amount ?? 0, 2) }}</strong>
+                            <strong>
+                                ${{ number_format($reservation->total_amount ?? 0, 2) }}
+                            </strong>
                         </td>
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
@@ -198,7 +209,10 @@
                                     <i class="bi bi-pencil"></i>
                                 </button>
                                 @if($reservation->status !== 'cancelled')
-                                <button class="btn btn-outline-success" onclick="confirmReservation({{ $reservation->id }})" title="Confirm">
+                                <button class="btn btn-outline-success"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#confirmReservationModal{{ $reservation->id }}"
+                                        title="Confirm">
                                     <i class="bi bi-check-circle"></i>
                                 </button>
                                 @endif
@@ -238,6 +252,25 @@
 @endif
 
 @include('reservations._modal_create')
+
+<!-- Confirm Reservation Modal -->
+<div class="modal fade" id="confirmReservationModal" tabindex="-1" aria-labelledby="confirmReservationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmReservationModalLabel">Confirm Reservation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to confirm this reservation?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmReservationBtn">Yes, Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -265,5 +298,37 @@ function confirmReservation(id) {
         });
     }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    var confirmReservationModal = document.getElementById('confirmReservationModal');
+    var confirmReservationBtn = document.getElementById('confirmReservationBtn');
+
+    confirmReservationModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var reservationId = button.getAttribute('data-reservation-id');
+
+        confirmReservationBtn.onclick = function () {
+            fetch(`/reservations/${reservationId}/confirm`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Failed to confirm reservation');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred');
+            });
+        }
+    });
+});
 </script>
 @endpush

@@ -22,7 +22,6 @@
                         <h6 class="card-subtitle mb-1" style="font-size: 0.75rem; color: #fff;">Total Rooms</h6>
                         <h3 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $totalRooms ?? 0 }}</h3>
                         <small style="font-size: 0.7rem; color: #ede9fe;">
-                            <i class="bi bi-arrow-up me-1" style="color: #fff;"></i>
                             Available: {{ $availableRooms ?? 0 }}
                         </small>
                     </div>
@@ -39,30 +38,9 @@
             <div class="card-body p-3">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-1" style="font-size: 0.75rem; color: #fff;">Active Guests</h6>
-                        <h3 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $activeGuests ?? 0 }}</h3>
-                        <small style="font-size: 0.7rem; color: #fff;">
-                            <i class="bi bi-arrow-up me-1" style="color: #fff;"></i>
-                            Check-ins today: {{ $todayCheckins ?? 0 }}
-                        </small>
-                    </div>
-                    <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(0,0,0,0.08);">
-                        <i class="bi bi-people fs-5" style="color: #fff;"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6">
-        <div class="card border-0" style="background: #38bdf8;">
-            <div class="card-body p-3">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 class="card-subtitle mb-1" style="font-size: 0.75rem; color: #fff;">Reservations</h6>
+                        <h6 class="card-subtitle mb-1" style="font-size: 0.75rem; color: #fff;">Total Reservations</h6>
                         <h3 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $totalReservations ?? 0 }}</h3>
                         <small style="font-size: 0.7rem; color: #fff;">
-                            <i class="bi bi-arrow-up me-1" style="color: #fff;"></i>
                             Pending: {{ $pendingReservations ?? 0 }}
                         </small>
                     </div>
@@ -75,15 +53,33 @@
     </div>
     
     <div class="col-xl-3 col-md-6">
+        <div class="card border-0" style="background: #38bdf8;">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="card-subtitle mb-1" style="font-size: 0.75rem; color: #fff;">Total Guests</h6>
+                        <h3 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $totalGuests ?? 0 }}</h3>
+                        <small style="font-size: 0.7rem; color: #fff;">
+                            Checked In: {{ $totalCheckins ?? 0 }}
+                        </small>
+                    </div>
+                    <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(0,0,0,0.08);">
+                        <i class="bi bi-people fs-5" style="color: #fff;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
         <div class="card border-0" style="background: #34d399;">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="card-subtitle mb-1" style="font-size: 0.75rem; color: #fff;">Revenue Today</h6>
-                        <h3 class="card-title mb-0 fw-bold" style="color: #fff;">${{ number_format($todayRevenue ?? 0, 2) }}</h3>
+                        <h6 class="card-subtitle mb-1" style="font-size: 0.75rem; color: #fff;">Revenue</h6>
+                        <h3 class="card-title mb-0 fw-bold" style="color: #fff;">${{ number_format($totalRevenue ?? 0, 2) }}</h3>
                         <small style="font-size: 0.7rem; color: #fff;">
-                            <i class="bi bi-arrow-up me-1" style="color: #fff;"></i>
-                            +12% from yesterday
+                            Folios: {{ $totalFolios ?? 0 }}
                         </small>
                     </div>
                     <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(0,0,0,0.08);">
@@ -102,14 +98,14 @@
             <div class="card-header p-3">
                 <div class="d-flex align-items-center justify-content-between">
                     <h5 class="card-title mb-0" style="font-size: 1rem;">Revenue Overview</h5>
-                    <div class="btn-group btn-group-sm" role="group">
-                        <input type="radio" class="btn-check" name="period" id="week" checked>
+                    <form method="GET" id="periodForm" class="btn-group btn-group-sm" role="group">
+                        <input type="radio" class="btn-check" name="period" id="week" value="this_week" {{ request('period', 'this_week') == 'this_week' ? 'checked' : '' }}>
                         <label class="btn btn-outline-primary" for="week" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Week</label>
-                        <input type="radio" class="btn-check" name="period" id="month">
+                        <input type="radio" class="btn-check" name="period" id="month" value="this_month" {{ request('period') == 'this_month' ? 'checked' : '' }}>
                         <label class="btn btn-outline-primary" for="month" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Month</label>
-                        <input type="radio" class="btn-check" name="period" id="year">
+                        <input type="radio" class="btn-check" name="period" id="year" value="this_year" {{ request('period') == 'this_year' ? 'checked' : '' }}>
                         <label class="btn btn-outline-primary" for="year" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Year</label>
-                    </div>
+                    </form>
                 </div>
             </div>
             <div class="card-body p-3">
@@ -149,11 +145,11 @@
                                 <th style="font-size: 0.8rem;">Room</th>
                                 <th style="font-size: 0.8rem;">Check-in</th>
                                 <th style="font-size: 0.8rem;">Status</th>
-                                <th style="font-size: 0.8rem;">Actions</th>
+                                {{-- Actions column removed --}}
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($recentCheckins ?? [] as $checkin)
+                            @forelse($latestCheckins ?? [] as $checkin)
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
@@ -177,20 +173,11 @@
                                         {{ $checkin->is_checkout ? 'Checked Out' : 'In Stay' }}
                                     </span>
                                 </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-outline-primary btn-sm" title="View Details" style="padding: 0.25rem 0.5rem;">
-                                            <i class="bi bi-eye" style="font-size: 0.75rem;"></i>
-                                        </button>
-                                        <button class="btn btn-outline-secondary btn-sm" title="Edit" style="padding: 0.25rem 0.5rem;">
-                                            <i class="bi bi-pencil" style="font-size: 0.75rem;"></i>
-                                        </button>
-                                    </div>
-                                </td>
+                                {{-- Actions column removed --}}
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="text-center py-4">
+                                <td colspan="4" class="text-center py-4">
                                     <div class="text-muted">
                                         <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                         <span style="font-size: 0.875rem;">No recent check-ins found</span>
@@ -231,47 +218,24 @@
                 </div>
             </div>
         </div>
-        
-        <div class="card mt-3">
-            <div class="card-header p-3">
-                <h5 class="card-title mb-0" style="font-size: 1rem;">System Status</h5>
-            </div>
-            <div class="card-body p-3">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted" style="font-size: 0.8rem;">Server Status</span>
-                    <span class="badge bg-success" style="font-size: 0.7rem;">Online</span>
-                </div>
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted" style="font-size: 0.8rem;">Database</span>
-                    <span class="badge bg-success" style="font-size: 0.7rem;">Connected</span>
-                </div>
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted" style="font-size: 0.8rem;">Last Backup</span>
-                    <span class="text-muted small" style="font-size: 0.75rem;">2 hours ago</span>
-                </div>
-                <div class="d-flex align-items-center justify-content-between">
-                    <span class="text-muted" style="font-size: 0.8rem;">Storage Used</span>
-                    <span class="text-muted small" style="font-size: 0.75rem;">68%</span>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
+
 @endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Revenue Chart
+    // Revenue Chart (dynamic)
     const revenueCtx = document.getElementById('revenueChart').getContext('2d');
     new Chart(revenueCtx, {
         type: 'line',
         data: {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            labels: @json($months ?? []),
             datasets: [{
                 label: 'Revenue',
-                data: [1200, 1900, 3000, 5000, 2000, 3000, 4500],
+                data: @json($revenues ?? []),
                 borderColor: '#2563eb',
                 backgroundColor: 'rgba(37, 99, 235, 0.1)',
                 borderWidth: 2,
@@ -313,14 +277,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Occupancy Chart
+    // Occupancy Chart (dynamic)
     const occupancyCtx = document.getElementById('occupancyChart').getContext('2d');
     new Chart(occupancyCtx, {
         type: 'doughnut',
         data: {
             labels: ['Occupied', 'Available', 'Maintenance'],
             datasets: [{
-                data: [65, 30, 5],
+                data: [
+                    {{ $occupiedRooms ?? 0 }},
+                    {{ $availableRooms ?? 0 }},
+                    {{ $maintenanceRooms ?? 0 }}
+                ],
                 backgroundColor: ['#10b981', '#3b82f6', '#f59e0b'],
                 borderWidth: 0
             }]
@@ -339,6 +307,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
+    });
+
+    // Pass check-in ID to show modal
+    var showModal = document.getElementById('showCheckinModal');
+    if (showModal) {
+        showModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var checkinId = button.getAttribute('data-checkin-id');
+            // You can now use checkinId to load data via AJAX or set a hidden input
+            // Example: $('#showCheckinModal').find('input[name="checkin_id"]').val(checkinId);
+        });
+    }
+
+    // Pass check-in ID to edit modal
+    var editModal = document.getElementById('editCheckinModal');
+    if (editModal) {
+        editModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var checkinId = button.getAttribute('data-checkin-id');
+            // You can now use checkinId to load data via AJAX or set a hidden input
+        });
+    }
+});
+</script>
+<script>
+document.querySelectorAll('#periodForm input[type=radio]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        document.getElementById('periodForm').submit();
     });
 });
 </script>

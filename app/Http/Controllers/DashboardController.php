@@ -245,11 +245,18 @@ class DashboardController extends Controller
         $latestCheckins = $latestCheckinsQuery->orderByDesc('checkin_date')->take(5)->get();
 
 
+        // Room status counts
+        $occupiedRooms = Room::where('status', 'occupied')->count();
+        $availableRooms = Room::where('status', 'available')->count();
+        $maintenanceRooms = Room::where('status', 'maintenance')->count();
+
+
         return view('dashboard', compact(
             'totalGuests', 'totalReservations', 'totalRooms',
             'totalCheckins', 'totalFolios', 'totalRevenue',
             'latestReservations', 'latestCheckins',
-            'months', 'revenues', 'occupancies', 'adrs', 'revpars'
+            'months', 'revenues', 'occupancies', 'adrs', 'revpars',
+            'occupiedRooms', 'availableRooms', 'maintenanceRooms'
         ));
     }
 }

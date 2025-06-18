@@ -3,7 +3,7 @@
 
 {{-- View Modal --}}
 <div class="modal fade" id="viewReservationModal{{ $reservation->id }}" tabindex="-1" aria-labelledby="viewReservationLabel{{ $reservation->id }}" aria-hidden="true">
-    <div class="modal-dialog custom-modal">
+    <div class="modal-dialog modal-lg"> <!-- Changed to modal-lg -->
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="viewReservationLabel{{ $reservation->id }}">Reservation Details</h5>
@@ -38,7 +38,7 @@
 
 {{-- Edit Modal --}}
 <div class="modal fade" id="editReservationModal{{ $reservation->id }}" tabindex="-1" aria-labelledby="editReservationLabel{{ $reservation->id }}" aria-hidden="true">
-    <div class="modal-dialog custom-modal">
+    <div class="modal-dialog modal-lg"> <!-- Changed to modal-lg -->
         <div class="modal-content">
             <form action="{{ route('reservations.update', $reservation->id) }}" method="POST">
                 @csrf
@@ -134,6 +134,28 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- Confirm Modal --}}
+<div class="modal fade" id="confirmReservationModal{{ $reservation->id }}" tabindex="-1" aria-labelledby="confirmReservationLabel{{ $reservation->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <form method="POST" action="{{ route('reservations.confirm', $reservation->id) }}">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmReservationLabel{{ $reservation->id }}">Confirm Reservation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to confirm the reservation for <strong>{{ $reservation->guest->name ?? 'N/A' }}</strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Yes, Confirm</button>
                 </div>
             </form>
         </div>
