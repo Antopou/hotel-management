@@ -3,7 +3,7 @@
 
 {{-- View Room Modal --}}
 <div class="modal fade" id="viewRoomModal{{ $room->id }}" tabindex="-1" aria-labelledby="viewRoomLabel{{ $room->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="viewRoomLabel{{ $room->id }}">Room Details</h5>
@@ -93,26 +93,14 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Room Type <span class="text-danger">*</span></label>
-                            <select name="room_type_id" class="form-select" required>
-                                <option value="">Select Room Type</option>
-                                @foreach($roomTypes ?? [] as $type)
-                                    <option value="{{ $type->id }}" {{ $room->room_type_id == $type->id ? 'selected' : '' }}>
+                            <select name="room_type_code" class="form-select" required>
+                                <option value="">-- Select Room Type --</option>
+                                @foreach($roomTypes as $type)
+                                    <option value="{{ $type->room_type_code }}" {{ $room->room_type_code == $type->room_type_code ? 'selected' : '' }}>
                                         {{ $type->name }}
                                     </option>
                                 @endforeach
                             </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Floor</label>
-                            <input type="number" name="floor" class="form-control" value="{{ $room->floor }}" min="1">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Capacity <span class="text-danger">*</span></label>
-                            <input type="number" name="capacity" class="form-control" value="{{ $room->capacity }}" min="1" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Price per Night <span class="text-danger">*</span></label>
-                            <input type="number" name="price" class="form-control" value="{{ $room->price }}" step="0.01" min="0" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Status</label>
@@ -122,27 +110,9 @@
                                 <option value="maintenance" {{ $room->status == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Size (sqft)</label>
-                            <input type="number" name="size" class="form-control" value="{{ $room->size }}" min="0">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Bed Type</label>
-                            <select name="bed_type" class="form-select">
-                                <option value="Single" {{ $room->bed_type == 'Single' ? 'selected' : '' }}>Single</option>
-                                <option value="Double" {{ $room->bed_type == 'Double' ? 'selected' : '' }}>Double</option>
-                                <option value="Queen" {{ $room->bed_type == 'Queen' ? 'selected' : '' }}>Queen</option>
-                                <option value="King" {{ $room->bed_type == 'King' ? 'selected' : '' }}>King</option>
-                                <option value="Twin" {{ $room->bed_type == 'Twin' ? 'selected' : '' }}>Twin</option>
-                            </select>
-                        </div>
                         <div class="col-12">
                             <label class="form-label">Description</label>
                             <textarea name="description" class="form-control" rows="3">{{ $room->description }}</textarea>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Amenities (comma separated)</label>
-                            <input type="text" name="amenities" class="form-control" value="{{ $room->amenities }}" placeholder="WiFi, TV, AC, Mini Bar">
                         </div>
                     </div>
                 </div>

@@ -64,13 +64,13 @@
                         <div class="col-6">
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-people text-muted me-2"></i>
-                                <span class="text-sm">{{ $roomType->capacity ?? 0 }} Guests</span>
+                                <span class="text-sm">{{ $roomType->max_occupancy ?? 0 }} Guests</span>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-currency-dollar text-muted me-2"></i>
-                                <span class="text-sm">${{ number_format($roomType->base_price ?? 0, 2) }}/night</span>
+                                <span class="text-sm">${{ number_format($roomType->price_per_night ?? 0, 2) }}/night</span>
                             </div>
                         </div>
                         <div class="col-6">
@@ -91,9 +91,21 @@
                     <div class="amenities mb-3">
                         <h6 class="text-sm fw-semibold mb-2">Amenities:</h6>
                         <div class="d-flex flex-wrap gap-1">
-                            @foreach(explode(',', $roomType->amenities) as $amenity)
-                                <span class="badge bg-light text-dark">{{ trim($amenity) }}</span>
-                            @endforeach
+                            @if($roomType->has_wifi)
+                                <span class="badge bg-light text-dark">WiFi</span>
+                            @endif
+                            @if($roomType->has_tv)
+                                <span class="badge bg-light text-dark">TV</span>
+                            @endif
+                            @if($roomType->has_ac)
+                                <span class="badge bg-light text-dark">AC</span>
+                            @endif
+                            @if($roomType->has_breakfast)
+                                <span class="badge bg-light text-dark">Breakfast</span>
+                            @endif
+                            @if($roomType->has_parking)
+                                <span class="badge bg-light text-dark">Parking</span>
+                            @endif
                         </div>
                     </div>
                     @endif

@@ -2,7 +2,7 @@
 <div class="modal fade" id="createRoomTypeModal" tabindex="-1" aria-labelledby="createRoomTypeLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form action="{{ route('room-types.store') }}" method="POST">
+            <form action="{{ route('room-types.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title" id="createRoomTypeLabel">
@@ -12,6 +12,10 @@
                 </div>
                 <div class="modal-body">
                     <div class="row g-3">
+                        <div class="col-md-12">
+                            <label for="roomTypeImage" class="form-label">Image</label>
+                            <input type="file" name="image" id="roomTypeImage" class="form-control" accept="image/*">
+                        </div>
                         <div class="col-md-6">
                             <label for="roomTypeName" class="form-label">Room Type Name <span class="text-danger">*</span></label>
                             <input type="text" name="name" id="roomTypeName" class="form-control" required placeholder="e.g., Deluxe Suite">
@@ -28,8 +32,39 @@
                             <input type="number" name="max_occupancy" id="roomTypeCapacity" class="form-control" min="1" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="roomTypeBeds" class="form-label">Number of Beds</label>
-                            <input type="number" name="number_of_beds" id="roomTypeBeds" class="form-control" min="1" value="1">
+                            <label for="roomTypeSize" class="form-label">Size</label>
+                            <select name="size" id="roomTypeSize" class="form-select">
+                                <option value="">Select Size</option>
+                                <option value="200">200 sqft</option>
+                                <option value="250">250 sqft</option>
+                                <option value="300">300 sqft</option>
+                                <option value="350">350 sqft</option>
+                                <option value="400">400 sqft</option>
+                                <option value="450">450 sqft</option>
+                                <option value="500">500 sqft</option>
+                                <option value="550">550 sqft</option>
+                                <option value="600">600 sqft</option>
+                                <option value="650">650 sqft</option>
+                                <option value="700">700 sqft</option>
+                                <option value="750">750 sqft</option>
+                                <option value="800">800 sqft</option>
+                                <option value="850">850 sqft</option>
+                                <option value="900">900 sqft</option>
+                                <option value="1000">1000 sqft</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="roomTypeBedType" class="form-label">Bed Type</label>
+                            <select name="bed_type" id="roomTypeBedType" class="form-select">
+                                <option value="">Select Bed Type</option>
+                                <option value="Single">Single</option>
+                                <option value="Double">Double</option>
+                                <option value="Queen">Queen</option>
+                                <option value="King">King</option>
+                                <option value="Twin">Twin</option>
+                                <option value="Suite">Suite</option>
+                            </select>
                         </div>
                         <div class="col-12">
                             <label class="form-label">Amenities</label>

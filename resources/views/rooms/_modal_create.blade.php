@@ -1,6 +1,6 @@
 {{-- resources/views/rooms/_modal_create.blade.php --}}
 <div class="modal fade" id="createRoomModal" tabindex="-1" aria-labelledby="createRoomLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg"><!-- Changed from modal-dialog to modal-dialog modal-lg -->
         <div class="modal-content">
             <form action="{{ route('rooms.store') }}" method="POST">
                 @csrf

@@ -27,6 +27,9 @@ class RoomType extends Model
         'has_ac',
         'has_breakfast',
         'has_parking',
+        // Add these:
+        'size',
+        'bed_type',
     ];
 
     /**
@@ -41,5 +44,10 @@ class RoomType extends Model
                 $roomType->room_type_code = (string) Str::uuid();
             }
         });
+    }
+
+    public function rooms()
+    {
+        return $this->hasMany(Room::class, 'room_type_code', 'room_type_code');
     }
 }

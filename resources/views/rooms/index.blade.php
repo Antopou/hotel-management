@@ -103,7 +103,7 @@
                 <select name="room_type" id="room_type" class="form-select">
                     <option value="">All Types</option>
                     @foreach($roomTypes ?? [] as $type)
-                        <option value="{{ $type->id }}" {{ request('room_type') == $type->id ? 'selected' : '' }}>
+                        <option value="{{ $type->room_type_code }}" {{ request('room_type') == $type->room_type_code ? 'selected' : '' }}>
                             {{ $type->name }}
                         </option>
                     @endforeach
@@ -133,6 +133,17 @@
 <!-- Rooms Grid -->
 <div class="row g-4">
     @forelse($rooms as $room)
+    @php
+        $statusColor = match($room->status ?? 'available') {
+            'occupied' => 'danger',
+            'maintenance' => 'warning',
+            default => 'success'
+        };
+        $capacity = $room->roomType->max_occupancy ?? 0;
+        $price = $room->roomType->price_per_night ?? 0;
+        $hasWifi = $room->roomType->has_wifi ?? false;
+        $hasTv = $room->roomType->has_tv ?? false;
+    @endphp
     <div class="col-xl-4 col-lg-6">
         <div class="card h-100 room-card">
             <div class="card-body">
@@ -179,25 +190,25 @@
                         <div class="col-6">
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-people text-muted me-2"></i>
-                                <span class="text-sm">{{ $room->capacity ?? 0 }} Guests</span>
+                                <span class="text-sm">{{ $capacity }} Guests</span>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-currency-dollar text-muted me-2"></i>
-                                <span class="text-sm">${{ number_format($room->price ?? 0, 2) }}/night</span>
+                                <span class="text-sm">${{ number_format($price, 2) }}/night</span>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-wifi text-muted me-2"></i>
-                                <span class="text-sm">Free WiFi</span>
+                                <span class="text-sm">{{ $hasWifi ? 'Free WiFi' : 'No WiFi' }}</span>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-tv text-muted me-2"></i>
-                                <span class="text-sm">Smart TV</span>
+                                <span class="text-sm">{{ $hasTv ? 'Smart TV' : 'No TV' }}</span>
                             </div>
                         </div>
                     </div>
