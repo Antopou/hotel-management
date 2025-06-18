@@ -170,9 +170,13 @@
                         </td>
                         <td>
                             <div class="text-sm">
-                                {{ $folio->checkin->checkin_date ? \Carbon\Carbon::parse($folio->checkin->checkin_date)->format('M d, Y') : 'N/A' }}
-                                <br>
-                                <small class="text-muted">{{ $folio->checkin->checkin_date ? \Carbon\Carbon::parse($folio->checkin->checkin_date)->format('H:i') : '' }}</small>
+                                @if($folio->checkin && $folio->checkin->checkin_date)
+                                    {{ \Carbon\Carbon::parse($folio->checkin->checkin_date)->format('M d, Y') }}
+                                    <br>
+                                    <small class="text-muted">{{ \Carbon\Carbon::parse($folio->checkin->checkin_date)->format('H:i') }}</small>
+                                @else
+                                    N/A
+                                @endif
                             </div>
                         </td>
                         <td>

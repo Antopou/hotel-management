@@ -38,12 +38,16 @@
                 <dt class="col-md-3 text-muted">Linked Check-in</dt> {{-- Changed Linked Reservation to Linked Check-in for accuracy --}}
                 <dd class="col-md-9">
                     @if($folio->checkin)
-                        <a href="{{ route('checkins.index', ['checkin_code' => $folio->checkin->checkin_code]) }}" class="fw-bold text-primary"> {{-- Link to Check-ins page --}}
+                        <a href="{{ route('checkins.index', ['checkin_code' => $folio->checkin->checkin_code]) }}" class="fw-bold text-primary">
                             <i class="bi bi-link-45deg me-1"></i> #{{ $folio->checkin->checkin_code ?? $folio->checkin->id }}
                         </a>
                         <small class="text-muted ms-2">
-                            ({{ \Carbon\Carbon::parse($folio->checkin->checkin_date)->format('M d') }} -
-                            {{ \Carbon\Carbon::parse($folio->checkin->checkout_date)->format('M d') }})
+                            @if($folio->checkin->checkin_date && $folio->checkin->checkout_date)
+                                ({{ \Carbon\Carbon::parse($folio->checkin->checkin_date)->format('M d') }} -
+                                {{ \Carbon\Carbon::parse($folio->checkin->checkout_date)->format('M d') }})
+                            @else
+                                (N/A)
+                            @endif
                         </small>
                     @else
                         <span class="text-muted">-</span>
@@ -73,7 +77,7 @@
                         <td>{{ \Carbon\Carbon::parse($charge->posted_at)->format('M d, Y') }}</td>
                         <td>
                             {{ $charge->description }}
-                            @if($charge->description === 'Room Charge' && $folio->checkin) {{-- Check if checkin exists on folio --}}
+                            @if($charge->description === 'Room Charge' && $folio->checkin && $folio->checkin->room && $folio->checkin->roomType && $folio->checkin->checkin_date && $folio->checkin->checkout_date)
                                 <br>
                                 <small class="text-muted">
                                     {{ $folio->checkin->room->roomType->name ?? '' }}:
