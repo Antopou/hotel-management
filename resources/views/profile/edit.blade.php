@@ -122,10 +122,18 @@
                 <form method="post" action="{{ route('profile.destroy') }}">
                     @csrf
                     @method('delete')
-                    <p class="mb-3">Once your account is deleted, all of its resources and data will be permanently deleted. Please download any data or information that you wish to retain before deleting your account.</p>
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.')">
-                        Delete Account
-                    </button>
+                    <p class="mb-3">
+                        Once your account is deleted, all of its resources and data will be permanently deleted. Please download any data or information that you wish to retain before deleting your account.
+                    </p>
+                    @if(Auth::id() == 1)
+                        <button type="button" class="btn btn-danger" disabled>
+                            Delete Account (Not allowed for this user)
+                        </button>
+                    @else
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.')">
+                            Delete Account
+                        </button>
+                    @endif
                 </form>
             </div>
         </div>
