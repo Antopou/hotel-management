@@ -1,298 +1,237 @@
 @extends('layouts.main-nosidebar')
 
 @section('content')
-{{-- Fullscreen Loader --}}
 <style>
     #fullscreen-loader {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
+        top: 0; left: 0; width: 100vw; height: 100vh;
         background: rgba(255,255,255,0.95);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 99999;
-        transition: opacity 0.5s;
+        display: flex; align-items: center; justify-content: center;
+        z-index: 99999; transition: opacity 0.5s;
     }
-    #fullscreen-loader.hidden {
-        opacity: 0;
-        pointer-events: none;
-    }
-    .spinner-border {
-        width: 2.5rem;
-        height: 2.5rem;
-        color: #0d6efd;
-    }
+    #fullscreen-loader.hidden { opacity: 0; pointer-events: none; }
+    .spinner-border { width: 2rem; height: 2rem; color: #0d6efd; }
 
-    /* Reduced base font size */
-    body {
-        font-size: 14px;
-        line-height: 1.5;
-    }
+    body { font-size: 13px; line-height: 1.45; }
 
-    /* Cards smaller */
     .dashboard-card {
-        border: none;
-        box-shadow: 0 2px 10px rgba(60,60,60,0.08);
-        border-radius: 0.8rem;
-        transition: all 0.3s ease;
-        background: white;
+        border: none; box-shadow: 0 1px 6px rgba(60,60,60,0.07);
+        border-radius: 0.6rem; background: white;
     }
-    .dashboard-card:hover {
-        box-shadow: 0 4px 16px rgba(60,60,60,0.12);
-        transform: translateY(-2px);
-    }
-    .dashboard-card .icon {
-        font-size: 2rem;
-        opacity: 0.9;
-    }
-    .dashboard-card h3 {
-        font-weight: 700;
-        margin-bottom: 0;
-        font-size: 1.5rem;
-    }
-    .dashboard-card .card-body {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1.2rem;
-    }
-    .dashboard-card .desc {
-        font-size: 0.95rem;
-        color: #666;
-        letter-spacing: .01em;
-        font-weight: 500;
-    }
+    .dashboard-card .icon { font-size: 1.5rem; }
+    .dashboard-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0; }
+    .dashboard-card .card-body { padding: 0.7rem 1rem; }
+    .dashboard-card .desc { font-size: 0.85rem; color: #666; }
 
-    /* Page header larger */
     .page-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 2rem 1.5rem;
-        border-radius: 1.2rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.18);
+        color: white; padding: 1.1rem 1rem; border-radius: 0.8rem;
+        margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(102,126,234,0.13);
     }
-    .page-header h2 {
-        font-size: 2.2rem;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.08);
-    }
-    .page-header .desc {
-        font-size: 1.25rem;
-        opacity: 0.95;
-        color: white;
-    }
+    .page-header h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.3rem; }
+    .page-header .desc { font-size: 1rem; opacity: 0.95; }
 
-    /* Filters and controls larger */
-    .filter-form .form-select, .filter-form .btn {
-        min-width: 110px;
-        border-radius: 0.7rem;
-        font-size: 1.1rem;
-        padding: 0.7rem 1.1rem;
-        font-weight: 600;
-    }
-    .toggle-btns .btn {
-        border-radius: 0.7rem;
-        font-size: 1.15rem;
-        padding: 0.7rem 1.1rem;
-        font-weight: 700;
-    }
-    .toggle-btns .btn.active {
-        background: #e3f2fd;
-        border-color: #0d6efd;
-        color: #0d6efd;
-        box-shadow: 0 1px 4px rgba(13, 110, 253, 0.13);
-    }
-
-    /* Room cards smaller */
-    .room-card .card {
-        border-radius: 0.8rem;
-        overflow: hidden;
-        border: none;
-        box-shadow: 0 2px 8px rgba(30,50,90,0.06);
-        transition: all 0.3s ease;
-        background: white;
-    }
-    .room-card .card:hover {
-        box-shadow: 0 6px 20px rgba(30,50,90,0.11);
-        transform: translateY(-3px) scale(1.01);
-    }
-    .room-card .card-img-top {
-        border-radius: 0;
-        height: 120px;
-        object-fit: cover;
-    }
-    .room-card .badge {
-        font-size: 0.85rem;
-        padding: 0.35rem 0.7rem;
-        border-radius: 0.35rem;
-        font-weight: 600;
-    }
-    .room-card .card-body {
-        padding: 1rem;
-    }
-    .room-card .card-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #2c3e50;
-    }
-    .room-card .desc {
-        font-size: 0.9rem;
-        color: #666;
-        font-weight: 500;
-    }
-    .room-card .alert {
-        font-size: 0.85rem;
-        padding: 0.5rem;
-        border-radius: 0.35rem;
-    }
-
-    /* Table slightly smaller */
-    .table {
-        font-size: 0.88rem;
-        background: white;
-        border-radius: 0.6rem;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-    .table th {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #2c3e50;
-        background: #f8f9fa;
-        border: none;
-        padding: 0.65rem;
-    }
-    .table td {
-        padding: 0.65rem;
-        vertical-align: middle;
-        border-color: #f1f3f4;
-    }
-    .table-hover tbody tr:hover {
-        background: #f8fafc;
-    }
-
-    /* Pagination smaller */
-    .pagination {
-        justify-content: center;
-        margin-top: 1.2rem;
-    }
-    .pagination .page-link {
-        font-size: 0.95rem;
-        padding: 0.5rem 0.8rem;
-        border-radius: 0.35rem;
-        margin: 0 0.15rem;
-        font-weight: 500;
-    }
-
-    /* Buttons smaller */
-    .btn {
-        font-size: 0.95rem;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-    .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 6px rgba(0,0,0,0.10);
-    }
-    .btn-sm {
-        font-size: 0.8rem;
-        padding: 0.3rem 0.7rem;
-    }
-
-    /* --- FILTER BAR IMPROVEMENTS --- */
+    /* Compact Filter Bar */
     .filter-bar {
-        background: #f8f9fa;
-        border-radius: 1rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        padding: 1.2rem 1.5rem;
-        margin-bottom: 2rem;
+        background: #fff;
+        border-radius: 0.8rem;
+        box-shadow: 0 1px 6px rgba(80, 80, 130, 0.08);
+        padding: 0.7rem 1rem;
+        margin-bottom: 1.2rem;
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        justify-content: space-between;
-        gap: 1.5rem;
+        gap: 0.7rem;
+        /* Removed background-image and background-size for clean look */
     }
     .filter-bar .filter-form {
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 0.6rem;
         margin-bottom: 0 !important;
     }
-    .filter-bar .form-select, .filter-bar .btn {
-        min-width: 140px;
-        border-radius: 0.7rem;
-        font-size: 1.1rem;
-        padding: 0.7rem 1.1rem;
-        font-weight: 600;
-        background: #fff;
-        border: 1px solid #e0e0e0;
-        box-shadow: none;
-        height: 48px;
-        display: flex;
-        align-items: center;
+    .filter-bar .form-select {
+        min-width: 110px;
+        font-size: 1rem;
+        padding: 0.35rem 1rem 0.35rem 0.9rem;
+        border-radius: 0.6rem;
+        background: #f8fafc;
+        box-shadow: 0 0.5px 2px rgba(30,40,70,0.03);
+        border: 1.5px solid #e6e8ec;
+        font-weight: 500;
+        color: #222;
+        height: 38px;
+        line-height: 1.2;
+        background-position: right 0.8rem center;
+        background-size: 1em;
+    }
+    .filter-bar .form-select:focus {
+        border-color: #347cf7;
+        outline: none;
+        box-shadow: 0 0 0 2px #d5e6ff;
     }
     .filter-bar .btn-primary {
-        background: #0d6efd;
-        border-color: #0d6efd;
-        color: #fff;
-        height: 48px;
-        display: flex;
-        align-items: center;
-    }
-    .filter-bar .btn-primary:hover {
-        background: #0b5ed7;
-        border-color: #0b5ed7;
-    }
-    .filter-bar .btn-group .btn {
-        background: #fff;
-        border: 1px solid #d1d5db;
-        color: #222;
+        min-width: 90px;
+        font-size: 1rem;
+        border-radius: 0.6rem;
+        padding: 0.35rem 1.2rem 0.35rem 1.2rem;
+        background: #347cf7;
+        border: none;
         font-weight: 600;
-        height: 48px;
+        box-shadow: 0 1px 4px rgba(40,80,180,0.05);
+        height: 38px;
+        line-height: 1.2;
         display: flex;
         align-items: center;
+        gap: 0.4rem;
     }
-    .filter-bar .btn-group .btn.active, 
-    .filter-bar .btn-group .btn:focus {
-        background: #e3f2fd;
-        border-color: #0d6efd;
-        color: #0d6efd;
-        box-shadow: 0 1px 4px rgba(13, 110, 253, 0.13);
+    .filter-bar .btn-primary:active,
+    .filter-bar .btn-primary:focus {
+        background: #175bc6;
     }
-    .filter-bar .btn-success {
-        background: #198754;
-        border-color: #198754;
+    .toggle-btns {
+        border: 1.2px solid #b9c9e2;
+        border-radius: 0.7rem;
+        background: #f5f8fd;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        height: 38px;
+    }
+    .toggle-btns .btn {
+        font-size: 1rem;
+        padding: 0.35rem 1rem;
+        height: 38px;
+        font-weight: 600;
+        border-radius: 0;
+        gap: 0.3rem;
+        border: none;
+        border-right: 1.2px solid #b9c9e2;
+        background: none;
+        color: #495468;
+        transition: background .13s, color .13s;
+        box-shadow: none !important;
+    }
+    .toggle-btns .btn.active {
+        background: #e6f0fe;
+        color: #2260c4;
+        border-right: 1.2px solid #b9c9e2;
+    }
+    .toggle-btns .btn:first-child {
+        border-left: none !important;
+    }
+    .toggle-btns .btn:last-child {
+        border-right: none !important;
+    }
+    .btn-checkin {
+        background: #438961;
         color: #fff;
+        border-radius: 0.7rem;
+        font-size: 1.05rem;
         font-weight: 700;
-        font-size: 1.1rem;
-        padding: 0.7rem 1.3rem;
-        height: 48px;
+        padding: 0.35rem 1.2rem;
+        border: none;
+        height: 38px;
         display: flex;
         align-items: center;
+        gap: 0.4rem;
+        box-shadow: 0 1px 4px rgba(60,130,90,0.05);
     }
-    .filter-bar .btn-success:hover {
-        background: #157347;
-        border-color: #157347;
+    .btn-checkin i {
+        font-size: 1.2em;
+        margin-right: 0.4em;
+    }
+    .btn-checkin:hover, .btn-checkin:focus {
+        background: #25683e;
         color: #fff;
     }
+
+    /* Dashboard card improvements */
+    .dashboard-card .card-body {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.2rem 1.2rem;
+    }
+    .dashboard-card .desc {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 0.3rem;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+    }
+    .dashboard-card h3 {
+        font-size: 2.1rem;
+        font-weight: 400; /* Remove bold */
+        margin-bottom: 0.2rem;
+        line-height: 1;
+    }
+    .dashboard-card .icon {
+        font-size: 2rem;
+        background: #e6edfa;
+        border-radius: 0.8rem;
+        padding: 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 48px;
+        min-height: 48px;
+        margin-left: 0.5rem;
+    }
+    .dashboard-card .icon.text-success { background: #eaf7ee; }
+    .dashboard-card .icon.text-danger { background: #fdeaea; }
+    .dashboard-card .icon.text-warning { background: #fff9ea; }
+
+    /* Table view: make more compact */
+    #tableView .table {
+        font-size: 0.97rem;
+        border-radius: 0.5rem;
+    }
+    #tableView .table th, #tableView .table td {
+        padding: 0.55rem 0.7rem;
+        vertical-align: middle;
+    }
+    #tableView .table th {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    #tableView .table td {
+        font-size: 0.97rem;
+        font-weight: 400;
+    }
+    #tableView .fs-5, #tableView .fs-6 {
+        font-size: 1rem !important;
+        font-weight: 400 !important;
+    }
+    #tableView .badge {
+        font-size: 0.92rem;
+        padding: 0.3em 0.7em;
+    }
+    #tableView .btn {
+        font-size: 0.95rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 0.4rem;
+    }
+    #tableView .text-monospace {
+        font-family: 'Fira Mono', 'Consolas', monospace;
+    }
+    #tableView .pagination {
+        margin-top: 0.5rem;
+    }
+
     @media (max-width: 991px) {
-        .filter-bar {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 1rem;
+        .dashboard-card .card-body { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+        .dashboard-card h3 { font-size: 1.3rem; }
+        .dashboard-card .icon { font-size: 1.3rem; min-width: 36px; min-height: 36px; padding: 0.5rem; }
+    }
+    @media (max-width: 600px) {
+        .filter-bar { padding: 0.4rem 0.3rem; }
+        .filter-bar .form-select, .filter-bar .btn-primary, .toggle-btns .btn, .btn-checkin {
+            font-size: 0.95rem; height: 32px; padding: 0.2rem 0.7rem;
         }
-        .filter-bar .filter-form,
-        .filter-bar .d-flex {
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
+        .toggle-btns { height: 32px; }
+        .btn-checkin { font-size: 0.95rem; padding: 0.2rem 0.7rem; }
     }
 </style>
 <div id="fullscreen-loader">
@@ -312,7 +251,7 @@
         <div class="desc mb-0">Manage rooms, check-ins, and reservations in real time</div>
     </div>
 
-    {{-- Improved Filter Bar --}}
+    {{-- MODERN FILTER BAR --}}
     <div class="filter-bar mb-4">
         <form method="GET" action="{{ route('front-desk.index') }}" class="filter-form">
             <select name="floor" class="form-select">
@@ -328,24 +267,23 @@
                 <option value="cleaning" {{ request('status') == 'cleaning' ? 'selected' : '' }}>Cleaning</option>
                 <option value="maintenance" {{ request('status') == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
             </select>
-            <button type="submit" class="btn btn-primary px-4">
-                <i class="bi bi-funnel me-2"></i>Filter
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-funnel"></i> Filter
             </button>
         </form>
-        <div class="d-flex align-items-center gap-3 flex-wrap">
-            <div class="btn-group toggle-btns" role="group">
-                <button class="btn btn-outline-secondary active" id="btnCardView" title="Card view">
-                    <i class="bi bi-grid-3x3-gap me-2"></i>Cards
-                </button>
-                <button class="btn btn-outline-secondary" id="btnTableView" title="Table view">
-                    <i class="bi bi-table me-2"></i>Table
-                </button>
-            </div>
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#quickCheckinModal">
-                <i class="bi bi-plus-circle me-2"></i>Quick Check-in
+        <div class="toggle-btns btn-group" role="group">
+            <button class="btn @if((session('roomView') ?? 'card') === 'card') active @endif" id="btnCardView" type="button">
+                <i class="bi bi-grid-3x3-gap"></i>
+            </button>
+            <button class="btn @if((session('roomView') ?? 'card') === 'table') active @endif" id="btnTableView" type="button">
+                <i class="bi bi-table"></i>
             </button>
         </div>
+        <button class="btn-checkin" data-bs-toggle="modal" data-bs-target="#quickCheckinModal">
+            <i class="bi bi-plus-circle"></i>Quick Check-in
+        </button>
     </div>
+    {{-- /filter-bar --}}
 
     {{-- Summary Cards --}}
     <div class="row mb-5 g-4">
@@ -364,7 +302,7 @@
                         <div class="desc mb-2">Total Rooms</div>
                         <h3>{{ $rooms->total() ?? $rooms->count() }}</h3>
                     </div>
-                    <div class="icon text-primary bg-primary bg-opacity-10 rounded-3 p-3">
+                    <div class="icon text-primary">
                         <i class="bi bi-door-closed"></i>
                     </div>
                 </div>
@@ -377,7 +315,7 @@
                         <div class="desc mb-2">Available</div>
                         <h3>{{ $rooms->where('status', 'available')->count() }}</h3>
                     </div>
-                    <div class="icon text-success bg-success bg-opacity-10 rounded-3 p-3">
+                    <div class="icon text-success">
                         <i class="bi bi-check-circle"></i>
                     </div>
                 </div>
@@ -390,7 +328,7 @@
                         <div class="desc mb-2">Occupied</div>
                         <h3>{{ $rooms->where('status', 'occupied')->count() }}</h3>
                     </div>
-                    <div class="icon text-danger bg-danger bg-opacity-10 rounded-3 p-3">
+                    <div class="icon text-danger">
                         <i class="bi bi-person-fill"></i>
                     </div>
                 </div>
@@ -403,7 +341,7 @@
                         <div class="desc mb-2">Require Attention</div>
                         <h3>{{ $rooms->whereIn('status', ['cleaning', 'maintenance'])->count() }}</h3>
                     </div>
-                    <div class="icon text-warning bg-warning bg-opacity-10 rounded-3 p-3">
+                    <div class="icon text-warning">
                         <i class="bi bi-exclamation-triangle"></i>
                     </div>
                 </div>
@@ -605,23 +543,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 <script>
 $(document).ready(function() {
-    let currentFloorFilter = 'all';
-    let currentStatusFilter = 'all';
-
-    // Restore view from localStorage
-    let savedView = localStorage.getItem('roomView') || 'card';
-    if (savedView === 'table') {
-        $('#cardView').hide();
-        $('#tableView').show();
-        $('#btnTableView').addClass('active');
-        $('#btnCardView').removeClass('active');
-    } else {
-        $('#tableView').hide();
-        $('#cardView').show();
-        $('#btnCardView').addClass('active');
-        $('#btnTableView').removeClass('active');
-    }
-
     // View switch
     $('#btnCardView').click(function() {
         $('#tableView').hide();
@@ -637,6 +558,19 @@ $(document).ready(function() {
         $('#btnCardView').removeClass('active');
         localStorage.setItem('roomView', 'table');
     });
+    // On load, restore last view
+    let savedView = localStorage.getItem('roomView') || 'card';
+    if (savedView === 'table') {
+        $('#cardView').hide();
+        $('#tableView').show();
+        $('#btnTableView').addClass('active');
+        $('#btnCardView').removeClass('active');
+    } else {
+        $('#tableView').hide();
+        $('#cardView').show();
+        $('#btnCardView').addClass('active');
+        $('#btnTableView').removeClass('active');
+    }
 });
 </script>
 @endpush

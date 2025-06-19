@@ -9,9 +9,9 @@
     <link href="{{ asset('asset/bootstrap-5.3.3/css/bootstrap.min.css') }}" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #2563eb;
-            --primary-dark: #1d4ed8;
-            --primary-light: #3b82f6;
+            --primary-color: #4a90e2; /* Softer blue, good with hotel imagery */
+            --primary-dark: #3a7bc4;
+            --primary-light: #6aaaf7;
             --secondary-color: #64748b;
             --success-color: #10b981;
             --warning-color: #f59e0b;
@@ -37,7 +37,9 @@
             height: 100%;
             margin: 0;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: 
+                linear-gradient(135deg, rgba(30,41,59,0.7) 0%, rgba(30,41,59,0.85) 100%),
+                url('{{ asset('images/hotel.jpg') }}') center center/cover no-repeat;
             overflow: hidden;
         }
 
@@ -48,9 +50,10 @@
         }
 
         .login-left {
-            flex: 1;
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.9) 0%, rgba(29, 78, 216, 0.9) 100%), 
-                        url('{{ asset("images/hotel.png") }}') center center/cover no-repeat;
+            flex: 55%; /* Adjusted to 55% */
+            background: 
+                linear-gradient(135deg, rgba(30,41,59,0.7) 0%, rgba(30,41,59,0.85) 100%),
+                url('{{ asset('images/hotel.jpg') }}') center center/cover no-repeat;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -59,14 +62,7 @@
         }
 
         .login-left::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.8) 0%, rgba(29, 78, 216, 0.9) 100%);
-            z-index: 1;
+            display: none;
         }
 
         .login-left-content {
@@ -110,11 +106,11 @@
         .feature-list li i {
             margin-right: 0.75rem;
             font-size: 1.25rem;
-            color: #10b981;
+            color: var(--primary-light); 
         }
 
         .login-right {
-            flex: 1;
+            flex: 45%; /* Adjusted to 45% */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -201,7 +197,7 @@
         .form-control:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1); 
         }
 
         .form-control.is-invalid {
@@ -260,7 +256,7 @@
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, #1e40af 100%);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #306bae 100%); 
             box-shadow: var(--shadow-lg);
             transform: translateY(-1px);
         }
@@ -389,7 +385,6 @@
     </style>
 </head>
 <body>
-    <!-- Desktop View -->
     <div class="login-container">
         <div class="login-left d-none d-md-flex">
             <div class="login-left-content">
@@ -456,7 +451,7 @@
 
                     <div class="form-check">
                         <input type="checkbox" name="remember" id="remember" class="form-check-input">
-                        <label for="remember" class="form-check-label">Remember me for 30 days</label>
+                        <label for="remember" class="form-check-label">Remember me</label>
                     </div>
 
                     <button type="submit" class="btn btn-primary" id="loginBtn">
@@ -474,9 +469,8 @@
         </div>
     </div>
 
-    <!-- Mobile View (Form on Image Overlay) -->
     <div class="login-mobile-overlay d-block d-md-none">
-        <img src="{{ asset('images/hotel.png') }}" alt="Hotel" class="mobile-hotel-img">
+        <img src="{{ asset('images/hotel.jpg') }}" alt="Hotel" class="mobile-hotel-img">
         <div class="login-mobile-form">
             <div class="login-box">
                 <div class="login-header">
