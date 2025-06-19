@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'profile_photo_url', // <-- Add this line
     ];
 
     /**
@@ -44,5 +45,32 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Accessor for profile photo URL.
+     */
+    public function getProfilePhotoUrlAttribute($value)
+    {
+        if ($value) {
+            return asset($value);
+        }
+        return asset('images/default-avatar.png');
+    }
+
+    /**
+     * Accessor for profile image URL.
+     */
+    public function getProfileImageUrlAttribute()
+    {
+        if ($this->profile_image) {
+            // If already starts with http or /storage, return as is
+            if (str_starts_with($this->profile_image, 'http') || str_starts_with($this->profile_image, '/storage')) {
+                return asset($this->profile_image);
+            }
+            // Otherwise, assume it's in storage
+            return asset('storage/' . $this->profile_image);
+        }
+        return asset('images/default-avatar.png');
     }
 }

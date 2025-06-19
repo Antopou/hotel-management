@@ -69,6 +69,7 @@ class CheckinController extends Controller
             'checkin_date' => 'required|date',
             'checkout_date' => 'nullable|date|after:checkin_date',
             'number_of_guest' => 'required|integer|min:1',
+            'notes' => 'nullable|string|max:1000', // <-- validate notes
         ]);
 
         $checkin = GuestCheckin::create([
@@ -81,6 +82,7 @@ class CheckinController extends Controller
             'number_of_guest' => $request->number_of_guest,
             'is_checkout' => $request->has('is_checkout'),
             'created_by' => 1,
+            'note' => $request->notes, // <-- Save notes to note column
         ]);
 
         // Set Room as occupied if no other ongoing checkins
@@ -185,6 +187,7 @@ class CheckinController extends Controller
             'checkin_date' => 'required|date',
             'checkout_date' => 'required|date|after:checkin_date',
             'number_of_guest' => 'required|integer|min:1',
+            'notes' => 'nullable|string|max:1000', // <-- validate notes
         ]);
 
         $oldRoomCode = $checkin->room_code;
@@ -199,6 +202,7 @@ class CheckinController extends Controller
             'number_of_guest' => $request->number_of_guest,
             'is_checkout' => $request->has('is_checkout'),
             'modified_by' => 1,
+            'note' => $request->notes, // <-- Save notes to note column
         ]);
 
         if (!$wasCheckedOut && $checkin->is_checkout) {

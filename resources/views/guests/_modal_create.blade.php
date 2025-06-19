@@ -1,6 +1,6 @@
 {{-- resources/views/guests/_modal_create.blade.php --}}
 <div class="modal fade" id="addGuestModal" tabindex="-1" aria-labelledby="addGuestLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg"> <!-- modal-lg for large size -->
         <div class="modal-content">
             <form action="{{ route('guests.store') }}" method="POST" id="addGuestForm">
                 @csrf

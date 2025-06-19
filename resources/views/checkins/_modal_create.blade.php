@@ -1,6 +1,6 @@
 {{-- resources/views/checkins/_modal_create.blade.php --}}
 <div class="modal fade" id="createCheckinModal" tabindex="-1" aria-labelledby="createCheckinLabel" aria-hidden="true">
-    <div class="modal-dialog custom-modal">
+    <div class="modal-dialog modal-lg"> <!-- Changed to modal-lg for consistent large size -->
         <div class="modal-content">
             <form action="{{ route('checkins.store') }}" method="POST" id="createCheckinForm">
                 @csrf

@@ -1,223 +1,371 @@
-@extends('layouts.main') {{-- Extend your main layout --}}
+@extends('layouts.main')
+
+@section('title', 'Revenue Report - Hotel Management')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('reports.index') }}">Reports</a></li>
+    <li class="breadcrumb-item active">Revenue</li>
+@endsection
 
 @section('content')
-@include('partials.loader')
-<div class="container-fluid py-4">
-    {{-- Page Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="bold m-0">Revenue Report</h3>
-        {{-- Export button --}}
-        <button class="btn btn-success shadow-sm"
-            onclick="window.location.href='{{ route('reports.revenue.export', request()->all()) }}'">
-            <i class="bi bi-file-earmark-arrow-down me-2"></i> Export Report
-        </button>
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h1>Revenue Report</h1>
+    <div>
+        <a href="{{ route('reports.revenue.export', array_merge(request()->all(), ['format' => 'csv'])) }}" class="btn btn-outline-primary me-2">
+            <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV
+        </a>
+        <a href="{{ route('reports.revenue.export', array_merge(request()->all(), ['format' => 'pdf'])) }}" class="btn btn-outline-danger">
+            <i class="bi bi-file-earmark-pdf"></i> Export PDF
+        </a>
     </div>
+</div>
 
-    {{-- Filter Form for Reports --}}
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <form method="GET" action="{{ route('reports.revenue') }}" class="row align-items-end g-2 w-100 m-0" id="reportFilterForm" style="flex-wrap:nowrap;">
-                <div class="col">
-                    <label class="form-label mb-1">Filter Period</label>
-                    <select name="period" class="form-select" id="reportPeriodSelect">
-                        <option value="all_time" {{ request('period', 'all_time') == 'all_time' ? 'selected' : '' }}>All Time</option>
-                        <option value="last_7_days" {{ request('period') == 'last_7_days' ? 'selected' : '' }}>Last 7 Days</option>
-                        <option value="this_week" {{ request('period') == 'this_week' ? 'selected' : '' }}>This Week</option>
-                        <option value="last_30_days" {{ request('period') == 'last_30_days' ? 'selected' : '' }}>Last 30 Days</option>
-                        <option value="this_month" {{ request('period') == 'this_month' ? 'selected' : '' }}>This Month</option>
-                        <option value="last_3_months" {{ request('period') == 'last_3_months' ? 'selected' : '' }}>Last 3 Months</option>
-                        <option value="last_6_months" {{ request('period') == '6_months' || request('period') == 'last_6_months' ? 'selected' : '' }}>Last 6 Months</option>
-                        <option value="this_year" {{ request('period') == 'this_year' ? 'selected' : '' }}>This Year</option>
-                        <option value="last_year" {{ request('period') == 'last_year' ? 'selected' : '' }}>Last Year</option>
-                        <option value="custom" {{ request('period') == 'custom' ? 'selected' : '' }}>Custom Range</option>
+<!-- Date Range Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ route('reports.revenue') }}">
+            <div class="row g-3">
+                <div class="col-12 col-md-3">
+                    <label for="start_date" class="form-label">Start Date</label>
+                    <input type="date" name="start_date" id="start_date" value="{{ request('start_date', now()->startOfMonth()->format('Y-m-d')) }}" 
+                           class="form-control">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label for="end_date" class="form-label">End Date</label>
+                    <input type="date" name="end_date" id="end_date" value="{{ request('end_date', now()->format('Y-m-d')) }}" 
+                           class="form-control">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label for="room_type" class="form-label">Room Type</label>
+                    <select name="room_type" id="room_type" class="form-select">
+                        <option value="">All Room Types</option>
+                        @foreach($roomTypes ?? [] as $type)
+                            <option value="{{ $type->id }}" {{ request('room_type') == $type->id ? 'selected' : '' }}>
+                                {{ $type->name }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
-                <div class="col">
-                    <label class="form-label mb-1">Start Date</label>
-                    <input type="date" name="start_date" class="form-control" id="reportStartDateInput" value="{{ request('start_date') }}">
-                </div>
-                <div class="col">
-                    <label class="form-label mb-1">End Date</label>
-                    <input type="date" name="end_date" class="form-control" id="reportEndDateInput" value="{{ request('end_date') }}">
-                </div>
-                <div class="col-auto d-flex gap-2 align-items-end">
-                    <button type="submit" class="btn btn-primary" id="applyReportFiltersBtn">
-                        <i class="bi bi-funnel-fill me-2"></i> Apply
+                <div class="col-12 col-md-3 d-flex flex-column align-items-start justify-content-end">
+                    <div class="mb-2 w-100 d-flex gap-2 flex-wrap">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setQuickDate('today')">Today</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setQuickDate('week')">Week</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setQuickDate('month')">Month</button>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-search me-2"></i>Generate Report
                     </button>
-                    <a href="{{ route('reports.revenue') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-counterclockwise me-2"></i> Reset
-                    </a>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
+</div>
 
-    {{-- Key Revenue Metrics --}}
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mb-4">
-        <div class="col">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body text-center">
-                    <h5 class="card-title text-muted mb-1">Total Revenue</h5>
-                    <h2 class="card-text text-dark fw-bold">${{ number_format($totalRevenue ?? 0, 2) }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body text-center">
-                    <h5 class="card-title text-muted mb-1">Average Daily Rate (ADR)</h5>
-                    <h2 class="card-text text-dark fw-bold">${{ number_format($averageDailyRate ?? 0, 2) }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body text-center">
-                    <h5 class="card-title text-muted mb-1">Revenue Per Available Room (RevPAR)</h5>
-                    <h2 class="card-text text-dark fw-bold">${{ number_format($revPar ?? 0, 2) }}</h2>
+<!-- Revenue Summary Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="card-subtitle mb-2" style="color: #e0e7ff;">Total Revenue</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">${{ number_format($totalRevenue ?? 0, 2) }}</h2>
+                        <small style="color: #e0e7ff;">
+                            <i class="bi bi-arrow-up me-1"></i>
+                            +12% from last period
+                        </small>
+                    </div>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-currency-dollar fs-2" style="color: #6366f1;"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-    {{-- Revenue Trends Chart --}}
-    <div class="card shadow-sm border-0 h-100 mb-4">
-        <div class="card-body">
-            <h5 class="card-title fw-bold mb-3">Revenue Trends Over Period</h5>
-            <canvas id="revenueTrendChart" height="100"></canvas>
-        </div>
-    </div>
-
-    {{-- Detailed Revenue Table with Pagination --}}
-    <div class="card shadow-sm border-0">
-        <div class="card-body">
-            <h5 class="card-title fw-bold mb-3">Revenue Breakdown</h5>
-            <div class="table-responsive">
-                <table class="table table-striped table-hover table-bordered mb-0">
-                    <thead>
-                        <tr>
-                            <th class="text-primary">Date / Month</th>
-                            <th class="text-primary">Room Revenue</th>
-                            <th class="text-primary">F&B Revenue</th>
-                            <th class="text-primary">Other Revenue</th>
-                            <th class="text-primary">Total Daily/Monthly Revenue</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($paginatedRevenueDetails ?? [] as $detail)
-                            <tr>
-                                <td>{{ $detail['date_or_month'] }}</td>
-                                <td>${{ number_format($detail['room_revenue'], 2) }}</td>
-                                <td>${{ number_format($detail['fb_revenue'], 2) }}</td>
-                                <td>${{ number_format($detail['other_revenue'], 2) }}</td>
-                                <td>${{ number_format($detail['total_revenue'], 2) }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">No revenue data available for the selected period.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            {{-- Pagination --}}
-            @if($paginatedRevenueDetails instanceof \Illuminate\Pagination\LengthAwarePaginator)
-                <div class="mt-3">
-                    {{ $paginatedRevenueDetails->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="card-subtitle mb-2" style="color: #e0ffe0;">Room Revenue</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">${{ number_format($roomRevenue ?? 0, 2) }}</h2>
+                        <small style="color: #e0ffe0;">
+                            {{ number_format(($roomRevenue ?? 0) / ($totalRevenue ?? 1) * 100, 1) }}% of total
+                        </small>
+                    </div>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-house-door fs-2" style="color: #10b981;"></i>
+                    </div>
                 </div>
-            @endif
+            </div>
         </div>
     </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="card-subtitle mb-2" style="color: #fde4ff;">Average Daily Rate</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">${{ number_format($averageDailyRate ?? 0, 2) }}</h2>
+                        <small style="color: #fde4ff;">
+                            <i class="bi bi-arrow-up me-1"></i>
+                            +5% from last period
+                        </small>
+                    </div>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-graph-up fs-2" style="color: #f43f5e;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="card-subtitle mb-2" style="color: #e0f7fa;">Occupancy Rate</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">{{ number_format($occupancyRate ?? 0, 1) }}%</h2>
+                        <small style="color: #e0f7fa;">
+                            <i class="bi bi-arrow-up me-1"></i>
+                            +3% from last period
+                        </small>
+                    </div>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-pie-chart fs-2" style="color: #0ea5e9;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-8">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0">Revenue Trend</h5>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <input type="radio" class="btn-check" name="chartPeriod" id="daily" checked>
+                        <label class="btn btn-outline-primary" for="daily">Daily</label>
+                        <input type="radio" class="btn-check" name="chartPeriod" id="weekly">
+                        <label class="btn btn-outline-primary" for="weekly">Weekly</label>
+                        <input type="radio" class="btn-check" name="chartPeriod" id="monthly">
+                        <label class="btn btn-outline-primary" for="monthly">Monthly</label>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="revenueChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Revenue by Room Type</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="roomTypeChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Revenue Details Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Revenue Details</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Room Type</th>
+                        <th>Rooms Sold</th>
+                        <th>Average Rate</th>
+                        <th>Revenue</th>
+                        <th>Occupancy %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @forelse($revenueDetails ?? [] as $detail)
+                    <tr>
+                        <td>{{ \Carbon\Carbon::parse($detail->date)->format('M d, Y') }}</td>
+                        <td>
+                            <span class="badge bg-info bg-opacity-10 text-info">
+                                {{ $detail->room_type_name ?? 'All Types' }}
+                            </span>
+                        </td>
+                        <td>{{ $detail->rooms_sold ?? 0 }}</td>
+                        <td>${{ number_format($detail->average_rate ?? 0, 2) }}</td>
+                        <td><strong class="text-success">${{ number_format($detail->revenue ?? 0, 2) }}</strong></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                    <div class="progress-bar bg-primary" style="width: {{ $detail->occupancy_rate ?? 0 }}%"></div>
+                                </div>
+                                <span class="text-sm">{{ number_format($detail->occupancy_rate ?? 0, 1) }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="bi bi-graph-down fs-1 d-block mb-2"></i>
+                                No revenue data found for the selected period
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const periodSelect = document.getElementById('reportPeriodSelect');
-    const startDateInput = document.getElementById('reportStartDateInput');
-    const endDateInput = document.getElementById('reportEndDateInput');
-    const filterForm = document.getElementById('reportFilterForm');
-
-    // Filter logic similar to dashboard
-    periodSelect.addEventListener('change', function() {
-        if (this.value !== 'custom') {
-            startDateInput.value = '';
-            endDateInput.value = '';
-        }
-    });
-
-    filterForm.addEventListener('submit', function(event) {
-        const startDateHasValue = startDateInput.value !== '';
-        const endDateHasValue = endDateInput.value !== '';
-
-        if ((startDateHasValue || endDateHasValue) && periodSelect.value !== 'custom') {
-            periodSelect.value = 'custom';
-        }
-    });
-
-    // Chart.js for Revenue Trend Chart
-    window.reportData = {
-        revenueLabels: @json($revenueLabels ?? []),
-        revenueValues: @json($revenueValues ?? [])
-    };
-
-    if (window.reportData.revenueLabels.length > 0) {
-        new Chart(document.getElementById('revenueTrendChart').getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: window.reportData.revenueLabels,
-                datasets: [{
-                    label: 'Revenue',
-                    data: window.reportData.revenueValues,
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
-                }]
+document.addEventListener('DOMContentLoaded', function() {
+    // Revenue Trend Chart
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: @json($chartLabels ?? []),
+            datasets: [{
+                label: 'Revenue',
+                data: @json($chartData ?? []),
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
             },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Amount ($)'
-                        }
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#e2e8f0'
                     },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Period'
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
                         }
                     }
                 },
-                plugins: {
-                    legend: {
+                x: {
+                    grid: {
                         display: false
                     }
                 }
             }
-        });
-    }
+        }
+    });
+
+    // Room Type Revenue Chart
+    const roomTypeCtx = document.getElementById('roomTypeChart').getContext('2d');
+    new Chart(roomTypeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: @json($roomTypeLabels ?? []),
+            datasets: [{
+                data: @json($roomTypeData ?? []),
+                backgroundColor: [
+                    '#2563eb',
+                    '#10b981',
+                    '#f59e0b',
+                    '#ef4444',
+                    '#8b5cf6',
+                    '#06b6d4'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
 });
+
+function setQuickDate(period) {
+    const startDate = document.getElementById('start_date');
+    const endDate = document.getElementById('end_date');
+    const today = new Date();
+    
+    switch(period) {
+        case 'today':
+            startDate.value = today.toISOString().split('T')[0];
+            endDate.value = today.toISOString().split('T')[0];
+            break;
+        case 'week':
+            const weekStart = new Date(today.setDate(today.getDate() - today.getDay()));
+            const weekEnd = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+            startDate.value = weekStart.toISOString().split('T')[0];
+            endDate.value = weekEnd.toISOString().split('T')[0];
+            break;
+        case 'month':
+            const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+            const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            startDate.value = monthStart.toISOString().split('T')[0];
+            endDate.value = monthEnd.toISOString().split('T')[0];
+            break;
+    }
+}
+
+function exportReport() {
+    const params = new URLSearchParams(window.location.search);
+    params.set('export', 'pdf');
+    window.open(`${window.location.pathname}?${params.toString()}`, '_blank');
+}
+
+function exportExcel() {
+    const params = new URLSearchParams(window.location.search);
+    params.set('export', 'excel');
+    window.open(`${window.location.pathname}?${params.toString()}`, '_blank');
+}
 </script>
-@endsection
+@endpush
 
 @push('styles')
 <style>
-#reportFilterForm {
-    width: 100%;
-    margin: 0;
-    flex-wrap: nowrap !important;
-    overflow-x: auto;
-}
-.card-body {
-    padding: 1.25rem;
+/* Remove horizontal scroll and make filter responsive */
+@media (max-width: 991.98px) {
+    .card-body form .col-md-3,
+    .card-body form .col-12 {
+        min-width: 100% !important;
+    }
+    .card-body form .d-flex {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
 }
 </style>
 @endpush

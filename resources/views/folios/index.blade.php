@@ -1,178 +1,283 @@
 @extends('layouts.main')
 
+@section('title', 'Folios - Hotel Management')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active">Folios</li>
+@endsection
+
 @section('content')
-@include('partials.loader')
-<div class="px-3 py-4">
-
-    {{-- Toast Notifications --}}
-    @include('partials.toasts')
-
-    {{-- Page Title --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="bold m-0">Guest Bills / Statements</h3> {{-- Changed Folios to Bills/Statements --}}
-        {{-- If you need a button to create a new, empty bill (not tied to a check-in), uncomment this:
-        <a href="{{ route('folios.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle-fill me-1"></i> New Bill
-        </a>
-        --}}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="page-title">Guest Folios</h1>
+        <p class="page-subtitle">Manage guest billing and financial records</p>
     </div>
-
-    {{-- Filter/Search Form (Consistent UI) --}}
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <form method="GET" action="{{ route('folios.index') }}" class="row g-3 align-items-end"> {{-- Changed g-2 to g-3, added align-items-end --}}
-                <div class="col-md-4">
-                    <label for="filterGuest" class="form-label">Guest Name</label> {{-- Added label --}}
-                    <input type="text" name="guest" id="filterGuest" value="{{ request('guest') }}" class="form-control" placeholder="Search by Guest Name">
-                </div>
-                <div class="col-md-4">
-                    <label for="filterRoom" class="form-label">Room Number</label> {{-- Added label --}}
-                    <input type="text" name="room" id="filterRoom" value="{{ request('room') }}" class="form-control" placeholder="Search by Room Number">
-                </div>
-                <div class="col-md-4 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-grow-1">
-                        <i class="bi bi-search me-1"></i> Filter
-                    </button>
-                    <a href="{{ route('folios.index') }}" class="btn btn-outline-secondary flex-grow-1">
-                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
-                    </a>
-                </div>
-            </form>
-        </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exportModal">
+            <i class="bi bi-download me-2"></i>
+            Export
+        </button>
+        {{-- Removed New Folio button --}}
     </div>
-    {{-- END Filter/Search Form --}}
+</div>
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle table-striped"> {{-- Added table-striped --}}
-            <thead class="table-primary"> {{-- Changed table-light to table-primary for consistent header color --}}
-                <tr>
-                    <th>Bill #</th> {{-- Changed Folio # to Bill # --}}
-                    <th>Guest</th>
-                    <th>Room</th>
-                    <th>Stay Period</th>
-                    <th class="text-center">Status</th> {{-- Aligned center for badge --}}
-                    <th class="text-end">Total (USD)</th> {{-- Aligned right for currency --}}
-                    <th class="text-center">Actions</th> {{-- Aligned center for buttons --}}
-                </tr>
-            </thead>
-            <tbody>
-            @forelse($folios as $folio)
-                <tr>
-                    <td>
-                        <span class="fw-bold text-primary">{{ $folio->folio_code ?? $folio->id }}</span> {{-- Added text-primary --}}
-                        <br>
-                        <small class="text-muted">{{ $folio->created_at->format('d M Y') }}</small>
-                    </td>
-                    <td>
-                        {{ $folio->guest->name ?? 'N/A' }}
-                        <br>
-                        <span class="badge bg-light text-secondary border"> {{-- Added border for subtle distinction --}}
-                            {{ $folio->guest->email ?? $folio->guest->tel ?? '-' }}
-                        </span>
-                    </td>
-                    <td>{{ $folio->room->name ?? 'N/A' }}</td>
-                    <td>
-                        {{ $folio->checkin?->checkin_date ? \Carbon\Carbon::parse($folio->checkin->checkin_date)->format('M d, Y H:i') : '-' }}<br>
-                        <span class="text-muted">to</span><br>
-                        {{ $folio->checkin?->checkout_date ? \Carbon\Carbon::parse($folio->checkin->checkout_date)->format('M d, Y H:i') : '-' }}
-                    </td>
-                    <td class="text-center"> {{-- Aligned center --}}
-                        <span class="badge text-white
-                            @if($folio->status === 'paid') bg-success
-                            @elseif($folio->status === 'partial') bg-warning
-                            @elseif($folio->status === 'voided') bg-danger
-                            @else bg-secondary @endif">
-                            {{ ucfirst($folio->status) }}
-                        </span>
-                    </td>
-                    <td class="fw-bold text-end text-success"> {{-- Aligned right, added text-success for total --}}
-                        {{ number_format($folio->total_amount, 2) }}
-                    </td>
-                    <td class="text-center"> {{-- Aligned center for button group --}}
-                        <div class="d-flex justify-content-center gap-1"> {{-- Added gap-1 for consistent spacing --}}
-                            <a href="{{ route('folios.show', $folio->folio_code) }}" class="btn btn-primary btn-sm" title="View Bill Details"> {{-- Changed btn-outline-dark to btn-primary, added title --}}
-                                <i class="bi bi-eye-fill me-1"></i> View
-                            </a>
-                            <a href="{{ route('folios.print', $folio->folio_code) }}" class="btn btn-secondary btn-sm" target="_blank" title="Print Bill"> {{-- Changed btn-outline-secondary to btn-secondary, added title --}}
-                                <i class="bi bi-printer"></i>
-                            </a>
-                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteFolioModal{{ $folio->id }}" title="Delete Bill"> {{-- Added title --}}
-                                <i class="bi bi-trash-fill"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="7">
-                        <div class="alert alert-info mb-0 text-center">
-                            <i class="bi bi-info-circle me-2"></i> No guest bills found. {{-- Updated message and added icon --}}
-                        </div>
-                    </td>
-                </tr>
-            @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    {{-- Pagination links --}}
-    <div class="d-flex justify-content-center mt-3"> {{-- Centered pagination --}}
-        {{ $folios->links('pagination::bootstrap-5') }}
-    </div>
-
-
-    {{-- Delete Bill Modals --}}
-    @foreach($folios as $folio)
-        <div class="modal fade" id="deleteFolioModal{{ $folio->id }}" tabindex="-1" aria-labelledby="deleteFolioLabel{{ $folio->id }}" aria-hidden="true">
-            <div class="modal-dialog modal-md"> {{-- Changed to modal-md for consistency --}}
-                <div class="modal-content">
-                    <form action="{{ route('folios.destroy', $folio->folio_code) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="deleteFolioLabel{{ $folio->id }}">Confirm Delete</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p>Are you sure you want to delete the bill for <strong>{{ $folio->guest->name ?? 'N/A' }}</strong>?</p>
-                            <p class="text-muted">This action cannot be undone.</p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-danger">Yes, Delete</button>
-                        </div>
-                    </form>
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="card-subtitle mb-2" style="color: #e0e7ff;">Total Folios</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">{{ $folios->total() }}</h2>
+                    </div>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-receipt fs-2" style="color: #6366f1;"></i>
+                    </div>
                 </div>
             </div>
         </div>
-    @endforeach
-
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="card-subtitle mb-2" style="color: #e0ffe0;">Total Revenue</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">${{ number_format($totalRevenue ?? 0, 2) }}</h2>
+                    </div>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-currency-dollar fs-2" style="color: #10b981;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="card-subtitle mb-2" style="color: #fde4ff;">Pending Payment</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">${{ number_format($pendingPayments ?? 0, 2) }}</h2>
+                    </div>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-clock fs-2" style="color: #f43f5e;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="card-subtitle mb-2" style="color: #e0f7fa;">Avg. Folio Value</h6>
+                        <h2 class="card-title mb-0 fw-bold" style="color: #fff;">${{ number_format($avgFolioValue ?? 0, 2) }}</h2>
+                    </div>
+                    <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
+                        <i class="bi bi-graph-up fs-2" style="color: #0ea5e9;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Filter Card -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ route('folios.index') }}" class="row g-3">
+            <div class="col-md-3">
+                <label for="guest" class="form-label">Guest Name</label>
+                <input type="text" name="guest" id="guest" value="{{ request('guest') }}" 
+                       class="form-control" placeholder="Search by guest name">
+            </div>
+            <div class="col-md-3">
+                <label for="folio_code" class="form-label">Folio Code</label>
+                <input type="text" name="folio_code" id="folio_code" value="{{ request('folio_code') }}" 
+                       class="form-control" placeholder="Enter folio code">
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label">Status</label>
+                <select name="status" id="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="open" {{ request('status') == 'open' ? 'selected' : '' }}>Open</option>
+                    <option value="closed" {{ request('status') == 'closed' ? 'selected' : '' }}>Closed</option>
+                    <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="bi bi-search me-2"></i>Filter
+                </button>
+                <a href="{{ route('folios.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Folios Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Folio Code</th>
+                        <th>Guest</th>
+                        <th>Room</th>
+                        <th>Check-in</th>
+                        <th>Total Amount</th>
+                        <th>Balance</th>
+                        <th>Status</th>
+                        <th>Notes</th> <!-- Add this -->
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @forelse($folios as $folio)
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-primary bg-opacity-10 rounded-circle me-3 d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-receipt text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">{{ $folio->folio_code }}</h6>
+                                    <small class="text-muted">{{ $folio->created_at->format('M d, Y') }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <h6 class="mb-0">{{ $folio->checkin->guest->name ?? 'N/A' }}</h6>
+                                <small class="text-muted">{{ $folio->checkin->guest->email ?? '' }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-info bg-opacity-10 text-info">
+                                {{ $folio->checkin->room->name ?? 'N/A' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="text-sm">
+                                @if($folio->checkin && $folio->checkin->checkin_date)
+                                    {{ \Carbon\Carbon::parse($folio->checkin->checkin_date)->format('M d, Y') }}
+                                    <br>
+                                    <small class="text-muted">{{ \Carbon\Carbon::parse($folio->checkin->checkin_date)->format('H:i') }}</small>
+                                @else
+                                    N/A
+                                @endif
+                            </div>
+                        </td>
+                        <td>
+                            <strong class="text-success">${{ number_format($folio->total_amount ?? 0, 2) }}</strong>
+                        </td>
+                        <td>
+                            @php
+                                $balance = ($folio->total_amount ?? 0) - ($folio->total_paid ?? 0);
+                            @endphp
+                            <strong class="{{ $balance > 0 ? 'text-danger' : 'text-success' }}">
+                                ${{ number_format($balance, 2) }}
+                            </strong>
+                        </td>
+                        <td>
+                            @php
+                                $statusClass = match($folio->status ?? 'open') {
+                                    'closed' => 'bg-secondary',
+                                    'paid' => 'bg-success',
+                                    default => 'bg-warning'
+                                };
+                            @endphp
+                            <span class="badge {{ $statusClass }}">
+                                {{ ucfirst($folio->status ?? 'open') }}
+                            </span>
+                        </td>
+                        <td>{{ $folio->notes }}</td> <!-- Add this -->
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ route('folios.show', $folio->folio_code) }}" class="btn btn-outline-info" title="View Details">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ route('folios.print', $folio->folio_code) }}" class="btn btn-outline-primary" title="Print" target="_blank">
+                                    <i class="bi bi-printer"></i>
+                                </a>
+                                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addPaymentModal{{ $folio->id }}" title="Add Payment">
+                                    <i class="bi bi-credit-card"></i>
+                                </button>
+                                {{-- Removed Edit button --}}
+                            </div>
+                        </td>
+                    </tr>
+
+                    @include('folios._modals', ['folio' => $folio])
+                @empty
+                    <tr>
+                        <td colspan="9" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-receipt fs-1 d-block mb-3 text-muted"></i>
+                                <h5>No folios found</h5>
+                                <p>Start by creating your first folio</p>
+                                {{-- Removed Create Folio button --}}
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+@if($folios->hasPages())
+<div class="d-flex justify-content-center mt-4">
+    {{ $folios->links('pagination::bootstrap-5') }}
+</div>
+@endif
+
+{{-- Remove @include('folios._modal_create') --}}
+@include('folios._modal_export')
 @endsection
 
-@section('scripts')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@push('scripts')
 <script>
-$(function() {
-    // Bootstrap Toasts
-    const successToastEl = document.getElementById('successToast');
-    const errorToastEl = document.getElementById('errorToast');
-    if (successToastEl) new bootstrap.Toast(successToastEl, { autohide: true, delay: 3000 }).show();
-    if (errorToastEl) new bootstrap.Toast(errorToastEl, { autohide: true, delay: 3000 }).show();
-
-    // Optional: Confirm for dangerous actions (e.g., void folio)
-    // Note: The delete modal already handles confirmation. If you had a separate 'void' button,
-    // this script would be useful for it. For now, it's commented out/not strictly needed
-    // if only delete uses a modal.
-    /*
-    $('.btn-void-folio').on('click', function(e) {
-        if(!confirm('Are you sure you want to void this bill? This action cannot be undone.')) {
-            e.preventDefault();
-        }
-    });
-    */
-
-    // Add more scripts for bill actions here if needed
-});
+function addPayment(folioCode) {
+    // You can implement a payment modal or redirect to payment page
+    const amount = prompt('Enter payment amount:');
+    if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
+        fetch(`/folios/${folioCode}/payment`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                amount: parseFloat(amount),
+                payment_method: 'cash',
+                notes: 'Payment added via quick action'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to add payment');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
+        });
+    }
+}
 </script>
-@endsection
+@endpush

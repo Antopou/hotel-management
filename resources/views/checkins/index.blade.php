@@ -1,253 +1,172 @@
 @extends('layouts.main')
 
+@section('title', 'Check-ins - Hotel Management')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active">Check-ins</li>
+@endsection
+
 @section('content')
-@include('partials.loader')
-<div class="px-3 py-4">
-
-    {{-- Toast Notifications --}}
-    @include('partials.toasts')
-
-    {{-- Page Title and Add Button --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="bold m-0">Guest Check-ins</h3> {{-- Added text-primary for consistency --}}
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createCheckinModal">
-            <i class="bi bi-plus-circle-fill me-1"></i> Add New Check-in
-        </button>
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="page-title">Guest Check-ins</h1>
+        <p class="page-subtitle">Manage guest check-ins and check-outs</p>
     </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCheckinModal">
+        <i class="bi bi-plus-circle me-2"></i>
+        New Check-in
+    </button>
+</div>
 
-    {{-- Filter/Search Form (NOW SAME UI AS RESERVATION MANAGEMENT) --}}
-    <div class="card shadow-sm mb-4"> {{-- Added card component --}}
-        <div class="card-body">
-            <form method="GET" action="{{ route('checkins.index') }}" class="row g-3 align-items-end"> {{-- Changed g-2 to g-3 for consistent spacing, added align-items-end --}}
-                <div class="col-md-4">
-                    <label for="filterGuestName" class="form-label">Guest Name</label> {{-- Added label --}}
-                    <input type="text" name="guest" id="filterGuestName" value="{{ request('guest') }}" class="form-control" placeholder="Search by Guest Name">
-                </div>
-                <div class="col-md-4">
-                    <label for="filterCheckinDate" class="form-label">Check-in Date</label> {{-- Added label --}}
-                    <input type="date" name="checkin_date" id="filterCheckinDate" value="{{ request('checkin_date') }}" class="form-control">
-                </div>
-                <div class="col-md-4 d-flex gap-2"> {{-- Adjusted for buttons on same line --}}
-                    <button type="submit" class="btn btn-primary flex-grow-1"> {{-- Changed w-100 to flex-grow-1 --}}
-                        <i class="bi bi-search me-1"></i> Filter
-                    </button>
-                    <a href="{{ route('checkins.index') }}" class="btn btn-outline-secondary flex-grow-1"> {{-- Changed w-100 to flex-grow-1 --}}
-                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
-                    </a>
-                </div>
-            </form>
-        </div>
+<!-- Filter Card -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ route('checkins.index') }}" class="row g-3">
+            <div class="col-md-4">
+                <label for="filterGuestName" class="form-label">Guest Name</label>
+                <input type="text" name="guest" id="filterGuestName" value="{{ request('guest') }}" 
+                       class="form-control" placeholder="Search by guest name">
+            </div>
+            <div class="col-md-4">
+                <label for="filterCheckinDate" class="form-label">Check-in Date</label>
+                <input type="date" name="checkin_date" id="filterCheckinDate" value="{{ request('checkin_date') }}" 
+                       class="form-control">
+            </div>
+            <div class="col-md-4 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="bi bi-search me-2"></i>Filter
+                </button>
+                <a href="{{ route('checkins.index') }}" class="btn btn-outline-secondary flex-fill">
+                    <i class="bi bi-arrow-counterclockwise me-2"></i>Reset
+                </a>
+            </div>
+        </form>
     </div>
-    {{-- END Filter/Search Form --}}
+</div>
 
-
-    {{-- Check-in Table --}}
-    <table class="table table-bordered table-hover table-striped"> {{-- Added table-striped for consistency --}}
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Guest</th>
-                <th>Room</th>
-                <th>Check-in</th>
-                <th>Check-out</th>
-                <th>Status</th>
-                <th class="text-center">Actions</th> {{-- Added text-center for consistency --}}
-            </tr>
-        </thead>
-        <tbody>
-        @forelse($checkins as $checkin)
-            <tr>
-                <td>{{ $checkin->id }}</td>
-                <td>{{ $checkin->guest->name ?? 'N/A' }}</td>
-                <td>{{ $checkin->room->name ?? 'N/A' }}</td>
-                <td>{{ $checkin->checkin_date ? \Carbon\Carbon::parse($checkin->checkin_date)->format('M d, Y H:i') : 'N/A' }}</td> {{-- Formatted date --}}
-                <td>{{ $checkin->checkout_date ? \Carbon\Carbon::parse($checkin->checkout_date)->format('M d, Y H:i') : 'N/A' }}</td> {{-- Formatted date --}}
-                <td>
-                    <span class="badge text-white
-                        @if($checkin->is_checkout) bg-secondary
-                        @else bg-success
-                        @endif">
-                        {{ $checkin->is_checkout ? 'Checked Out' : 'In Stay' }}
-                    </span>
-                </td>
-                <td class="text-center"> {{-- Added text-center for consistency --}}
-                    <div class="d-flex justify-content-center gap-1"> {{-- Added gap-1 for consistency --}}
-                        {{-- View --}}
-                        <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewCheckinModal{{ $checkin->id }}" title="View Check-in Details"> {{-- Added title --}}
-                            <i class="bi bi-eye-fill"></i>
-                        </button>
-                        {{-- Edit --}}
-                        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editCheckinModal{{ $checkin->id }}" title="Edit Check-in"> {{-- Added title --}}
-                            <i class="bi bi-pencil-square"></i>
-                        </button>
-                        {{-- Delete --}}
-                        <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCheckinModal{{ $checkin->id }}" title="Delete Check-in"> {{-- Added title --}}
-                            <i class="bi bi-trash-fill"></i>
-                        </button>
-                        @php
-                            $folio = \App\Models\GuestFolio::where('checkin_code', $checkin->checkin_code)->first();
-                        @endphp
-                        @if($folio)
-                            <a href="{{ route('folios.show', $folio->folio_code) }}" class="btn btn-dark btn-sm" title="View Folio"> {{-- Added title --}}
-                                <i class="bi bi-receipt"></i> Folio
-                            </a>
-                        @else
-                            <form method="POST" action="{{ route('folios.create.for.checkin', $checkin->checkin_code) }}" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-outline-primary btn-sm" title="Create Folio"> {{-- Added title --}}
-                                    <i class="bi bi-plus-circle"></i> Folio
+<!-- Check-ins Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Guest</th>
+                        <th>Room</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Status</th>
+                        <th>Guests</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @forelse($checkins as $checkin)
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-primary bg-opacity-10 rounded-circle me-3 d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-person text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">{{ $checkin->guest->name ?? 'N/A' }}</h6>
+                                    <small class="text-muted">{{ $checkin->guest->email ?? '' }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-info bg-opacity-10 text-info">
+                                {{ $checkin->room->name ?? 'N/A' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="text-sm">
+                                {{ $checkin->checkin_date ? \Carbon\Carbon::parse($checkin->checkin_date)->format('M d, Y') : 'N/A' }}
+                                <br>
+                                <small class="text-muted">{{ $checkin->checkin_date ? \Carbon\Carbon::parse($checkin->checkin_date)->format('H:i') : '' }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="text-sm">
+                                {{ $checkin->checkout_date ? \Carbon\Carbon::parse($checkin->checkout_date)->format('M d, Y') : 'N/A' }}
+                                <br>
+                                <small class="text-muted">{{ $checkin->checkout_date ? \Carbon\Carbon::parse($checkin->checkout_date)->format('H:i') : '' }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge {{ $checkin->is_checkout ? 'bg-secondary' : 'bg-success' }}">
+                                {{ $checkin->is_checkout ? 'Checked Out' : 'In Stay' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark">{{ $checkin->number_of_guest }} {{ Str::plural('Guest', $checkin->number_of_guest) }}</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewCheckinModal{{ $checkin->id }}" title="View Details">
+                                    <i class="bi bi-eye"></i>
                                 </button>
-                            </form>
-                        @endif
-                    </div>
-                </td>
-            </tr>
+                                <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editCheckinModal{{ $checkin->id }}" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteCheckinModal{{ $checkin->id }}" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                @php
+                                    $folio = \App\Models\GuestFolio::where('checkin_code', $checkin->checkin_code)->first();
+                                @endphp
+                                @if($folio)
+                                    <a href="{{ route('folios.show', $folio->folio_code) }}" class="btn btn-outline-primary" title="View Folio">
+                                        <i class="bi bi-receipt"></i>
+                                    </a>
+                                @else
+                                    <form method="POST" action="{{ route('folios.create.for.checkin', $checkin->checkin_code) }}" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-outline-success" title="Create Folio">
+                                            <i class="bi bi-plus-circle"></i>
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
 
-            @include('checkins._modals', ['checkin' => $checkin, 'guests' => $guests, 'rooms' => $rooms])
-        @empty
-            <tr>
-                <td colspan="7">
-                    <div class="alert alert-info mb-0 text-center">
-                        <i class="bi bi-info-circle me-2"></i> No check-ins found. {{-- Added icon --}}
-                    </div>
-                </td>
-            </tr>
-        @endforelse
-        </tbody>
-    </table>
-
-    {{ $checkins->links('pagination::bootstrap-5') }}
-
-    {{-- Create Check-in Modal --}}
-    <div class="modal fade" id="createCheckinModal" tabindex="-1" aria-labelledby="createCheckinLabel" aria-hidden="true">
-        <div class="modal-dialog custom-modal"> {{-- Use custom-modal for consistent modal width --}}
-            <div class="modal-content">
-                <form action="{{ route('checkins.store') }}" method="POST" id="createCheckinForm">
-                    @csrf
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="createCheckinLabel">Add New Check-in</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row g-3">
-                            {{-- Guest Select with Add New --}}
-                            <div class="col-md-6">
-                                <label for="guestSelect" class="form-label">Guest <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <select name="guest_code" class="form-select" required id="guestSelect">
-                                        <option value="">-- Select Guest --</option>
-                                        @foreach ($guests as $guest)
-                                            <option value="{{ $guest->guest_code }}">{{ $guest->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addGuestModal" title="Add New Guest">
-                                        <i class="bi bi-person-plus-fill"></i>
-                                    </button>
-                                </div>
+                    @include('checkins._modals', ['checkin' => $checkin, 'guests' => $guests, 'rooms' => $rooms])
+                @empty
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-3 text-muted"></i>
+                                <h5>No check-ins found</h5>
+                                <p>Start by creating your first check-in</p>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCheckinModal">
+                                    <i class="bi bi-plus-circle me-2"></i>Create Check-in
+                                </button>
                             </div>
-                            {{-- Room Select --}}
-                            <div class="col-md-6">
-                                <label for="roomSelect" class="form-label">Room <span class="text-danger">*</span></label>
-                                <select name="room_code" class="form-select" required id="roomSelect">
-                                    <option value="">-- Select Room --</option>
-                                    @foreach ($rooms as $room)
-                                        <option value="{{ $room->room_code }}">{{ $room->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            {{-- Check-in, Duration, Check-out (calculated) --}}
-                            <div class="col-md-6">
-                                <label for="checkin_date" class="form-label">Check-in Date <span class="text-danger">*</span></label>
-                                <input type="datetime-local" name="checkin_date" id="checkin_date" class="form-control" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="number_of_nights" class="form-label">Number of Nights <span class="text-danger">*</span></label>
-                                <input type="number" name="number_of_nights" id="number_of_nights" class="form-control" min="1" value="1" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="checkout_date" class="form-label">Check-out Date</label>
-                                <input type="datetime-local" name="checkout_date" id="checkout_date" class="form-control" readonly required>
-                            </div>
-                            {{-- Number of Guests --}}
-                            <div class="col-md-6">
-                                <label for="number_of_guest" class="form-label">Number of Guests <span class="text-danger">*</span></label>
-                                <input type="number" name="number_of_guest" id="number_of_guest" class="form-control" min="1" value="1" required>
-                            </div>
-                            {{-- Mark as Checked Out --}}
-                            <div class="col-12">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="is_checkout" id="is_checkout" value="1">
-                                    <label class="form-check-label" for="is_checkout">Mark as Checked Out</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-save me-2"></i> Create
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    {{-- Add Guest Modal (already has good, standard modal form UI) --}}
-    <div class="modal fade" id="addGuestModal" tabindex="-1" aria-labelledby="addGuestLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form action="{{ route('guests.store') }}" method="POST" id="addGuestForm">
-                    @csrf
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addGuestLabel">Add New Guest</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="guestName" class="form-label">Guest Name <span class="text-danger">*</span></label> {{-- Added for attribute --}}
-                            <input type="text" name="name" id="guestName" class="form-control" required> {{-- Added id --}}
-                        </div>
-                        <div class="mb-3">
-                            <label for="guestEmail" class="form-label">Email</label> {{-- Added for attribute --}}
-                            <input type="email" name="email" id="guestEmail" class="form-control"> {{-- Added id --}}
-                        </div>
-                        <div class="mb-3">
-                            <label for="guestPhone" class="form-label">Phone</label> {{-- Added for attribute --}}
-                            <input type="text" name="tel" id="guestPhone" class="form-control"> {{-- Added id --}}
-                        </div>
-                        <div class="mb-3">
-                            <label for="guestGender" class="form-label">Gender</label> {{-- Added for attribute --}}
-                            <select name="gender" id="guestGender" class="form-select"> {{-- Added id --}}
-                                <option value="">-- Select --</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Add Guest</button>
-                    </div>
-                </form>
-            </div>
+                        </td>
+                    </tr>
+                @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
+
+<!-- Pagination -->
+@if($checkins->hasPages())
+<div class="d-flex justify-content-center mt-4">
+    {{ $checkins->links('pagination::bootstrap-5') }}
+</div>
+@endif
+
+@include('checkins._modal_create')
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(function() {
-    // Toasts
-    const successToastEl = document.getElementById('successToast');
-    const errorToastEl = document.getElementById('errorToast');
-    if (successToastEl) new bootstrap.Toast(successToastEl, { autohide: true, delay: 3000 }).show();
-    if (errorToastEl) new bootstrap.Toast(errorToastEl, { autohide: true, delay: 3000 }).show();
-
-    // Auto-calculate checkout date (just like reservation)
+    // Auto-calculate checkout date
     function updateCheckoutDate() {
         let checkin = document.getElementById('checkin_date').value;
         let nights = parseInt(document.getElementById('number_of_nights').value) || 1;
@@ -262,10 +181,12 @@ $(function() {
             document.getElementById('checkout_date').value = `${y}-${m}-${d}T${H}:${I}`;
         }
     }
-    document.getElementById('checkin_date').addEventListener('change', updateCheckoutDate);
-    document.getElementById('number_of_nights').addEventListener('input', updateCheckoutDate);
-    // Initial call in case values are pre-filled (e.g., validation error)
-    updateCheckoutDate();
+    
+    if (document.getElementById('checkin_date')) {
+        document.getElementById('checkin_date').addEventListener('change', updateCheckoutDate);
+        document.getElementById('number_of_nights').addEventListener('input', updateCheckoutDate);
+        updateCheckoutDate();
+    }
 
     // AJAX Guest Add
     $('#addGuestForm').submit(function(e) {
@@ -286,18 +207,17 @@ $(function() {
                     $('#addGuestModal').modal('hide');
                     $form[0].reset();
                 } else {
-                    // Consider a more robust error message or toast notification here
-                    alert('Guest added, but no response data. Please refresh to see the new guest if not automatically selected.');
+                    alert('Guest added successfully!');
                     $('#addGuestModal').modal('hide');
+                    location.reload();
                 }
             },
             error: function(xhr) {
-                // More detailed error handling could be added here
-                alert('Failed to add guest. Please check your input or console for details.');
+                alert('Failed to add guest. Please try again.');
                 console.error('AJAX error:', xhr.responseText);
             }
         });
     });
 });
 </script>
-@endsection
+@endpush

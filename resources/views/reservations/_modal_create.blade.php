@@ -1,6 +1,6 @@
 {{-- resources/views/reservations/_modal_create.blade.php --}}
 <div class="modal fade" id="createReservationModal" tabindex="-1" aria-labelledby="createReservationLabel" aria-hidden="true">
-    <div class="modal-dialog custom-modal">
+    <div class="modal-dialog modal-lg"> <!-- Changed to modal-lg -->
         <div class="modal-content">
             <form action="{{ route('reservations.store') }}" method="POST">
                 @csrf
@@ -72,3 +72,37 @@
 
 {{-- Optionally, add the Add Guest modal here if you want --}}
 @include('guests._modal_create')
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function updateCheckoutDate() {
+        const checkinInput = document.getElementById('reservation_checkin_date');
+        const nightsInput = document.getElementById('reservation_number_of_nights');
+        const checkoutInput = document.getElementById('reservation_checkout_date');
+
+        const checkinVal = checkinInput.value;
+        const nightsVal = parseInt(nightsInput.value, 10);
+
+        if (checkinVal && nightsVal > 0) {
+            const checkinDate = new Date(checkinVal);
+            // Add nights
+            checkinDate.setDate(checkinDate.getDate() + nightsVal);
+            // Format to yyyy-MM-ddTHH:mm for datetime-local
+            const pad = n => n.toString().padStart(2, '0');
+            const formatted = checkinDate.getFullYear() + '-' +
+                pad(checkinDate.getMonth() + 1) + '-' +
+                pad(checkinDate.getDate()) + 'T' +
+                pad(checkinDate.getHours()) + ':' +
+                pad(checkinDate.getMinutes());
+            checkoutInput.value = formatted;
+        } else {
+            checkoutInput.value = '';
+        }
+    }
+
+    document.getElementById('reservation_checkin_date').addEventListener('change', updateCheckoutDate);
+    document.getElementById('reservation_number_of_nights').addEventListener('input', updateCheckoutDate);
+});
+</script>
+@endpush

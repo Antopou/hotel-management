@@ -19,14 +19,13 @@ class RoomController extends Controller
 
         $query = Room::with('roomType');
 
-        if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+        // Updated filter logic to match Blade form fields
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
         }
-
-        if ($request->filled('room_type_code')) {
-            $query->where('room_type_code', $request->room_type_code);
+        if ($request->filled('room_type')) {
+            $query->where('room_type_code', $request->room_type);
         }
-
         if ($request->filled('status')) {
             $query->where('status', strtolower($request->status));
         }
@@ -37,7 +36,20 @@ class RoomController extends Controller
 
         $roomTypes = RoomType::all();
 
-        return view('rooms.index', compact('rooms', 'roomTypes', 'sortBy', 'direction'));
+        // Room stats
+        $availableRooms = Room::where('status', 'available')->count();
+        $occupiedRooms = Room::where('status', 'occupied')->count();
+        $maintenanceRooms = Room::where('status', 'maintenance')->count();
+
+        return view('rooms.index', compact(
+            'rooms',
+            'roomTypes',
+            'sortBy',
+            'direction',
+            'availableRooms',
+            'occupiedRooms',
+            'maintenanceRooms'
+        ));
     }
 
     public function store(StoreRoomRequest $request)
@@ -56,8 +68,8 @@ class RoomController extends Controller
                 'room_code' => $roomCode,
                 'name' => $request->name,
                 'room_type_code' => $request->room_type_code,
-                // Always save as lowercase
                 'status' => strtolower($request->status),
+                'description' => $request->description, // <-- Add this line
                 'created_by' => Auth::id(),
                 'is_active' => true,
             ]);
@@ -81,8 +93,13 @@ class RoomController extends Controller
             $room->update([
                 'name' => $request->name,
                 'room_type_code' => $request->room_type_code,
-                // Always save as lowercase
                 'status' => strtolower($request->status),
+                'description' => $request->description,
+                'has_wifi' => $request->has('has_wifi') ? 1 : 0,
+                'has_tv' => $request->has('has_tv') ? 1 : 0,
+                'has_ac' => $request->has('has_ac') ? 1 : 0,
+                'has_breakfast' => $request->has('has_breakfast') ? 1 : 0,
+                'has_parking' => $request->has('has_parking') ? 1 : 0,
                 'modified_by' => Auth::id(),
             ]);
 

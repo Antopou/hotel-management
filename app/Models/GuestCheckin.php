@@ -14,7 +14,7 @@ class GuestCheckin extends Model
         'checkin_code', 'reservation_ref', 'guest_code', 'room_code',
         'checkin_date', 'checkout_date', 'cancelled_date', 'rate', 'total_payment',
         'payment_method', 'number_of_guest', 'is_checkout', 'created_by',
-        'modified_by', 'is_active'
+        'modified_by', 'is_active', 'note'
     ];
 
     public function guest()

@@ -12,7 +12,7 @@ class ReservationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = GuestReservation::with(['guest', 'room']);
+        $query = GuestReservation::with(['guest', 'room.roomType']); // <-- updated
 
         if ($request->filled('guest')) {
             $query->whereHas('guest', function ($q) use ($request) {
@@ -34,9 +34,32 @@ class ReservationController extends Controller
         }
 
         $reservations = $query->latest()->paginate(10)->withQueryString();
+
+        // Calculate stats
+        $pendingCount = GuestReservation::where('status', 'pending')->count();
+        $confirmedCount = GuestReservation::where('status', 'confirmed')->count();
+        $todayArrivals = GuestReservation::whereDate('checkin_date', now()->toDateString())->count();
+
+        // Calculate number_of_nights and total_amount for each reservation using room type rate
+        $reservations->getCollection()->transform(function ($reservation) {
+            if ($reservation->checkin_date && $reservation->checkout_date) {
+                $reservation->number_of_nights = \Carbon\Carbon::parse($reservation->checkin_date)
+                    ->diffInDays(\Carbon\Carbon::parse($reservation->checkout_date));
+            } else {
+                $reservation->number_of_nights = 0;
+            }
+            $rate = $reservation->room->roomType->price_per_night ?? 0;
+            $reservation->total_amount = $rate * $reservation->number_of_nights;
+            return $reservation;
+        });
+
         $guests = Guest::all();
-        $rooms = Room::all();
-        return view('reservations.index', compact('reservations', 'guests', 'rooms'));
+        $rooms = Room::with('roomType')->get();
+
+        return view('reservations.index', compact(
+            'reservations', 'guests', 'rooms',
+            'pendingCount', 'confirmedCount', 'todayArrivals'
+        ));
     }
 
     public function create()
@@ -55,6 +78,7 @@ class ReservationController extends Controller
             'checkout_date' => 'required|date|after:checkin_date',
             'number_of_guest' => 'required|integer|min:1',
             'status' => 'nullable|string|in:pending,confirmed,checked-in,checked-out,cancelled',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         // Check for double-booking
@@ -74,6 +98,16 @@ class ReservationController extends Controller
             return back()->withInput()->withErrors(['room_code' => 'Room is already booked for the selected dates.']);
         }
 
+        // After validation and before creating the reservation
+        $room = Room::with('roomType')->where('room_code', $request->room_code)->first();
+        $rate = ($room && $room->roomType) ? $room->roomType->price_per_night : 0;
+        $number_of_nights = 0;
+        if ($request->checkin_date && $request->checkout_date) {
+            $number_of_nights = \Carbon\Carbon::parse($request->checkin_date)
+                ->diffInDays(\Carbon\Carbon::parse($request->checkout_date));
+        }
+        $total_amount = $rate * $number_of_nights;
+
         $reservation = GuestReservation::create([
             'reservation_code' => Str::uuid(),
             'guest_code' => $request->guest_code,
@@ -84,6 +118,8 @@ class ReservationController extends Controller
             'status' => $request->status ?? 'pending',
             'is_checkin' => false,
             'created_by' => 1,
+            'total_amount' => $total_amount,
+            'note' => $request->notes, // <-- Save notes to note column
         ]);
 
         // --- Set Room as reserved ONLY if currently available ---
@@ -100,7 +136,8 @@ class ReservationController extends Controller
                 ->with('success', 'Reservation created.');
         }
 
-        return redirect()->route('front-desk.rooms')->with('success', 'Reservation created.');
+        // Default: go back to reservations page
+        return redirect()->route('reservations.index')->with('success', 'Reservation created.');
     }
 
 
@@ -127,6 +164,7 @@ class ReservationController extends Controller
             'number_of_guest' => 'required|integer|min:1',
             'status' => ['nullable', Rule::in(['pending', 'confirmed', 'checked-in', 'cancelled', 'no-show', 'checked-out'])],
             'is_checkin' => 'nullable|boolean',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         // Prevent editing to double-booked dates
@@ -156,18 +194,29 @@ class ReservationController extends Controller
             $status = 'pending'; // or previous status
         }
 
+        $room = Room::with('roomType')->where('room_code', $request->room_code)->first();
+        $rate = ($room && $room->roomType) ? $room->roomType->price_per_night : 0;
+        $number_of_nights = 0;
+        if ($request->checkin_date && $request->checkout_date) {
+            $number_of_nights = \Carbon\Carbon::parse($request->checkin_date)
+                ->diffInDays(\Carbon\Carbon::parse($request->checkout_date));
+        }
+        $total_amount = $rate * $number_of_nights;
+
         $reservation->update([
             'guest_code' => $request->guest_code,
             'room_code' => $request->room_code,
             'checkin_date' => $request->checkin_date,
             'checkout_date' => $request->checkout_date,
-            'rate' => $request->rate ?? 0,
+            'rate' => $rate,
             'total_payment' => $request->total_payment ?? 0,
             'payment_method' => $request->payment_method,
             'number_of_guest' => $request->number_of_guest,
             'modified_by' => 1,
             'is_checkin' => $isCheckin,
             'status' => $status,
+            'total_amount' => $total_amount,
+            'note' => $request->notes, // <-- Save notes to note column
         ]);
 
         return redirect()->route('reservations.index')->with('success', 'Reservation updated.');
@@ -195,6 +244,14 @@ class ReservationController extends Controller
         if ($room) $room->update(['status' => 'available']);
 
         return redirect()->route('reservations.index')->with('success', 'Reservation canceled.');
+    }
+
+    public function confirm(Request $request, GuestReservation $reservation)
+    {
+        $reservation->status = 'confirmed';
+        $reservation->save();
+
+        return redirect()->route('reservations.index')->with('success', 'Reservation confirmed.');
     }
 }
 
