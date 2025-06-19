@@ -3,7 +3,7 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - v4
+      - main
 
 jobs:
   deploy:
@@ -23,7 +23,7 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no root@167.71.202.143 << 'EOF'
           cd /var/www/hotel-management
-          git pull origin v4
+          git pull origin main
           composer install --no-dev --optimize-autoloader
           php artisan migrate --force
           php artisan config:cache
