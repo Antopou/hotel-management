@@ -216,8 +216,6 @@
                             </div>
                         </td>
                     </tr>
-
-                    @include('folios._modals', ['folio' => $folio])
                 @empty
                     <tr>
                         <td colspan="9" class="text-center py-5">
@@ -235,6 +233,10 @@
         </div>
     </div>
 </div>
+
+@foreach($folios as $folio)
+    @include('folios._modals', ['folio' => $folio])
+@endforeach
 
 <!-- Pagination -->
 @if($folios->hasPages())
