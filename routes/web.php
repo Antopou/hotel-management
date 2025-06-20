@@ -41,6 +41,8 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo');
+    Route::post('/profile/register-admin', [ProfileController::class, 'registerAdmin'])->name('profile.registerAdmin');
+    Route::post('/profile/switch-user', [ProfileController::class, 'switchUser'])->name('profile.switchUser');
 
     // Resource Routes
     Route::resource('rooms', RoomController::class);

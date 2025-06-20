@@ -27,6 +27,14 @@
                     <dd class="col-sm-8">{{ $reservation->reason ?? 'N/A' }}</dd>
                     <dt class="col-sm-4">Cancelled Date</dt>
                     <dd class="col-sm-8">{{ $reservation->cancelled_date ?? 'N/A' }}</dd>
+                    <dt class="col-sm-4">Rate per Night</dt>
+                    <dd class="col-sm-8">${{ number_format($reservation->room->roomType->price_per_night ?? 0, 2) }}</dd>
+                    <dt class="col-sm-4">Number of Nights</dt>
+                    <dd class="col-sm-8">{{ $reservation->number_of_nights ?? 0 }}</dd>
+                    <dt class="col-sm-4">Total Amount</dt>
+                    <dd class="col-sm-8">${{ number_format($reservation->total_amount ?? 0, 2) }}</dd>
+                    <dt class="col-sm-4">Payment Method</dt>
+                    <dd class="col-sm-8">{{ $reservation->payment_method ?? '-' }}</dd>
                 </dl>
             </div>
             <div class="modal-footer">

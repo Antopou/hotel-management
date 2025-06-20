@@ -1,6 +1,6 @@
 {{-- View Check-in Modal --}}
 <div class="modal fade" id="viewCheckinModal{{ $checkin->id }}" tabindex="-1" aria-labelledby="viewCheckinLabel{{ $checkin->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg"> <!-- Changed to modal-lg -->
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="viewCheckinLabel{{ $checkin->id }}">Check-in Details</h5>
@@ -19,9 +19,17 @@
                     <dt class="col-sm-4">Guests</dt>
                     <dd class="col-sm-8">{{ $checkin->number_of_guest }}</dd>
                     <dt class="col-sm-4">Rate</dt>
-                    <dd class="col-sm-8">{{ $checkin->rate ?? '0.00' }}</dd>
+                    <dd class="col-sm-8">
+                        {{ $checkin->room && $checkin->room->roomType ? number_format($checkin->room->roomType->price_per_night, 2) : '0.00' }}
+                    </dd>
                     <dt class="col-sm-4">Total Payment</dt>
-                    <dd class="col-sm-8">{{ $checkin->total_payment ?? '0.00' }}</dd>
+                    <dd class="col-sm-8">
+                        @if($checkin->folio)
+                            {{ number_format($checkin->folio->total_amount, 2) }}
+                        @else
+                            {{ $checkin->total_payment ?? '0.00' }}
+                        @endif
+                    </dd>
                     <dt class="col-sm-4">Payment Method</dt>
                     <dd class="col-sm-8">{{ $checkin->payment_method ?? '-' }}</dd>
                     <dt class="col-sm-4">Status</dt>

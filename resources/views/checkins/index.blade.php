@@ -130,8 +130,6 @@
                             </div>
                         </td>
                     </tr>
-
-                    @include('checkins._modals', ['checkin' => $checkin, 'guests' => $guests, 'rooms' => $rooms])
                 @empty
                     <tr>
                         <td colspan="7" class="text-center py-5">
@@ -151,6 +149,11 @@
         </div>
     </div>
 </div>
+
+<!-- Place all modals here, outside the table -->
+@foreach($checkins as $checkin)
+    @include('checkins._modals', ['checkin' => $checkin, 'guests' => $guests, 'rooms' => $rooms])
+@endforeach
 
 <!-- Pagination -->
 @if($checkins->hasPages())

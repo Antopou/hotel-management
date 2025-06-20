@@ -14,7 +14,7 @@ class CheckinController extends Controller
 {
     public function index(Request $request)
     {
-        $query = GuestCheckin::with(['guest', 'room']);
+        $query = GuestCheckin::with(['guest', 'room.roomType', 'folio']);
 
         if ($request->filled('guest')) {
             $query->whereHas('guest', function ($q) use ($request) {

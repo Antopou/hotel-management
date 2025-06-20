@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
@@ -67,17 +68,68 @@ class ProfileController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
-        $request->validateWithBag('userDeletion', [
+        $request->validate([
             'password' => ['required', 'current_password'],
         ]);
 
         $user = $request->user();
+
+        // Prevent deleting main admin
+        if ($user->id == 1) {
+            abort(403, 'Cannot delete the main admin account.');
+        }
+
         Auth::logout();
         $user->delete();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return Redirect::to('/');
+        return redirect()->route('login');
+    }
+
+    public function registerAdmin(Request $request)
+    {
+        if (Auth::id() !== 1) {
+            abort(403, 'Unauthorized');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = User::create([
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'password' => Hash::make($request->input('password')),
+            'is_admin' => true,
+        ]);
+
+        // Store new admin ID in session for switch prompt
+        session([
+            'new_admin_id' => $user->id,
+            'new_admin_email' => $user->email,
+            'new_admin_name' => $user->name, // Add this line
+        ]);
+
+        return redirect()->route('profile.edit')->with('success', 'New admin registered successfully!');
+    }
+
+    public function switchUser(Request $request)
+    {
+        if (Auth::id() !== 1) {
+            abort(403, 'Unauthorized');
+        }
+
+        $user = User::findOrFail($request->input('user_id'));
+        Auth::logout();
+        Auth::login($user);
+
+        // Remove session prompt
+        $request->session()->forget(['new_admin_id', 'new_admin_email']);
+
+        return redirect()->route('profile.edit')->with('success', 'Switched to new admin account!');
     }
 }

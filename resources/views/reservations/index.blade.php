@@ -222,8 +222,6 @@
                             </div>
                         </td>
                     </tr>
-
-                    @include('reservations._modals', ['reservation' => $reservation, 'guests' => $guests ?? [], 'rooms' => $rooms ?? []])
                 @empty
                     <tr>
                         <td colspan="8" class="text-center py-5">
@@ -271,6 +269,11 @@
         </div>
     </div>
 </div>
+
+<!-- Place all modals here, outside the table -->
+@foreach($reservations as $reservation)
+    @include('reservations._modals', ['reservation' => $reservation, 'guests' => $guests ?? [], 'rooms' => $rooms ?? []])
+@endforeach
 @endsection
 
 @push('scripts')
