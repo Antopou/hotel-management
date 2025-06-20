@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\GuestCheckin;
 use App\Models\GuestFolioItem;
 use App\Models\Room;
+use App\Models\RoomType; // Add at the top
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -53,9 +54,10 @@ class ReportController extends Controller
     public function revenue(Request $request)
     {
         // 1. Get filter parameters
-        $period = $request->input('period', 'this_month'); // Changed default to this_month
+        $period = $request->input('period', 'this_month');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
+        $roomTypes = RoomType::all();
 
         // 2. Determine date range based on period
         $dateRange = $this->getDateRange($request, $period, $startDate, $endDate);
@@ -83,6 +85,17 @@ class ReportController extends Controller
             });
         }
         $relevantCheckinsQuery->whereNull('cancelled_date');
+
+        // --- Room type filter ---
+        if ($request->filled('room_type')) {
+            $relevantCheckinsQuery->whereHas('room', function($q) use ($request) {
+                $q->where('room_type_id', $request->input('room_type'));
+            });
+        }
+
+        // --- Eager load relationships ---
+        $relevantCheckinsQuery->with(['room.roomType', 'folio.items']);
+
         $checkinsForCalculation = $relevantCheckinsQuery->get();
 
         // Initialize metrics
@@ -106,7 +119,17 @@ class ReportController extends Controller
             $fullNights = $checkinDate->diffInDays($checkoutDate);
 
             if ($fullNights <= 0) {
-                if ($roomRevenue > 0 && $checkinDate->between($startDate, $endDate)) {
+                if (
+                    $roomRevenue > 0 &&
+                    $startDate && $endDate && // <-- add this check
+                    $checkinDate->between($startDate, $endDate)
+                ) {
+                    $formattedDate = $checkinDate->format('Y-m-d');
+                    $revenueByDate[$formattedDate] = ($revenueByDate[$formattedDate] ?? 0) + $roomRevenue;
+                    $totalNightsOccupied++;
+                }
+                // Optionally, handle the "all time" case:
+                if ($roomRevenue > 0 && (!$startDate || !$endDate)) {
                     $formattedDate = $checkinDate->format('Y-m-d');
                     $revenueByDate[$formattedDate] = ($revenueByDate[$formattedDate] ?? 0) + $roomRevenue;
                     $totalNightsOccupied++;
@@ -129,6 +152,27 @@ class ReportController extends Controller
                 $formattedDate = $date->format('Y-m-d');
                 $revenueByDate[$formattedDate] = ($revenueByDate[$formattedDate] ?? 0) + $dailyRate;
                 $totalNightsOccupied++;
+            }
+        }
+
+        // Count rooms sold per date
+        $roomsSoldByDate = [];
+        foreach ($checkinsForCalculation as $checkin) {
+            $checkinDate = Carbon::parse($checkin->checkin_date);
+            $checkoutDate = $checkin->checkout_date ? Carbon::parse($checkin->checkout_date) : Carbon::now();
+
+            $periodStartForCheckin = ($startDate && $checkinDate->lessThan($startDate)) ? $startDate : $checkinDate;
+            $periodEndForCheckin = ($endDate && $checkoutDate->greaterThan($endDate)) ? $endDate : $checkoutDate;
+
+            if ($periodStartForCheckin->greaterThanOrEqualTo($periodEndForCheckin)) {
+                continue;
+            }
+
+            $periodDates = CarbonPeriod::create($periodStartForCheckin, '1 day', $periodEndForCheckin->subDay());
+
+            foreach ($periodDates as $date) {
+                $formattedDate = $date->format('Y-m-d');
+                $roomsSoldByDate[$formattedDate] = ($roomsSoldByDate[$formattedDate] ?? 0) + 1;
             }
         }
 
@@ -197,13 +241,16 @@ class ReportController extends Controller
         $revenueDetails = [];
         foreach ($revenueByDate as $date => $total) {
             $carbonDate = Carbon::parse($date);
+            $roomsSold = $roomsSoldByDate[$date] ?? 0;
+            $occupancy = $totalRoomsInHotel > 0 ? ($roomsSold / $totalRoomsInHotel) * 100 : 0;
+
             $revenueDetails[] = (object)[
                 'date' => $carbonDate->format('Y-m-d'),
                 'room_type_name' => 'All Types', // You can group by room type if needed
-                'rooms_sold' => null, // Optional: fill if you want
+                'rooms_sold' => $roomsSold,
                 'average_rate' => $total, // Or calculate as needed
                 'revenue' => $total,
-                'occupancy_rate' => null, // Optional: fill if you want
+                'occupancy_rate' => $occupancy,
             ];
         }
 
@@ -240,7 +287,8 @@ class ReportController extends Controller
             'roomTypeLabels',
             'roomTypeData',
             'revenueDetails',
-            'paginatedRevenueDetails' // <-- add this line
+            'paginatedRevenueDetails',
+            'roomTypes'
         ));
     }
 
@@ -298,7 +346,17 @@ class ReportController extends Controller
             $fullNights = $checkinDate->diffInDays($checkoutDate);
 
             if ($fullNights <= 0) {
-                if ($roomRevenue > 0 && $startDate && $endDate && $checkinDate->between($startDate, $endDate)) {
+                if (
+                    $roomRevenue > 0 &&
+                    $startDate && $endDate && // <-- add this check
+                    $checkinDate->between($startDate, $endDate)
+                ) {
+                    $formattedDate = $checkinDate->format('Y-m-d');
+                    $revenueByDate[$formattedDate] = ($revenueByDate[$formattedDate] ?? 0) + $roomRevenue;
+                    $totalNightsOccupied++;
+                }
+                // Optionally, handle the "all time" case:
+                if ($roomRevenue > 0 && (!$startDate || !$endDate)) {
                     $formattedDate = $checkinDate->format('Y-m-d');
                     $revenueByDate[$formattedDate] = ($revenueByDate[$formattedDate] ?? 0) + $roomRevenue;
                     $totalNightsOccupied++;

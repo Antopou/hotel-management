@@ -24,16 +24,30 @@
 <div class="card mb-4">
     <div class="card-body">
         <form method="GET" action="{{ route('reports.revenue') }}">
-            <div class="row g-3">
+            <input type="hidden" name="group_by" id="group_by" value="{{ request('group_by', 'daily') }}">
+            <div class="row g-3 align-items-end">
                 <div class="col-12 col-md-3">
-                    <label for="start_date" class="form-label">Start Date</label>
-                    <input type="date" name="start_date" id="start_date" value="{{ request('start_date', now()->startOfMonth()->format('Y-m-d')) }}" 
-                           class="form-control">
+                    <label for="period" class="form-label">Period</label>
+                    <select name="period" id="period" class="form-select" onchange="toggleCustomDates()">
+                        <option value="this_month" {{ request('period', 'this_month') == 'this_month' ? 'selected' : '' }}>This Month</option>
+                        <option value="last_7_days" {{ request('period') == 'last_7_days' ? 'selected' : '' }}>Last 7 Days</option>
+                        <option value="this_week" {{ request('period') == 'this_week' ? 'selected' : '' }}>This Week</option>
+                        <option value="last_30_days" {{ request('period') == 'last_30_days' ? 'selected' : '' }}>Last 30 Days</option>
+                        <option value="last_3_months" {{ request('period') == 'last_3_months' ? 'selected' : '' }}>Last 3 Months</option>
+                        <option value="last_6_months" {{ request('period') == 'last_6_months' ? 'selected' : '' }}>Last 6 Months</option>
+                        <option value="this_year" {{ request('period') == 'this_year' ? 'selected' : '' }}>This Year</option>
+                        <option value="last_year" {{ request('period') == 'last_year' ? 'selected' : '' }}>Last Year</option>
+                        <option value="all_time" {{ request('period') == 'all_time' ? 'selected' : '' }}>All Time</option>
+                        <option value="custom" {{ request('period') == 'custom' ? 'selected' : '' }}>Custom</option>
+                    </select>
                 </div>
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-md-3" id="startDateCol">
+                    <label for="start_date" class="form-label">Start Date</label>
+                    <input type="date" name="start_date" id="start_date" value="{{ request('start_date') }}" class="form-control">
+                </div>
+                <div class="col-12 col-md-3" id="endDateCol">
                     <label for="end_date" class="form-label">End Date</label>
-                    <input type="date" name="end_date" id="end_date" value="{{ request('end_date', now()->format('Y-m-d')) }}" 
-                           class="form-control">
+                    <input type="date" name="end_date" id="end_date" value="{{ request('end_date') }}" class="form-control">
                 </div>
                 <div class="col-12 col-md-3">
                     <label for="room_type" class="form-label">Room Type</label>
@@ -46,13 +60,8 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-12 col-md-3 d-flex flex-column align-items-start justify-content-end">
-                    <div class="mb-2 w-100 d-flex gap-2 flex-wrap">
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setQuickDate('today')">Today</button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setQuickDate('week')">Week</button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setQuickDate('month')">Month</button>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                <div class="col-12 col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-search me-2"></i>Generate Report
                     </button>
                 </div>
@@ -60,6 +69,21 @@
         </form>
     </div>
 </div>
+<script>
+function toggleCustomDates() {
+    var period = document.getElementById('period').value;
+    var startCol = document.getElementById('startDateCol');
+    var endCol = document.getElementById('endDateCol');
+    if (period === 'custom') {
+        startCol.style.display = '';
+        endCol.style.display = '';
+    } else {
+        startCol.style.display = 'none';
+        endCol.style.display = 'none';
+    }
+}
+document.addEventListener('DOMContentLoaded', toggleCustomDates);
+</script>
 
 <!-- Revenue Summary Cards -->
 <div class="row g-4 mb-4">
@@ -151,12 +175,9 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <h5 class="card-title mb-0">Revenue Trend</h5>
                     <div class="btn-group btn-group-sm" role="group">
-                        <input type="radio" class="btn-check" name="chartPeriod" id="daily" checked>
-                        <label class="btn btn-outline-primary" for="daily">Daily</label>
-                        <input type="radio" class="btn-check" name="chartPeriod" id="weekly">
-                        <label class="btn btn-outline-primary" for="weekly">Weekly</label>
-                        <input type="radio" class="btn-check" name="chartPeriod" id="monthly">
-                        <label class="btn btn-outline-primary" for="monthly">Monthly</label>
+                        <button type="button" class="btn btn-outline-primary {{ request('group_by', 'daily') == 'daily' ? 'active' : '' }}" onclick="setGroupBy('daily')">Daily</button>
+                        <button type="button" class="btn btn-outline-primary {{ request('group_by') == 'weekly' ? 'active' : '' }}" onclick="setGroupBy('weekly')">Weekly</button>
+                        <button type="button" class="btn btn-outline-primary {{ request('group_by') == 'monthly' ? 'active' : '' }}" onclick="setGroupBy('monthly')">Monthly</button>
                     </div>
                 </div>
             </div>
@@ -237,6 +258,11 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+function setGroupBy(val) {
+    document.getElementById('group_by').value = val;
+    document.querySelector('form[action="{{ route('reports.revenue') }}"]').submit();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Revenue Trend Chart
     const revenueCtx = document.getElementById('revenueChart').getContext('2d');
@@ -313,43 +339,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
-function setQuickDate(period) {
-    const startDate = document.getElementById('start_date');
-    const endDate = document.getElementById('end_date');
-    const today = new Date();
-    
-    switch(period) {
-        case 'today':
-            startDate.value = today.toISOString().split('T')[0];
-            endDate.value = today.toISOString().split('T')[0];
-            break;
-        case 'week':
-            const weekStart = new Date(today.setDate(today.getDate() - today.getDay()));
-            const weekEnd = new Date(today.setDate(today.getDate() - today.getDay() + 6));
-            startDate.value = weekStart.toISOString().split('T')[0];
-            endDate.value = weekEnd.toISOString().split('T')[0];
-            break;
-        case 'month':
-            const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-            const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            startDate.value = monthStart.toISOString().split('T')[0];
-            endDate.value = monthEnd.toISOString().split('T')[0];
-            break;
-    }
-}
-
-function exportReport() {
-    const params = new URLSearchParams(window.location.search);
-    params.set('export', 'pdf');
-    window.open(`${window.location.pathname}?${params.toString()}`, '_blank');
-}
-
-function exportExcel() {
-    const params = new URLSearchParams(window.location.search);
-    params.set('export', 'excel');
-    window.open(`${window.location.pathname}?${params.toString()}`, '_blank');
-}
 </script>
 @endpush
 
