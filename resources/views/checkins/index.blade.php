@@ -150,7 +150,7 @@
     </div>
 </div>
 
-<!-- Place all modals here, outside the table -->
+<!-- Place all checkin modals here, outside the table -->
 @foreach($checkins as $checkin)
     @include('checkins._modals', ['checkin' => $checkin, 'guests' => $guests, 'rooms' => $rooms])
 @endforeach
@@ -162,6 +162,7 @@
 </div>
 @endif
 
+{{-- Only include ONCE --}}
 @include('checkins._modal_create')
 @endsection
 
@@ -171,8 +172,8 @@
 $(function() {
     // Auto-calculate checkout date
     function updateCheckoutDate() {
-        let checkin = document.getElementById('checkin_date').value;
-        let nights = parseInt(document.getElementById('number_of_nights').value) || 1;
+        let checkin = document.getElementById('checkin_date')?.value;
+        let nights = parseInt(document.getElementById('number_of_nights')?.value) || 1;
         if (checkin) {
             let date = new Date(checkin);
             date.setDate(date.getDate() + nights);
@@ -184,15 +185,15 @@ $(function() {
             document.getElementById('checkout_date').value = `${y}-${m}-${d}T${H}:${I}`;
         }
     }
-    
+
     if (document.getElementById('checkin_date')) {
         document.getElementById('checkin_date').addEventListener('change', updateCheckoutDate);
         document.getElementById('number_of_nights').addEventListener('input', updateCheckoutDate);
         updateCheckoutDate();
     }
 
-    // AJAX Guest Add
-    $('#addGuestForm').submit(function(e) {
+    // AJAX Guest Add (Use class in selector!)
+    $('.addGuestForm').submit(function(e) {
         e.preventDefault();
         var $form = $(this);
         var data = $form.serialize();

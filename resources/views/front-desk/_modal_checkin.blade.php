@@ -14,11 +14,11 @@
                 </div>
                 <div class="modal-body">
                     <div class="row g-3">
-                        <!-- Guest Select with Add New -->
+                        <!-- Guest Select with Add New (uses guestSelect class) -->
                         <div class="col-md-6">
-                            <label for="guest_code" class="form-label">Guest <span class="text-danger">*</span></label>
+                            <label for="quick_guest_code" class="form-label">Guest <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <select name="guest_code" id="guest_code" class="form-select" required>
+                                <select name="guest_code" class="form-select guestSelect" id="quick_guest_code" required>
                                     <option value="">-- Select Guest --</option>
                                     @foreach ($guests as $guest)
                                         <option value="{{ $guest->guest_code }}">
@@ -33,8 +33,8 @@
                         </div>
                         <!-- Room Select (ALL ROOMS, occupied disabled and labeled) -->
                         <div class="col-md-6">
-                            <label for="room_code" class="form-label">Room <span class="text-danger">*</span></label>
-                            <select name="room_code" id="room_code" class="form-select" required>
+                            <label for="quick_room_code" class="form-label">Room <span class="text-danger">*</span></label>
+                            <select name="room_code" class="form-select" id="quick_room_code" required>
                                 <option value="">-- Select Room --</option>
                                 @foreach($rooms as $room)
                                     @php
@@ -101,50 +101,6 @@
     </div>
 </div>
 
-<!-- Add Guest Modal (unchanged) -->
-<div class="modal fade" id="addGuestModal" tabindex="-1" aria-labelledby="addGuestLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="{{ route('guests.store') }}" method="POST" id="addGuestForm">
-                @csrf
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="addGuestLabel">
-                        <i class="bi bi-person-plus-fill"></i> Add New Guest
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="guestName" class="form-label">Guest Name <span class="text-danger">*</span></label>
-                        <input type="text" name="name" id="guestName" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="guestEmail" class="form-label">Email</label>
-                        <input type="email" name="email" id="guestEmail" class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label for="guestPhone" class="form-label">Phone</label>
-                        <input type="text" name="tel" id="guestPhone" class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label for="guestGender" class="form-label">Gender</label>
-                        <select name="gender" id="guestGender" class="form-select">
-                            <option value="">-- Select --</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add Guest</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 @push('scripts')
 <script>
 $(function() {
@@ -166,8 +122,8 @@ $(function() {
     $('#quick_checkin_date, #quick_number_of_nights').on('change input', updateQuickCheckoutDate);
     updateQuickCheckoutDate();
 
-    // Show warning if occupied room is selected (shouldn't happen if disabled, but safe)
-    $('#room_code').on('change', function() {
+    // Show warning if occupied room is selected
+    $('#quick_room_code').on('change', function() {
         let selectedOption = $(this).find('option:selected');
         let isOccupied = selectedOption.data('occupied') === 1 || selectedOption.data('occupied') === '1';
         let occupiedUntil = selectedOption.data('occupied-until') || '';
@@ -182,44 +138,14 @@ $(function() {
         }
     });
 
-    // --- Add Guest AJAX (for quick check-in modal) ---
-    $('#addGuestForm').submit(function(e) {
-        e.preventDefault();
-        var $form = $(this);
-        var data = $form.serialize();
-
-        $.ajax({
-            url: $form.attr('action'),
-            type: 'POST',
-            data: data,
-            headers: {'X-CSRF-TOKEN': $('input[name="_token"]').val()},
-            success: function(response) {
-                if (response && response.guest_code && response.name) {
-                    var newOption = new Option(response.name, response.guest_code, true, true);
-                    $('#guest_code').append(newOption).val(response.guest_code);
-                    $('#guest_code').trigger('change');
-                    $('#addGuestModal').modal('hide');
-                    $form[0].reset();
-                } else {
-                    alert('Guest added, but no response data. Please refresh to see the new guest if not automatically selected.');
-                    $('#addGuestModal').modal('hide');
-                }
-            },
-            error: function(xhr) {
-                alert('Failed to add guest. Please check your input or console for details.');
-                console.error('AJAX error:', xhr.responseText);
-            }
-        });
-    });
-
     // On modal open, preselect room if triggered with data-room-code
     $('#quickCheckinModal').on('show.bs.modal', function(event) {
         let button = $(event.relatedTarget);
         let roomCode = button && button.data('room-code');
         if (roomCode) {
-            $('#room_code').val(roomCode).trigger('change');
+            $('#quick_room_code').val(roomCode).trigger('change');
         } else {
-            $('#room_code').val('').trigger('change');
+            $('#quick_room_code').val('').trigger('change');
         }
     });
 });

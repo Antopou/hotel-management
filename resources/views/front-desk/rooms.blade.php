@@ -507,20 +507,26 @@
         ])
     @endforeach
 
-    @include('front-desk._modal_checkin', ['rooms' => $rooms, 'guests' => $guests])
-    @include('front-desk._modal_reservation', ['rooms' => $rooms, 'guests' => $guests])
+    {{-- Render all reservation detail modals --}}
     @foreach($rooms as $room)
-        @if($room->currentCheckin())
-            @include('checkins._modals', ['checkin' => $room->currentCheckin()])
-            @include('front-desk._modal_checkin_detail', ['checkin' => $room->currentCheckin()])
+        @php
+            $nextReservation = $room->nextReservation();
+        @endphp
+        @if($nextReservation)
+            @include('front-desk._modal_reservation_detail', ['nextReservation' => $nextReservation])
         @endif
-        @if($room->nextReservation())
-            @include('reservations._modals', ['reservation' => $room->nextReservation()])
-            @include('front-desk._modal_reservation_detail', ['nextReservation' => $room->nextReservation()])
+        @php
+            $currentCheckin = $room->currentCheckIn();
+        @endphp
+        @if($currentCheckin)
+            @include('front-desk._modal_checkin_detail', ['checkin' => $currentCheckin])
         @endif
     @endforeach
 
-</div>
+    @include('front-desk._modal_checkin')
+    @include('front-desk._modal_reservation')
+    @include('front-desk._modal_add_guest')
+
 @endsection
 
 @push('scripts')

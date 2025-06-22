@@ -43,6 +43,14 @@
                     <button type="submit" class="btn btn-warning">
                         <i class="bi bi-save me-2"></i> Update
                     </button>
+                    <!-- Delete button -->
+                    <form action="{{ route('guests.destroy', $guest->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this guest?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-2"></i> Delete
+                        </button>
+                    </form>
                 </div>
             </form>
         </div>

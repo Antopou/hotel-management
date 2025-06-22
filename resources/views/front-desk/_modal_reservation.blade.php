@@ -17,7 +17,7 @@
                         <div class="col-md-6">
                             <label for="reservation_guest_code" class="form-label">Guest <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <select name="guest_code" id="reservation_guest_code" class="form-select" required>
+                                <select name="guest_code" class="form-select guestSelect" id="reservation_guest_code" required>
                                     <option value="">-- Select Guest --</option>
                                     @foreach ($guests as $guest)
                                         <option value="{{ $guest->guest_code }}">
@@ -30,12 +30,11 @@
                                 </button>
                             </div>
                         </div>
-
                         <div class="col-md-6">
                             <label for="reservation_room_code" class="form-label">Room <span class="text-danger">*</span></label>
                             <select name="room_code" id="reservation_room_code" class="form-select" required>
                                 <option value="">-- Select Room --</option>
-                                @foreach ($rooms as $room)
+                                @foreach($rooms as $room)
                                     <option value="{{ $room->room_code }}"
                                         data-next-available="{{ $room->nextAvailableDate()->format('Y-m-d\TH:i') }}"
                                         data-status="{{ $room->status }}">
@@ -62,12 +61,10 @@
                             <label for="reservation_checkout_date" class="form-label">Check-out Date</label>
                             <input type="datetime-local" name="checkout_date" id="reservation_checkout_date" class="form-control" readonly required>
                         </div>
-
                         <div class="col-md-6">
                             <label for="reservation_number_of_guest" class="form-label">Number of Guests <span class="text-danger">*</span></label>
                             <input type="number" name="number_of_guest" id="reservation_number_of_guest" class="form-control" min="1" value="1" required>
                         </div>
-
                         <div class="col-12">
                             <label for="reservation_status" class="form-label">Status</label>
                             <select name="status" id="reservation_status" class="form-select">
@@ -78,7 +75,6 @@
                                 <option value="cancelled">Cancelled</option>
                             </select>
                         </div>
-
                         <div class="col-12">
                             <label for="reservation_notes" class="form-label">Notes</label>
                             <textarea name="notes" id="reservation_notes" class="form-control" rows="2"></textarea>
@@ -96,54 +92,10 @@
     </div>
 </div>
 
-<!-- Add Guest Modal -->
-<div class="modal fade" id="addGuestModal" tabindex="-1" aria-labelledby="addGuestLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="{{ route('guests.store') }}" method="POST" id="addGuestForm">
-                @csrf
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="addGuestLabel">
-                        <i class="bi bi-person-plus-fill"></i> Add New Guest
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="guestName" class="form-label">Guest Name <span class="text-danger">*</span></label>
-                        <input type="text" name="name" id="guestName" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="guestEmail" class="form-label">Email</label>
-                        <input type="email" name="email" id="guestEmail" class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label for="guestPhone" class="form-label">Phone</label>
-                        <input type="text" name="tel" id="guestPhone" class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label for="guestGender" class="form-label">Gender</label>
-                        <select name="gender" id="guestGender" class="form-select">
-                            <option value="">-- Select --</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add Guest</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 @push('scripts')
 <script>
 $(function() {
-    // 1. When a room is selected, update check-in date and warning
+    // Room select: update check-in date and show/hide warning
     $('#reservation_room_code').on('change', function() {
         let selectedOption = $(this).find('option:selected');
         let suggestedCheckin = selectedOption.data('next-available') || '{{ now()->format('Y-m-d\TH:i') }}';
@@ -157,19 +109,17 @@ $(function() {
         }
     });
 
-    // 2. Auto-select room based on data-room-code when modal is opened
+    // Auto-select room if triggered with data-room-code
     $('#newReservationModal').on('show.bs.modal', function(event) {
-        let button = $(event.relatedTarget); // Button that triggered the modal
+        let button = $(event.relatedTarget);
         let roomCode = button && button.data('room-code');
         if (roomCode) {
             $('#reservation_room_code').val(roomCode).trigger('change');
         }
     });
-
-    // On page load, trigger change to set correct warning and check-in date
     $('#reservation_room_code').trigger('change');
 
-    // 3. Reservation Modal: Auto-calculate checkout date
+    // Auto-calculate checkout date
     function updateReservationCheckoutDate() {
         let checkin = $('#reservation_checkin_date').val();
         let nights = parseInt($('#reservation_number_of_nights').val()) || 1;
@@ -186,36 +136,6 @@ $(function() {
     }
     $('#reservation_checkin_date, #reservation_number_of_nights').on('change input', updateReservationCheckoutDate);
     updateReservationCheckoutDate();
-
-    // 4. Add Guest AJAX (for reservation modal)
-    $('#addGuestForm').submit(function(e) {
-        e.preventDefault();
-        var $form = $(this);
-        var data = $form.serialize();
-
-        $.ajax({
-            url: $form.attr('action'),
-            type: 'POST',
-            data: data,
-            headers: {'X-CSRF-TOKEN': $('input[name="_token"]').val()},
-            success: function(response) {
-                if (response && response.guest_code && response.name) {
-                    var newOption = new Option(response.name, response.guest_code, true, true);
-                    $('#reservation_guest_code').append(newOption).val(response.guest_code);
-                    $('#reservation_guest_code').trigger('change');
-                    $('#addGuestModal').modal('hide');
-                    $form[0].reset();
-                } else {
-                    alert('Guest added, but no response data. Please refresh to see the new guest if not automatically selected.');
-                    $('#addGuestModal').modal('hide');
-                }
-            },
-            error: function(xhr) {
-                alert('Failed to add guest. Please check your input or console for details.');
-                console.error('AJAX error:', xhr.responseText);
-            }
-        });
-    });
 });
 </script>
 @endpush
