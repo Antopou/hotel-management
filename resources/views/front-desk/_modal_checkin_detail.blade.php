@@ -8,7 +8,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <dl class="row">
+                <dl class="row fs-6">
                     <dt class="col-sm-4">Guest Name:</dt>
                     <dd class="col-sm-8">{{ $checkin->guest->name ?? 'N/A' }}</dd>
 
