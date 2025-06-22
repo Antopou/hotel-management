@@ -54,7 +54,7 @@
                     <select name="room_type" id="room_type" class="form-select">
                         <option value="">All Room Types</option>
                         @foreach($roomTypes ?? [] as $type)
-                            <option value="{{ $type->id }}" {{ request('room_type') == $type->id ? 'selected' : '' }}>
+                            <option value="{{ $type->room_type_code }}" {{ request('room_type') == $type->room_type_code ? 'selected' : '' }}>
                                 {{ $type->name }}
                             </option>
                         @endforeach

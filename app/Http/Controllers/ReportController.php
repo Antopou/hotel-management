@@ -89,7 +89,7 @@ class ReportController extends Controller
         // --- Room type filter ---
         if ($request->filled('room_type')) {
             $relevantCheckinsQuery->whereHas('room', function($q) use ($request) {
-                $q->where('room_type_id', $request->input('room_type'));
+                $q->where('room_type_code', $request->input('room_type'));
             });
         }
 
