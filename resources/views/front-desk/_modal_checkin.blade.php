@@ -22,7 +22,7 @@
                                     <option value="">-- Select Guest --</option>
                                     @foreach ($guests as $guest)
                                         <option value="{{ $guest->guest_code }}">
-                                            {{ $guest->name }}@if($guest->phone) ({{ $guest->phone }})@endif
+                                            {{ $guest->name }}@if($guest->tel) ({{ $guest->tel }})@endif
                                         </option>
                                     @endforeach
                                 </select>

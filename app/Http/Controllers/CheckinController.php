@@ -104,11 +104,17 @@ class CheckinController extends Controller
             $reservation->save();
         }
 
-        // Detect redirect target
         $redirectTo = $request->input('redirect_to');
         $page = $request->input('page', 1);
+
+        // Only keep 'page', 'floor', 'status' (or more, if needed)
+        $params = [];
+        foreach(['page'] as $key) {
+            if ($request->filled($key)) $params[$key] = $request->input($key);
+        }
+
         if ($redirectTo === 'front-desk') {
-            return redirect()->route('front-desk.index', array_merge($request->except(['_token', 'redirect_to']), ['page' => $page]))
+            return redirect()->route('front-desk.index', $params)
                 ->with('success', 'Check-in successful!');
         }
 

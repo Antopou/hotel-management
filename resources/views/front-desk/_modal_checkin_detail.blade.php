@@ -13,7 +13,7 @@
                     <dd class="col-sm-8">{{ $checkin->guest->name ?? 'N/A' }}</dd>
 
                     <dt class="col-sm-4">Phone:</dt>
-                    <dd class="col-sm-8">{{ $checkin->guest->phone ?? 'N/A' }}</dd>
+                    <dd class="col-sm-8">{{ $checkin->guest->tel ?? 'N/A' }}</dd>
 
                     <dt class="col-sm-4">Email:</dt>
                     <dd class="col-sm-8">{{ $checkin->guest->email ?? 'N/A' }}</dd>

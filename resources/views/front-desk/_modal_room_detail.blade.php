@@ -71,7 +71,7 @@
                                         <div>
                                             <h5 class="mb-1">{{ $currentCheckin->guest->name ?? 'Guest' }}</h5>
                                             <p class="text-muted small mb-1">
-                                                {{ $currentCheckin->guest->phone ?? 'No phone' }} | 
+                                                {{ $currentCheckin->guest->tel ?? 'No phone' }} | 
                                                 {{ $currentCheckin->guest->email ?? 'No email' }}
                                             </p>
                                         </div>
@@ -139,7 +139,7 @@
                                         <div>
                                             <h5 class="mb-1">{{ $nextReservation->guest->name ?? 'Guest' }}</h5>
                                             <p class="text-muted small mb-1">
-                                                {{ $nextReservation->guest->phone ?? 'No phone' }} | 
+                                                {{ $nextReservation->guest->tel ?? 'No phone' }} | 
                                                 {{ $nextReservation->guest->email ?? 'No email' }}
                                             </p>
                                         </div>

@@ -13,7 +13,7 @@
                     <dd class="col-sm-8">{{ $nextReservation->guest->name ?? 'N/A' }}</dd>
 
                     <dt class="col-sm-4">Phone:</dt>
-                    <dd class="col-sm-8">{{ $nextReservation->guest->phone ?? 'N/A' }}</dd>
+                    <dd class="col-sm-8">{{ $nextReservation->guest->tel ?? 'N/A' }}</dd>
 
                     <dt class="col-sm-4">Email:</dt>
                     <dd class="col-sm-8">{{ $nextReservation->guest->email ?? 'N/A' }}</dd>
