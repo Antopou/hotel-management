@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', toggleCustomDates);
                         <h6 class="card-subtitle mb-2" style="color: #e0ffe0;">Room Revenue</h6>
                         <h2 class="card-title mb-0 fw-bold" style="color: #fff;">${{ number_format($roomRevenue ?? 0, 2) }}</h2>
                         <small style="color: #e0ffe0;">
-                            {{ number_format(($roomRevenue ?? 0) / ($totalRevenue ?? 1) * 100, 1) }}% of total
+                            {{ $totalRevenue > 0 ? number_format(($roomRevenue ?? 0) / $totalRevenue * 100, 1) : '0.0' }}% of total
                         </small>
                     </div>
                     <div class="rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: #fff;">
